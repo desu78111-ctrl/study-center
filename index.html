@@ -1,0 +1,736 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>스터디센터 실시간 현황판</title>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0f1117;
+      --surface: #1a1d27;
+      --surface2: #22263a;
+      --border: #2e3352;
+      --accent: #5b6af0;
+      --accent2: #7c3aed;
+      --green: #22c55e;
+      --yellow: #f59e0b;
+      --blue: #3b82f6;
+      --red: #ef4444;
+      --text: #e8eaf6;
+      --text2: #8892b0;
+      --text3: #4a5568;
+      --card-in: #0d2318;
+      --card-in-border: #166534;
+      --card-out: #1a1500;
+      --card-out-border: #854d0e;
+      --card-done: #0a1628;
+      --card-done-border: #1d4ed8;
+      --card-none: #1a1d27;
+      --card-none-border: #2e3352;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Noto Sans KR', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+    /* ── HEADER ── */
+    .header {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 16px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .header-left h1 { font-size: 20px; font-weight: 900; color: var(--text); letter-spacing: -0.5px; }
+    .header-left p { font-size: 12px; color: var(--text2); margin-top: 2px; }
+    .header-right { display: flex; align-items: center; gap: 12px; }
+    .clock {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--accent);
+      background: rgba(91,106,240,0.12);
+      border: 1px solid rgba(91,106,240,0.3);
+      padding: 6px 16px;
+      border-radius: 10px;
+      letter-spacing: 1px;
+    }
+    .sync-indicator {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+      color: var(--text2);
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      padding: 5px 10px;
+      border-radius: 8px;
+    }
+    .sync-dot {
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      background: var(--green);
+      animation: pulse 2s infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.3; }
+    }
+    /* ── STATS ── */
+    .stats-bar {
+      padding: 14px 24px;
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+    }
+    .stat-chip {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 14px;
+      border-radius: 10px;
+      border: 1px solid;
+      font-size: 13px;
+      font-weight: 700;
+    }
+    .stat-chip span { font-size: 18px; font-weight: 900; }
+    .stat-total { background: rgba(46,51,82,0.5); border-color: var(--border); color: var(--text2); }
+    .stat-in { background: rgba(34,197,94,0.1); border-color: rgba(34,197,94,0.3); color: var(--green); }
+    .stat-out { background: rgba(245,158,11,0.1); border-color: rgba(245,158,11,0.3); color: var(--yellow); }
+    .stat-done { background: rgba(59,130,246,0.1); border-color: rgba(59,130,246,0.3); color: var(--blue); }
+    /* ── TOOLBAR ── */
+    .toolbar {
+      padding: 12px 24px;
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      flex-wrap: wrap;
+      border-bottom: 1px solid var(--border);
+    }
+    .search-wrap { position: relative; flex: 1; min-width: 200px; }
+    .search-wrap input {
+      width: 100%;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 8px 14px 8px 36px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-family: inherit;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .search-wrap input:focus { border-color: var(--accent); }
+    .search-icon {
+      position: absolute; left: 10px; top: 50%; transform: translateY(-50%);
+      color: var(--text3); font-size: 15px; pointer-events: none;
+    }
+    .btn {
+      display: flex; align-items: center; gap: 6px;
+      padding: 8px 14px; border-radius: 8px; border: 1px solid;
+      font-size: 12px; font-weight: 700; cursor: pointer;
+      font-family: inherit; transition: all 0.15s; white-space: nowrap;
+    }
+    .btn-primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+    .btn-primary:hover { background: #4a57d8; }
+    .btn-ghost { background: transparent; border-color: var(--border); color: var(--text2); }
+    .btn-ghost:hover { border-color: var(--text2); color: var(--text); }
+    .btn-danger { background: transparent; border-color: rgba(239,68,68,0.3); color: var(--red); font-size: 11px; }
+    .btn-danger:hover { background: rgba(239,68,68,0.1); }
+    .filter-btns { display: flex; gap: 6px; }
+    .filter-btn {
+      padding: 6px 12px; border-radius: 7px; border: 1px solid var(--border);
+      background: transparent; color: var(--text2); font-size: 11px; font-weight: 700;
+      cursor: pointer; font-family: inherit; transition: all 0.15s;
+    }
+    .filter-btn.active-all { background: rgba(91,106,240,0.15); border-color: var(--accent); color: var(--accent); }
+    .filter-btn.active-재실 { background: rgba(34,197,94,0.15); border-color: var(--green); color: var(--green); }
+    .filter-btn.active-외출 { background: rgba(245,158,11,0.15); border-color: var(--yellow); color: var(--yellow); }
+    .filter-btn.active-퇴실 { background: rgba(59,130,246,0.15); border-color: var(--blue); color: var(--blue); }
+    .filter-btn.active-미입실 { background: rgba(74,85,104,0.15); border-color: var(--text3); color: var(--text2); }
+    /* ── ADD FORM ── */
+    .add-form {
+      background: rgba(91,106,240,0.06);
+      border-bottom: 1px solid rgba(91,106,240,0.2);
+      padding: 14px 24px;
+      display: flex; gap: 10px; flex-wrap: wrap; align-items: flex-end;
+    }
+    .add-form input, .add-form select {
+      background: var(--surface2); border: 1px solid var(--border);
+      color: var(--text); padding: 7px 12px; border-radius: 8px;
+      font-size: 13px; font-family: inherit; outline: none; min-width: 120px;
+      transition: border-color 0.2s;
+    }
+    .add-form input:focus, .add-form select:focus { border-color: var(--accent); }
+    .add-form label { font-size: 11px; color: var(--text2); display: block; margin-bottom: 4px; }
+    /* ── GRID ── */
+    .grid-wrap { padding: 16px 24px; }
+    .students-grid {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 10px;
+    }
+    @media (max-width: 1200px) { .students-grid { grid-template-columns: repeat(4, 1fr); } }
+    @media (max-width: 900px)  { .students-grid { grid-template-columns: repeat(3, 1fr); } }
+    @media (max-width: 600px)  { .students-grid { grid-template-columns: repeat(2, 1fr); } }
+    /* ── CARD ── */
+    .card {
+      border-radius: 14px;
+      border: 1.5px solid;
+      padding: 12px;
+      transition: transform 0.15s, box-shadow 0.15s;
+      position: relative;
+      overflow: hidden;
+    }
+    .card:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,0.4); }
+    .card-미입실 { background: var(--card-none); border-color: var(--card-none-border); }
+    .card-재실   { background: var(--card-in);   border-color: var(--card-in-border); }
+    .card-외출   { background: var(--card-out);  border-color: var(--card-out-border); }
+    .card-퇴실   { background: var(--card-done); border-color: var(--card-done-border); }
+
+    .card-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; }
+    .student-info .school-grade { font-size: 10px; color: var(--text2); margin-bottom: 2px; }
+    .student-info .name { font-size: 16px; font-weight: 900; color: var(--text); }
+    .status-badge {
+      display: inline-block;
+      margin-top: 4px;
+      padding: 2px 8px;
+      border-radius: 5px;
+      font-size: 10px;
+      font-weight: 700;
+    }
+    .badge-미입실 { background: rgba(74,85,104,0.4); color: var(--text2); }
+    .badge-재실   { background: rgba(34,197,94,0.25); color: var(--green); }
+    .badge-외출   { background: rgba(245,158,11,0.25); color: var(--yellow); }
+    .badge-퇴실   { background: rgba(59,130,246,0.25); color: var(--blue); }
+
+    .card-right { display: flex; flex-direction: column; align-items: flex-end; gap: 4px; }
+    .study-time { font-family: 'JetBrains Mono', monospace; font-size: 12px; font-weight: 700; color: var(--text2); }
+    .study-time.active { color: var(--green); }
+    .delete-btn {
+      background: none; border: none; cursor: pointer;
+      color: var(--text3); transition: color 0.15s; padding: 2px;
+    }
+    .delete-btn:hover { color: var(--red); }
+    /* ── LOG ── */
+    .log-area {
+      background: rgba(0,0,0,0.2);
+      border-radius: 8px;
+      padding: 8px;
+      margin-bottom: 10px;
+      font-size: 11px;
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+    .log-row { display: flex; justify-content: space-between; align-items: center; }
+    .log-label { color: var(--text2); }
+    .log-label.entry  { color: #a3f7b5; }
+    .log-label.outing { color: var(--yellow); }
+    .log-label.return { color: var(--green); }
+    .log-label.checkout { color: var(--blue); }
+    .log-val { font-family: 'JetBrains Mono', monospace; font-weight: 700; font-size: 11px; color: var(--text); }
+    /* ── ACTION BUTTONS ── */
+    .actions { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+    .act-btn {
+      padding: 7px 4px; border-radius: 9px; border: none;
+      font-size: 11px; font-weight: 700; cursor: pointer;
+      font-family: inherit; transition: all 0.15s; text-align: center;
+    }
+    .act-btn:active { transform: scale(0.96); }
+    .act-col2 { grid-column: span 2; }
+    .act-checkin  { background: rgba(34,197,94,0.2); color: var(--green); border: 1px solid rgba(34,197,94,0.4); }
+    .act-checkin:hover  { background: rgba(34,197,94,0.35); }
+    .act-outing   { background: rgba(245,158,11,0.2); color: var(--yellow); border: 1px solid rgba(245,158,11,0.4); }
+    .act-outing:hover   { background: rgba(245,158,11,0.35); }
+    .act-checkout { background: rgba(59,130,246,0.2); color: var(--blue); border: 1px solid rgba(59,130,246,0.4); }
+    .act-checkout:hover { background: rgba(59,130,246,0.35); }
+    .act-return   { background: rgba(34,197,94,0.2); color: var(--green); border: 1px solid rgba(34,197,94,0.4); }
+    .act-return:hover   { background: rgba(34,197,94,0.35); }
+    .act-reset    { background: rgba(74,85,104,0.2); color: var(--text2); border: 1px solid var(--border); font-size: 10px; }
+    .act-reset:hover    { background: rgba(74,85,104,0.4); }
+    /* ── TOAST ── */
+    .toast {
+      position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
+      background: var(--surface); border: 1px solid var(--border);
+      color: var(--text); padding: 10px 20px; border-radius: 10px;
+      font-size: 13px; font-weight: 700; z-index: 999;
+      opacity: 0; transition: opacity 0.3s;
+      pointer-events: none; white-space: nowrap;
+    }
+    .toast.show { opacity: 1; }
+    /* ── EMPTY ── */
+    .empty { text-align: center; color: var(--text2); padding: 60px; font-size: 15px; }
+    .divider { height: 1px; background: var(--border); margin: 4px 0; }
+  </style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-left">
+    <h1>📚 스터디센터 실시간 현황판</h1>
+    <p>태블릿·PC 실시간 연동 · 학생 직접 조작 가능</p>
+  </div>
+  <div class="header-right">
+    <div class="sync-indicator">
+      <div class="sync-dot" id="syncDot"></div>
+      <span id="syncText">연동중</span>
+    </div>
+    <div class="clock" id="clock">--:--:--</div>
+  </div>
+</div>
+
+<div class="stats-bar" id="statsBar">
+  <div class="stat-chip stat-total">전체 <span id="stTotal">0</span>명</div>
+  <div class="stat-chip stat-in">🟢 재실 <span id="stIn">0</span>명</div>
+  <div class="stat-chip stat-out">🟡 외출 <span id="stOut">0</span>명</div>
+  <div class="stat-chip stat-done">🔵 퇴실 <span id="stDone">0</span>명</div>
+</div>
+
+<div class="toolbar">
+  <div class="search-wrap">
+    <span class="search-icon">🔍</span>
+    <input type="text" id="searchInput" placeholder="이름 또는 학교로 검색...">
+  </div>
+  <div class="filter-btns">
+    <button class="filter-btn active-all" data-filter="전체" onclick="setFilter('전체',this)">전체</button>
+    <button class="filter-btn" data-filter="재실" onclick="setFilter('재실',this)">재실</button>
+    <button class="filter-btn" data-filter="외출" onclick="setFilter('외출',this)">외출</button>
+    <button class="filter-btn" data-filter="미입실" onclick="setFilter('미입실',this)">미입실</button>
+    <button class="filter-btn" data-filter="퇴실" onclick="setFilter('퇴실',this)">퇴실</button>
+  </div>
+  <button class="btn btn-primary" onclick="toggleAddForm()">➕ 신규 등록</button>
+  <button class="btn btn-danger" onclick="hardReset()">🔄 전체 초기화</button>
+</div>
+
+<div class="add-form" id="addForm" style="display:none">
+  <div>
+    <label>학교</label>
+    <input type="text" id="nSchool" placeholder="예: 소하">
+  </div>
+  <div>
+    <label>학년</label>
+    <select id="nGrade">
+      <option>1학년</option><option>2학년</option><option selected>3학년</option><option>기타</option>
+    </select>
+  </div>
+  <div>
+    <label>이름</label>
+    <input type="text" id="nName" placeholder="학생 이름">
+  </div>
+  <button class="btn btn-primary" onclick="addStudent()">등록 완료</button>
+  <button class="btn btn-ghost" onclick="toggleAddForm()">취소</button>
+</div>
+
+<div class="grid-wrap">
+  <div class="students-grid" id="grid"></div>
+  <div class="empty" id="emptyMsg" style="display:none">검색 결과가 없습니다.</div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ════════════════════════════════════════
+// 초기 학생 데이터
+// ════════════════════════════════════════
+const INITIAL_STUDENTS = [
+  { school:'소하', grade:'3학년', name:'강수현' }, { school:'소하', grade:'3학년', name:'강예슬' }, { school:'소하', grade:'3학년', name:'고준수' },
+  { school:'운산', grade:'2학년', name:'곽예찬' }, { school:'소하', grade:'3학년', name:'권민재' }, { school:'충현', grade:'3학년', name:'권태린' },
+  { school:'운산', grade:'2학년', name:'김규진' }, { school:'광휘', grade:'2학년', name:'김나운' }, { school:'운산', grade:'3학년', name:'김도훈' },
+  { school:'소하', grade:'3학년', name:'김동건' }, { school:'소하', grade:'3학년', name:'김민주' }, { school:'충현', grade:'2학년', name:'김세훈' },
+  { school:'소하', grade:'3학년', name:'김수연' }, { school:'소하', grade:'2학년', name:'김아현' }, { school:'소하', grade:'2학년', name:'김예일' },
+  { school:'운산', grade:'3학년', name:'김예찬' }, { school:'운산', grade:'1학년', name:'김종호' }, { school:'운산', grade:'2학년', name:'김준수' },
+  { school:'소하', grade:'3학년', name:'김지윤' }, { school:'광휘', grade:'3학년', name:'김태린' }, { school:'충현', grade:'3학년', name:'김태영' },
+  { school:'소하', grade:'3학년', name:'김태현' }, { school:'소하', grade:'3학년', name:'김혜빈' }, { school:'소하', grade:'3학년', name:'노희수' },
+  { school:'창의경영', grade:'3학년', name:'명승아' }, { school:'광휘', grade:'2학년', name:'박다원' }, { school:'진성', grade:'3학년', name:'박서진' },
+  { school:'문일', grade:'1학년', name:'박성훈' }, { school:'소하', grade:'3학년', name:'박지웅' }, { school:'광휘', grade:'2학년', name:'박하음' },
+  { school:'운산', grade:'3학년', name:'배서윤' }, { school:'운산', grade:'1학년', name:'배진혁' }, { school:'광명', grade:'1학년', name:'손유리' },
+  { school:'소하', grade:'3학년', name:'송예준' }, { school:'소하', grade:'3학년', name:'송현율' }, { school:'소하', grade:'3학년', name:'신대율' },
+  { school:'소하', grade:'3학년', name:'신유빈' }, { school:'소하', grade:'2학년', name:'양지원' }, { school:'운산', grade:'3학년', name:'유승아' },
+  { school:'운산', grade:'3학년', name:'윤대현' }, { school:'소하', grade:'2학년', name:'윤현지' }, { school:'광휘', grade:'1학년', name:'이나경' },
+  { school:'운산', grade:'2학년', name:'이도윤' }, { school:'소하', grade:'2학년', name:'이서연' }, { school:'운산', grade:'2학년', name:'이서윤' },
+  { school:'소하', grade:'2학년', name:'이서윤(소하)' }, { school:'소하', grade:'3학년', name:'이서윤(고3)' }, { school:'진성', grade:'3학년', name:'이서하' },
+  { school:'충현', grade:'3학년', name:'이세연' }, { school:'광휘', grade:'3학년', name:'이수민' }, { school:'광휘', grade:'3학년', name:'이유진' },
+  { school:'광휘', grade:'3학년', name:'이윤아' }, { school:'광휘', grade:'3학년', name:'이재민' }, { school:'운산', grade:'2학년', name:'이재범' },
+  { school:'광명', grade:'3학년', name:'이준오' }, { school:'광휘', grade:'3학년', name:'이준환' }, { school:'광휘', grade:'3학년', name:'이지모' },
+  { school:'운산', grade:'3학년', name:'이지오' }, { school:'광명', grade:'1학년', name:'이현서' }, { school:'소하', grade:'3학년', name:'이형우' },
+  { school:'소하', grade:'3학년', name:'임지상' }, { school:'운산', grade:'2학년', name:'임지아' }, { school:'운산', grade:'2학년', name:'임찬유' },
+  { school:'소하', grade:'3학년', name:'장혜은' }, { school:'소하', grade:'3학년', name:'전수원' }, { school:'소하', grade:'3학년', name:'전혜주' },
+  { school:'광북', grade:'3학년', name:'정승인' }, { school:'소하', grade:'2학년', name:'정예은' }, { school:'광명', grade:'2학년', name:'정유은' },
+  { school:'충현', grade:'3학년', name:'조환희' }, { school:'소하', grade:'3학년', name:'최규석' }, { school:'광휘', grade:'2학년', name:'하가은' },
+  { school:'운산', grade:'2학년', name:'한정원' }, { school:'소하', grade:'3학년', name:'현재훈' }
+].map((s, i) => ({
+  id: i + 1,
+  name: s.name, school: s.school, grade: s.grade,
+  status: '미입실',
+  entryTime: null, checkOutTime: null,
+  outingLogs: [],           // [{outingTime, returnTime}, ...]
+  currentSessionStart: null,
+  totalStudySeconds: 0
+}));
+
+// ════════════════════════════════════════
+// 상태 관리 (공유 스토리지 연동)
+// ════════════════════════════════════════
+const STORAGE_KEY = 'studyCenter_v2';
+let students = [];
+let currentFilter = '전체';
+let searchTerm = '';
+let tickInterval = null;
+let syncInterval = null;
+
+function generateId() {
+  return Date.now() + Math.random();
+}
+
+function serializeStudents(arr) {
+  return JSON.stringify(arr.map(s => ({
+    ...s,
+    entryTime: s.entryTime ? new Date(s.entryTime).getTime() : null,
+    checkOutTime: s.checkOutTime ? new Date(s.checkOutTime).getTime() : null,
+    currentSessionStart: s.currentSessionStart ? new Date(s.currentSessionStart).getTime() : null,
+    outingLogs: (s.outingLogs || []).map(l => ({
+      outingTime: l.outingTime ? new Date(l.outingTime).getTime() : null,
+      returnTime: l.returnTime ? new Date(l.returnTime).getTime() : null
+    }))
+  })));
+}
+
+function deserializeStudents(str) {
+  try {
+    return JSON.parse(str).map(s => ({
+      ...s,
+      entryTime: s.entryTime ? new Date(s.entryTime) : null,
+      checkOutTime: s.checkOutTime ? new Date(s.checkOutTime) : null,
+      currentSessionStart: s.currentSessionStart ? new Date(s.currentSessionStart) : null,
+      outingLogs: (s.outingLogs || []).map(l => ({
+        outingTime: l.outingTime ? new Date(l.outingTime) : null,
+        returnTime: l.returnTime ? new Date(l.returnTime) : null
+      }))
+    }));
+  } catch(e) { return null; }
+}
+
+async function saveToShared() {
+  try {
+    await window.storage.set(STORAGE_KEY, serializeStudents(students), true);
+    setSyncStatus(true);
+  } catch(e) {
+    // 공유 스토리지 없으면 localStorage 폴백
+    try { localStorage.setItem(STORAGE_KEY, serializeStudents(students)); } catch(_) {}
+  }
+}
+
+async function loadFromShared() {
+  try {
+    const result = await window.storage.get(STORAGE_KEY, true);
+    if (result && result.value) {
+      const loaded = deserializeStudents(result.value);
+      if (loaded) {
+        students = loaded;
+        setSyncStatus(true);
+        renderAll();
+        return;
+      }
+    }
+  } catch(e) {}
+  // 폴백: localStorage
+  try {
+    const local = localStorage.getItem(STORAGE_KEY);
+    if (local) {
+      const loaded = deserializeStudents(local);
+      if (loaded) { students = loaded; renderAll(); return; }
+    }
+  } catch(_) {}
+  // 최초 초기화
+  students = JSON.parse(JSON.stringify(INITIAL_STUDENTS));
+  await saveToShared();
+  renderAll();
+}
+
+function setSyncStatus(ok) {
+  document.getElementById('syncDot').style.background = ok ? '#22c55e' : '#ef4444';
+  document.getElementById('syncText').textContent = ok ? '연동중' : '오프라인';
+}
+
+// ════════════════════════════════════════
+// 액션 핸들러
+// ════════════════════════════════════════
+async function action(type, id) {
+  const now = new Date();
+  students = students.map(s => {
+    if (s.id !== id) return s;
+    if (type === 'checkin') {
+      return { ...s, status:'재실', entryTime:now, checkOutTime:null, outingLogs:[], currentSessionStart:now, totalStudySeconds:0 };
+    }
+    if (type === 'outing' && s.status === '재실') {
+      const sec = Math.floor((now - new Date(s.currentSessionStart)) / 1000);
+      return { ...s, status:'외출', outingLogs:[...(s.outingLogs||[]), {outingTime:now, returnTime:null}],
+               totalStudySeconds: s.totalStudySeconds + sec, currentSessionStart:null };
+    }
+    if (type === 'return' && s.status === '외출') {
+      const logs = [...(s.outingLogs||[])];
+      if (logs.length > 0) logs[logs.length-1] = { ...logs[logs.length-1], returnTime:now };
+      return { ...s, status:'재실', outingLogs:logs, currentSessionStart:now };
+    }
+    if (type === 'checkout') {
+      let extra = 0;
+      if (s.status === '재실' && s.currentSessionStart) {
+        extra = Math.floor((now - new Date(s.currentSessionStart)) / 1000);
+      }
+      return { ...s, status:'퇴실', checkOutTime:now, totalStudySeconds: s.totalStudySeconds + extra, currentSessionStart:null };
+    }
+    if (type === 'reset') {
+      return { ...s, status:'미입실', entryTime:null, checkOutTime:null, outingLogs:[], currentSessionStart:null, totalStudySeconds:0 };
+    }
+    return s;
+  });
+  await saveToShared();
+  renderAll();
+}
+
+async function deleteStudent(id, name) {
+  if (!confirm(`${name} 학생을 명단에서 삭제하시겠습니까?`)) return;
+  students = students.filter(s => s.id !== id);
+  await saveToShared();
+  renderAll();
+  showToast(`${name} 삭제 완료`);
+}
+
+async function addStudent() {
+  const name = document.getElementById('nName').value.trim();
+  const school = document.getElementById('nSchool').value.trim();
+  const grade = document.getElementById('nGrade').value;
+  if (!name || !school) { showToast('이름과 학교를 입력하세요'); return; }
+  const newId = students.length > 0 ? Math.max(...students.map(s=>s.id)) + 1 : 1;
+  students = [{
+    id:newId, name, school, grade,
+    status:'미입실', entryTime:null, checkOutTime:null,
+    outingLogs:[], currentSessionStart:null, totalStudySeconds:0
+  }, ...students];
+  await saveToShared();
+  renderAll();
+  document.getElementById('nName').value = '';
+  document.getElementById('nSchool').value = '';
+  document.getElementById('addForm').style.display = 'none';
+  showToast(`${name} 등록 완료!`);
+}
+
+async function hardReset() {
+  if (!confirm('⚠️ 모든 기록과 명단이 초기화됩니다. 계속할까요?')) return;
+  students = JSON.parse(JSON.stringify(INITIAL_STUDENTS));
+  await saveToShared();
+  renderAll();
+  showToast('초기화 완료');
+}
+
+// ════════════════════════════════════════
+// 렌더링
+// ════════════════════════════════════════
+function fmt(d) {
+  if (!d) return '-';
+  const dt = new Date(d);
+  return dt.toLocaleTimeString('ko-KR', { hour:'2-digit', minute:'2-digit' });
+}
+
+function fmtSec(sec) {
+  const h = Math.floor(sec/3600);
+  const m = Math.floor((sec%3600)/60);
+  const s = sec % 60;
+  return `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+}
+
+function getLiveSec(s) {
+  let t = s.totalStudySeconds || 0;
+  if (s.status === '재실' && s.currentSessionStart) {
+    t += Math.floor((Date.now() - new Date(s.currentSessionStart).getTime()) / 1000);
+  }
+  return t;
+}
+
+function renderAll() {
+  updateStats();
+  renderGrid();
+}
+
+function updateStats() {
+  document.getElementById('stTotal').textContent = students.length;
+  document.getElementById('stIn').textContent = students.filter(s=>s.status==='재실').length;
+  document.getElementById('stOut').textContent = students.filter(s=>s.status==='외출').length;
+  document.getElementById('stDone').textContent = students.filter(s=>s.status==='퇴실').length;
+}
+
+function renderGrid() {
+  const grid = document.getElementById('grid');
+  const empty = document.getElementById('emptyMsg');
+  const search = searchTerm.toLowerCase();
+
+  let list = students.filter(s => {
+    const matchSearch = !search || s.name.includes(search) || s.school.includes(search);
+    const matchFilter = currentFilter === '전체' || s.status === currentFilter;
+    return matchSearch && matchFilter;
+  });
+
+  if (list.length === 0) {
+    grid.innerHTML = '';
+    empty.style.display = 'block';
+    return;
+  }
+  empty.style.display = 'none';
+
+  grid.innerHTML = list.map(s => {
+    const liveSec = getLiveSec(s);
+    const logs = s.outingLogs || [];
+    const multi = logs.length > 1;
+
+    // 로그 행 생성
+    let logRows = `
+      <div class="log-row">
+        <span class="log-label entry">입실</span>
+        <span class="log-val">${fmt(s.entryTime)}</span>
+      </div>`;
+
+    logs.forEach((log, i) => {
+      const label = multi ? `외출 ${i+1}` : '외출';
+      const rlabel = multi ? `복귀 ${i+1}` : '복귀';
+      logRows += `
+        <div class="log-row">
+          <span class="log-label outing">${label}</span>
+          <span class="log-val">${fmt(log.outingTime)}</span>
+        </div>`;
+      if (log.returnTime) {
+        logRows += `
+          <div class="log-row">
+            <span class="log-label return">${rlabel}</span>
+            <span class="log-val">${fmt(log.returnTime)}</span>
+          </div>`;
+      }
+    });
+
+    logRows += `
+      <div class="log-row">
+        <span class="log-label checkout">퇴실</span>
+        <span class="log-val">${fmt(s.checkOutTime)}</span>
+      </div>`;
+
+    // 액션 버튼
+    let btns = '';
+    if (s.status === '미입실') {
+      btns = `<button class="act-btn act-col2 act-checkin" onclick="action('checkin',${s.id})">▶ 입실</button>`;
+    } else if (s.status === '재실') {
+      btns = `
+        <button class="act-btn act-outing" onclick="action('outing',${s.id})">⏸ 외출</button>
+        <button class="act-btn act-checkout" onclick="action('checkout',${s.id})">⏹ 퇴실</button>`;
+    } else if (s.status === '외출') {
+      btns = `<button class="act-btn act-col2 act-return" onclick="action('return',${s.id})">▶ 복귀</button>`;
+    } else if (s.status === '퇴실') {
+      btns = `<button class="act-btn act-col2 act-reset" onclick="action('reset',${s.id})">↩ 기록 초기화</button>`;
+    }
+
+    return `
+      <div class="card card-${s.status}" id="card-${s.id}">
+        <div class="card-header">
+          <div class="student-info">
+            <div class="school-grade">${s.school} ${s.grade}</div>
+            <div class="name">${s.name}</div>
+            <span class="status-badge badge-${s.status}">${s.status}</span>
+          </div>
+          <div class="card-right">
+            <button class="delete-btn" onclick="deleteStudent(${s.id},'${s.name}')" title="삭제">✕</button>
+            <div class="study-time ${s.status==='재실'?'active':''}" id="time-${s.id}">${fmtSec(liveSec)}</div>
+          </div>
+        </div>
+        <div class="log-area">${logRows}</div>
+        <div class="actions">${btns}</div>
+      </div>`;
+  }).join('');
+}
+
+// ════════════════════════════════════════
+// 실시간 타이머 (1초 tick)
+// ════════════════════════════════════════
+function tick() {
+  // 시계 업데이트
+  document.getElementById('clock').textContent = new Date().toLocaleTimeString('ko-KR');
+  // 재실 학생 공부 시간 업데이트 (DOM만, 재렌더 없이)
+  students.forEach(s => {
+    if (s.status === '재실' && s.currentSessionStart) {
+      const el = document.getElementById(`time-${s.id}`);
+      if (el) el.textContent = fmtSec(getLiveSec(s));
+    }
+  });
+  updateStats();
+}
+
+// ════════════════════════════════════════
+// 주기적 동기화 (5초마다 외부 변경 감지)
+// ════════════════════════════════════════
+async function syncFromShared() {
+  try {
+    const result = await window.storage.get(STORAGE_KEY, true);
+    if (result && result.value) {
+      const loaded = deserializeStudents(result.value);
+      if (loaded && JSON.stringify(loaded) !== JSON.stringify(students)) {
+        students = loaded;
+        setSyncStatus(true);
+        renderAll();
+      }
+    }
+  } catch(e) { setSyncStatus(false); }
+}
+
+// ════════════════════════════════════════
+// UI 헬퍼
+// ════════════════════════════════════════
+function setFilter(f, btn) {
+  currentFilter = f;
+  document.querySelectorAll('.filter-btn').forEach(b => {
+    b.className = 'filter-btn';
+    if (b.dataset.filter === f) b.className = `filter-btn active-${f}`;
+  });
+  renderGrid();
+}
+
+function toggleAddForm() {
+  const el = document.getElementById('addForm');
+  el.style.display = el.style.display === 'none' ? 'flex' : 'none';
+}
+
+let toastTimer;
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+// ════════════════════════════════════════
+// 검색 이벤트
+// ════════════════════════════════════════
+document.getElementById('searchInput').addEventListener('input', e => {
+  searchTerm = e.target.value;
+  renderGrid();
+});
+
+// ════════════════════════════════════════
+// 초기화
+// ════════════════════════════════════════
+(async () => {
+  await loadFromShared();
+  tickInterval = setInterval(tick, 1000);
+  syncInterval = setInterval(syncFromShared, 5000); // 5초마다 동기화
+})();
+</script>
+</body>
+</html>
