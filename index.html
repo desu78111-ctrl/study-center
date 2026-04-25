@@ -5,8 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>스터디센터 실시간 현황판</title>
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
-  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
   <style>
     :root{--bg:#0f1117;--surface:#1a1d27;--surface2:#22263a;--border:#2e3352;--accent:#5b6af0;--green:#22c55e;--yellow:#f59e0b;--blue:#3b82f6;--red:#ef4444;--purple:#7c3aed;--text:#e8eaf6;--text2:#8892b0;--text3:#4a5568;}
     *{box-sizing:border-box;margin:0;padding:0;}
@@ -853,16 +853,37 @@ function goLocal(){
 }
 function startFirebase(cfg){
   try{
-    let app;try{app=firebase.app();}catch(e){app=firebase.initializeApp(cfg);}
-    isFirebase=true;const db=firebase.database();dbRef=db.ref('studyCenter/students');
-    document.getElementById('modeLabel').textContent='🔥 Firebase 실시간 연동';document.getElementById('syncTxt').textContent='연동됨';document.getElementById('setupModal').style.display='none';
-    dbRef.on('value',snap=>{
-      const data=snap.val();
-      if(!data){students=JSON.parse(JSON.stringify(INIT_DATA));dbRef.set(ser(students));}
-      else{const d=des(data);if(d)students=d;}
-      document.getElementById('syncDot').classList.remove('err');renderAll();
-    },err=>{document.getElementById('syncDot').classList.add('err');document.getElementById('syncTxt').textContent='연결 오류';showToast('Firebase 연결 오류!');});
-  }catch(err){showToast('Firebase 오류: '+err.message);document.getElementById('setupModal').style.display='flex';}
+    // 이미 초기화된 앱 재사용 or 새로 초기화
+    let app;
+    try{ app=firebase.app(); }
+    catch(e){ app=firebase.initializeApp(cfg); }
+
+    isFirebase=true;
+    const db=firebase.database();
+    dbRef=db.ref('studyCenter/students');
+
+    document.getElementById('modeLabel').textContent='🔥 Firebase 실시간 연동';
+    document.getElementById('syncTxt').textContent='연동됨';
+    document.getElementById('setupModal').style.display='none';
+
+    dbRef.on('value', function(snap){
+      var data=snap.val();
+      if(!data){ students=JSON.parse(JSON.stringify(INIT_DATA)); dbRef.set(ser(students)); }
+      else{ var d=des(data); if(d) students=d; }
+      document.getElementById('syncDot').classList.remove('err');
+      renderAll();
+    }, function(err){
+      console.error('Firebase error:', err);
+      document.getElementById('syncDot').classList.add('err');
+      document.getElementById('syncTxt').textContent='연결 오류';
+      showToast('Firebase 연결 오류! 설정을 확인하세요.');
+    });
+
+  }catch(err){
+    console.error('startFirebase error:', err);
+    showToast('Firebase 오류: '+err.message);
+    document.getElementById('setupModal').style.display='flex';
+  }
 }
 
 // ════ 진입점 ════
