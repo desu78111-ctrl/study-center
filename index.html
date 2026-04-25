@@ -122,17 +122,19 @@
     .modal{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:24px;max-width:480px;width:100%;}
     .modal h2{font-size:17px;font-weight:900;margin-bottom:12px;}
     .modal label{font-size:11px;color:var(--text2);display:block;margin-bottom:3px;margin-top:9px;}
-    .modal input{width:100%;background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:7px 11px;border-radius:8px;font-size:12px;font-family:'JetBrains Mono',monospace;outline:none;}
-    .modal input:focus{border-color:var(--accent);}
+    .modal input, .modal select{width:100%;background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:7px 11px;border-radius:8px;font-size:12px;font-family:inherit;outline:none;}
+    .modal input:focus, .modal select:focus{border-color:var(--accent);}
     .modal-info{background:rgba(34,197,94,.08);border:1px solid rgba(34,197,94,.2);border-radius:8px;padding:9px 13px;font-size:12px;color:var(--text2);margin-bottom:12px;line-height:1.8;}
     .modal-info strong{color:var(--green);}
     .modal-btns{display:flex;gap:7px;margin-top:14px;}
-    /* 상벌점 모달 */
+    /* 카톡 알림 모달 입력 필드 */
+    .am-field{margin-bottom: 12px;}
+    .am-field label{font-size:12px; font-weight: 700; color:var(--text);}
+    /* 상벌점/리포트 모달 기타 스타일들... */
     .pts-modal{background:var(--surface);border:1px solid var(--border);border-radius:16px;max-width:860px;width:100%;max-height:90vh;overflow:hidden;display:flex;flex-direction:column;}
     .pts-modal-head{padding:18px 22px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;}
     .pts-modal-head h2{font-size:17px;font-weight:900;}
     .pts-body{overflow-y:auto;padding:18px 22px;flex:1;}
-    /* 상벌점 입력 패널 */
     .pts-input-panel{background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:18px;}
     .pts-input-panel h3{font-size:13px;font-weight:700;margin-bottom:12px;color:var(--text2);}
     .pts-input-row{display:flex;gap:8px;align-items:flex-end;flex-wrap:wrap;}
@@ -145,11 +147,9 @@
     .pts-type-btn.good.sel{background:rgba(34,197,94,.4);border-color:var(--green);}
     .pts-type-btn.bad{background:rgba(239,68,68,.15);border-color:rgba(239,68,68,.4);color:var(--red);}
     .pts-type-btn.bad.sel{background:rgba(239,68,68,.4);border-color:var(--red);}
-    /* 주간 탭 */
     .week-tabs{display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap;}
     .week-tab{padding:5px 12px;border-radius:7px;border:1px solid var(--border);background:transparent;color:var(--text2);font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;}
     .week-tab.active{background:rgba(124,58,237,.2);border-color:rgba(124,58,237,.5);color:#c4b5fd;}
-    /* 상벌점 테이블 */
     .pts-table{width:100%;border-collapse:collapse;font-size:12px;}
     .pts-table th{background:var(--surface2);color:var(--text2);font-weight:700;padding:8px 10px;text-align:center;border:1px solid var(--border);font-size:11px;}
     .pts-table td{padding:7px 10px;border:1px solid var(--border);text-align:center;color:var(--text);vertical-align:middle;}
@@ -162,7 +162,6 @@
     .discount-cell{background:rgba(91,106,240,.1);color:#a5b4fc;font-weight:700;}
     .pts-log-list{font-size:10px;color:var(--text2);max-height:80px;overflow-y:auto;}
     .pts-log-item{display:flex;justify-content:space-between;padding:2px 0;border-bottom:1px solid rgba(255,255,255,.04);}
-    /* 주간 리포트 */
     .report-modal{background:var(--surface);border:1px solid var(--border);border-radius:16px;max-width:860px;width:100%;max-height:90vh;overflow:hidden;display:flex;flex-direction:column;}
     .report-header{padding:18px 22px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;}
     .report-header h2{font-size:17px;font-weight:900;}
@@ -180,7 +179,6 @@
     .save-notice{background:rgba(91,106,240,.1);border:1px solid rgba(91,106,240,.2);border-radius:8px;padding:9px 13px;font-size:11px;color:var(--text2);margin-bottom:12px;}
     .save-notice strong{color:var(--accent);}
     .no-data{text-align:center;color:var(--text2);padding:40px;font-size:14px;}
-    /* 개별 리포트 (흰배경) */
     .student-report-modal{background:#fff;border-radius:16px;max-width:500px;width:100%;max-height:90vh;overflow-y:auto;color:#1a1a2e;}
     .sr-header{background:linear-gradient(135deg,#5b6af0,#7c3aed);padding:22px;color:#fff;border-radius:16px 16px 0 0;}
     .sr-header h3{font-size:20px;font-weight:900;margin-bottom:3px;}
@@ -195,7 +193,6 @@
     .sr-total-label{font-size:12px;font-weight:700;color:#333;}
     .sr-total-val{font-family:'JetBrains Mono',monospace;font-size:20px;font-weight:900;color:#5b6af0;}
     .sr-days-count{font-size:11px;color:#666;margin-top:3px;}
-    /* 상벌점 리포트 박스 */
     .sr-pts-box{border-radius:10px;padding:13px;margin-top:10px;display:flex;justify-content:space-between;align-items:flex-start;}
     .sr-pts-good{background:rgba(34,197,94,.08);border:1px solid rgba(34,197,94,.3);}
     .sr-pts-bad{background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.3);}
@@ -208,49 +205,23 @@
     .sr-alert-good{background:rgba(91,106,240,.12);border:1px solid rgba(91,106,240,.3);color:#4f46e5;}
     .sr-footer{background:#f8f9ff;padding:12px 18px;border-top:1px solid #e8eaf6;font-size:10px;color:#999;text-align:center;border-radius:0 0 16px 16px;}
     .copy-btn-wrap{margin-top:10px;display:flex;flex-direction:column;gap:5px;}
- 
-    /* ── 로그인 화면 ── */
-    .login-bg{position:fixed;inset:0;background:linear-gradient(135deg,#0a0c14 0%,#111320 100%);z-index:999;display:flex;align-items:center;justify-content:center;padding:20px;}
-    .login-box{background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:40px 36px;max-width:380px;width:100%;box-shadow:0 24px 60px rgba(0,0,0,.7);}
-    .login-logo{text-align:center;margin-bottom:28px;}
-    .login-logo .icon{font-size:52px;margin-bottom:8px;}
-    .login-logo h1{font-size:22px;font-weight:900;color:var(--text);margin-bottom:4px;}
-    .login-logo p{font-size:11px;color:var(--text2);}
-    .login-field{margin-bottom:14px;}
-    .login-field label{font-size:11px;color:var(--text2);display:block;margin-bottom:5px;font-weight:700;letter-spacing:.5px;}
-    .login-field input{width:100%;background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:12px 14px;border-radius:10px;font-size:14px;font-family:inherit;outline:none;transition:border-color .2s;}
-    .login-field input:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(91,106,240,.15);}
-    .login-btn{width:100%;background:var(--accent);border:none;color:#fff;padding:13px;border-radius:10px;font-size:15px;font-weight:900;cursor:pointer;font-family:inherit;transition:all .15s;margin-top:8px;letter-spacing:.3px;}
-    .login-btn:hover{background:#4a57d8;transform:translateY(-1px);box-shadow:0 6px 20px rgba(91,106,240,.4);}
-    .login-btn:active{transform:translateY(0);}
-    .login-error{background:rgba(239,68,68,.15);border:1px solid rgba(239,68,68,.3);color:#ff8080;border-radius:8px;padding:10px 13px;font-size:12px;font-weight:700;margin-top:10px;display:none;text-align:center;}
-    .login-box.shake{animation:shake .4s ease;}
-    @keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-10px)}40%{transform:translateX(10px)}60%{transform:translateX(-6px)}80%{transform:translateX(6px)}}
   </style>
 </head>
 <body>
- 
-<!-- 로그인 화면 -->
-<div class="login-bg" id="loginScreen">
-  <div class="login-box" id="loginBox">
-    <div class="login-logo">
-      <div class="icon">📚</div>
-      <h1>스터디센터</h1>
-      <p>관리자 로그인이 필요합니다</p>
+
+<!-- 액션(입/퇴실/외출) 카톡 알림 모달 -->
+<div class="modal-bg" id="actionModal" style="display:none">
+  <div class="modal">
+    <h2 id="amTitle">상태 변경 알림</h2>
+    <div id="amContent" class="am-field"></div>
+    <div class="modal-btns">
+      <button class="btn btn-p" style="flex:1" onclick="confirmAction(true)">상태 변경 + 카톡 복사</button>
+      <button class="btn btn-g" onclick="confirmAction(false)">그냥 변경만</button>
+      <button class="btn btn-d" onclick="closeActionModal()">취소</button>
     </div>
-    <div class="login-field">
-      <label>아이디</label>
-      <input type="text" id="loginId" placeholder="아이디 입력" autocomplete="username" onkeydown="if(event.key==='Enter')document.getElementById('loginPw').focus()">
-    </div>
-    <div class="login-field">
-      <label>비밀번호</label>
-      <input type="password" id="loginPw" placeholder="비밀번호 입력" autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()">
-    </div>
-    <button class="login-btn" onclick="doLogin()">로그인</button>
-    <div class="login-error" id="loginError">❌ 아이디 또는 비밀번호가 틀렸습니다</div>
   </div>
 </div>
- 
+
 <!-- Firebase 설정 모달 -->
 <div class="modal-bg" id="setupModal" style="display:none">
   <div class="modal">
@@ -266,7 +237,7 @@
     </div>
   </div>
 </div>
- 
+
 <!-- 상벌점 관리 모달 -->
 <div class="modal-bg" id="ptsModal" style="display:none">
   <div class="pts-modal">
@@ -304,7 +275,7 @@
           <button class="btn btn-p" onclick="addPoints()">부여</button>
         </div>
       </div>
-      <!-- 주차 직접 입력 + 탭 -->
+      <!-- 주차 탭 -->
       <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;flex-wrap:wrap;">
         <div style="display:flex;align-items:center;gap:6px;background:var(--surface2);border:1px solid var(--border);border-radius:9px;padding:6px 12px;">
           <span style="font-size:11px;color:var(--text2);">주 직접 이동:</span>
@@ -319,7 +290,7 @@
     </div>
   </div>
 </div>
- 
+
 <!-- 주간 공부 리포트 모달 -->
 <div class="modal-bg" id="weeklyModal" style="display:none">
   <div class="report-modal">
@@ -336,7 +307,6 @@
     </div>
     <div class="report-body">
       <div class="save-notice"><strong>💡 사용법:</strong> 날짜 선택 후 "선택 날짜로 저장" → 학생 이름 클릭 시 부모님께 보낼 개별 리포트 생성 (공부시간 + 상벌점 포함)<br><strong>주 직접 이동:</strong> 아래 날짜 입력창에 원하는 날짜를 입력하면 해당 주로 이동합니다.</div>
-      <!-- 주 직접 이동 -->
       <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;flex-wrap:wrap;">
         <div style="display:flex;align-items:center;gap:6px;background:var(--surface2);border:1px solid var(--border);border-radius:9px;padding:6px 12px;">
           <span style="font-size:11px;color:var(--text2);">주 직접 이동:</span>
@@ -350,29 +320,28 @@
     </div>
   </div>
 </div>
- 
+
 <!-- 개별 학생 리포트 -->
 <div class="modal-bg" id="studentReportModal" style="display:none" onclick="if(event.target===this)this.style.display='none'">
   <div class="student-report-modal" id="studentReportContent"></div>
 </div>
- 
+
 <!-- MAIN -->
 <div class="header">
   <div><h1>📚 스터디센터 실시간 현황판</h1><p id="modeLabel">초기화 중...</p></div>
   <div class="header-right">
     <div class="sync-badge"><div class="sync-dot" id="syncDot"></div><span id="syncTxt">연결중</span></div>
     <div class="clock" id="clock">--:--:--</div>
-    <button class="btn btn-g" style="font-size:10px;padding:4px 10px" onclick="doLogout()">🔒 로그아웃</button>
   </div>
 </div>
- 
+
 <div class="stats">
   <div class="chip c-total">전체 <span id="stTotal">0</span>명</div>
   <div class="chip c-in">🟢 재실 <span id="stIn">0</span>명</div>
   <div class="chip c-out">🟡 외출 <span id="stOut">0</span>명</div>
   <div class="chip c-done">🔵 퇴실 <span id="stDone">0</span>명</div>
 </div>
- 
+
 <div class="toolbar">
   <div class="search-wrap"><span class="si">🔍</span><input type="text" id="searchInput" placeholder="이름 또는 학교 검색..."></div>
   <div class="filters">
@@ -388,7 +357,7 @@
   <button class="btn btn-g" onclick="openSetup()">⚙️ 연동</button>
   <button class="btn btn-d" onclick="hardReset()">🔄 초기화</button>
 </div>
- 
+
 <div class="add-form" id="addForm" style="display:none">
   <div><label>학교</label><input type="text" id="nSchool" placeholder="소하"></div>
   <div><label>학년</label><select id="nGrade"><option>1학년</option><option>2학년</option><option selected>3학년</option><option>기타</option></select></div>
@@ -396,34 +365,34 @@
   <button class="btn btn-p" onclick="addStudent()">등록</button>
   <button class="btn btn-g" onclick="toggleAdd()">취소</button>
 </div>
- 
+
 <div class="grid-wrap">
   <div class="grid" id="grid"></div>
   <div class="empty" id="emptyMsg" style="display:none">검색 결과가 없습니다.</div>
 </div>
 <div class="toast" id="toast"></div>
- 
+
 <script>
 // ════ 초기 학생 데이터 ════
 const INIT_DATA=[{school:'소하',grade:'3학년',name:'강수현'},{school:'소하',grade:'3학년',name:'강예슬'},{school:'소하',grade:'3학년',name:'고준수'},{school:'운산',grade:'2학년',name:'곽예찬'},{school:'소하',grade:'3학년',name:'권민재'},{school:'충현',grade:'3학년',name:'권태린'},{school:'운산',grade:'2학년',name:'김규진'},{school:'광휘',grade:'2학년',name:'김나운'},{school:'운산',grade:'3학년',name:'김도훈'},{school:'소하',grade:'3학년',name:'김동건'},{school:'소하',grade:'3학년',name:'김민주'},{school:'충현',grade:'2학년',name:'김세훈'},{school:'소하',grade:'3학년',name:'김수연'},{school:'소하',grade:'2학년',name:'김아현'},{school:'소하',grade:'2학년',name:'김예일'},{school:'운산',grade:'3학년',name:'김예찬'},{school:'운산',grade:'1학년',name:'김종호'},{school:'운산',grade:'2학년',name:'김준수'},{school:'소하',grade:'3학년',name:'김지윤'},{school:'광휘',grade:'3학년',name:'김태린'},{school:'충현',grade:'3학년',name:'김태영'},{school:'소하',grade:'3학년',name:'김태현'},{school:'소하',grade:'3학년',name:'김혜빈'},{school:'소하',grade:'3학년',name:'노희수'},{school:'창의경영',grade:'3학년',name:'명승아'},{school:'광휘',grade:'2학년',name:'박다원'},{school:'진성',grade:'3학년',name:'박서진'},{school:'문일',grade:'1학년',name:'박성훈'},{school:'소하',grade:'3학년',name:'박지웅'},{school:'광휘',grade:'2학년',name:'박하음'},{school:'운산',grade:'3학년',name:'배서윤'},{school:'운산',grade:'1학년',name:'배진혁'},{school:'광명',grade:'1학년',name:'손유리'},{school:'소하',grade:'3학년',name:'송예준'},{school:'소하',grade:'3학년',name:'송현율'},{school:'소하',grade:'3학년',name:'신대율'},{school:'소하',grade:'3학년',name:'신유빈'},{school:'소하',grade:'2학년',name:'양지원'},{school:'운산',grade:'3학년',name:'유승아'},{school:'운산',grade:'3학년',name:'윤대현'},{school:'소하',grade:'2학년',name:'윤현지'},{school:'광휘',grade:'1학년',name:'이나경'},{school:'운산',grade:'2학년',name:'이도윤'},{school:'소하',grade:'2학년',name:'이서연'},{school:'운산',grade:'2학년',name:'이서윤'},{school:'소하',grade:'2학년',name:'이서윤(소하)'},{school:'소하',grade:'3학년',name:'이서윤(고3)'},{school:'진성',grade:'3학년',name:'이서하'},{school:'충현',grade:'3학년',name:'이세연'},{school:'광휘',grade:'3학년',name:'이수민'},{school:'광휘',grade:'3학년',name:'이유진'},{school:'광휘',grade:'3학년',name:'이윤아'},{school:'광휘',grade:'3학년',name:'이재민'},{school:'운산',grade:'2학년',name:'이재범'},{school:'광명',grade:'3학년',name:'이준오'},{school:'광휘',grade:'3학년',name:'이준환'},{school:'광휘',grade:'3학년',name:'이지모'},{school:'운산',grade:'3학년',name:'이지오'},{school:'광명',grade:'1학년',name:'이현서'},{school:'소하',grade:'3학년',name:'이형우'},{school:'소하',grade:'3학년',name:'임지상'},{school:'운산',grade:'2학년',name:'임지아'},{school:'운산',grade:'2학년',name:'임찬유'},{school:'소하',grade:'3학년',name:'장혜은'},{school:'소하',grade:'3학년',name:'전수원'},{school:'소하',grade:'3학년',name:'전혜주'},{school:'광북',grade:'3학년',name:'정승인'},{school:'소하',grade:'2학년',name:'정예은'},{school:'광명',grade:'2학년',name:'정유은'},{school:'충현',grade:'3학년',name:'조환희'},{school:'소하',grade:'3학년',name:'최규석'},{school:'광휘',grade:'2학년',name:'하가은'},{school:'운산',grade:'2학년',name:'한정원'},{school:'소하',grade:'3학년',name:'현재훈'}].map((s,i)=>({id:i+1,...s,status:'미입실',entryTime:null,checkOutTime:null,outingLogs:[],currentSessionStart:null,totalStudySeconds:0}));
- 
+
 // ════ 상태 ════
 let students=[],filterVal='전체',searchVal='',dbRef=null,isFirebase=false;
 let selectedPtsType='good'; // 'good' | 'bad'
 let currentPtsWeek=null, currentWeekStart=null;
- 
+let pendingActionType=null, pendingActionId=null;
+
 // ════ 날짜 유틸 ════
 const DAY_KO=['일','월','화','수','목','금','토'];
 function todayKey(){const d=new Date();return`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;}
 function keyToLabel(k){const d=new Date(k+'T00:00:00');return`${d.getMonth()+1}/${d.getDate()}(${DAY_KO[d.getDay()]})`;}
 function getWeekKey(dateStr){const d=new Date(dateStr+'T00:00:00');const day=d.getDay();const mon=new Date(d);mon.setDate(d.getDate()-(day===0?6:day-1));return`${mon.getFullYear()}-${String(mon.getMonth()+1).padStart(2,'0')}-${String(mon.getDate()).padStart(2,'0')}`;}
 function weekLabel(wk){const d=new Date(wk+'T00:00:00');const e=new Date(d);e.setDate(d.getDate()+6);return`${d.getMonth()+1}/${d.getDate()}~${e.getMonth()+1}/${e.getDate()}`;}
- 
+
 // ════ 주간 공부 기록 ════
 function getWeeklyData(){try{return JSON.parse(localStorage.getItem('sc_weekly')||'{}');}catch(e){return{};}}
 function setWeeklyData(d){localStorage.setItem('sc_weekly',JSON.stringify(d));}
- 
-function saveToday(){_saveForDate(todayKey());}
+
 function saveTodayWithDate(){
   const inp=document.getElementById('saveDateInput').value;
   if(!inp){showToast('날짜를 선택하세요');return;}
@@ -444,13 +413,10 @@ function _saveForDate(key){
 }
 function jumpWeek(dateStr){if(!dateStr)return;currentWeekStart=getWeekKey(dateStr);renderWeeklyReport();}
 function jumpPtsWeek(dateStr){if(!dateStr)return;currentPtsWeek=getWeekKey(dateStr);renderPtsTabs();renderPtsTable();}
- 
-// ════ 상벌점 저장소 ════
-// 구조: { 'YYYY-MM-DD': { '이름_학교': {good:N, bad:N, logs:[{type,score,reason,time}]} } }
+
+// ════ 상벌점 ════
 function getPtsData(){try{return JSON.parse(localStorage.getItem('sc_pts')||'{}');}catch(e){return{};}}
 function setPtsData(d){localStorage.setItem('sc_pts',JSON.stringify(d));}
- 
-// 학생별 현재 누적 상벌점 (이번 주)
 function getStudentWeekPts(name,school,weekStart){
   const data=getPtsData();
   const days=Object.keys(data).filter(d=>getWeekKey(d)===weekStart);
@@ -462,12 +428,8 @@ function getStudentWeekPts(name,school,weekStart){
   });
   return{good,bad,logs};
 }
- 
-// 학생별 이번 주 상벌점 (현재 주 기준)
-function getCurrentWeekPts(name,school){
-  return getStudentWeekPts(name,school,getWeekKey(todayKey()));
-}
- 
+function getCurrentWeekPts(name,school){ return getStudentWeekPts(name,school,getWeekKey(todayKey())); }
+
 function addPoints(){
   const sel=document.getElementById('ptsStudent').value;
   if(!sel){showToast('학생을 선택하세요');return;}
@@ -475,37 +437,34 @@ function addPoints(){
   const score=parseInt(document.getElementById('ptsScore').value)||1;
   const reason=document.getElementById('ptsReason').value.trim()||'사유 없음';
   const type=selectedPtsType;
- 
-  // 범위 체크
+
   if(type==='good'&&(score<1||score>100)){showToast('상점은 1~100점');return;}
   if(type==='bad'&&(score<1||score>30)){showToast('벌점은 1~30점');return;}
- 
-  // 날짜: 직접 입력한 날짜 또는 오늘
+
   const ptsDateVal=document.getElementById('ptsDate').value;
   const today=ptsDateVal||todayKey();
   const data=getPtsData();
   if(!data[today])data[today]={};
   const key=`${name}_${school}`;
   if(!data[today][key])data[today][key]={good:0,bad:0,logs:[]};
- 
+
   data[today][key][type]=(data[today][key][type]||0)+score;
   data[today][key].logs.push({type,score,reason,time:new Date().toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit'})});
   setPtsData(data);
- 
-  // 경고 체크
+
   const wkKey=getWeekKey(today);
   const tot=getStudentWeekPts(name,school,wkKey);
   let msg=`${name} ${type==='good'?'상점':'벌점'} ${score}점 부여 완료!`;
   if(type==='bad'){
     if(tot.bad>=30)msg=`🚨 ${name} 벌점 ${tot.bad}점! 퇴원 위기!`;
-    else if(tot.bad>=15)msg=`⚠️ ${name} 벌점 ${tot.bad}점! 경고 (15점 2회 퇴원)`;
+    else if(tot.bad>=15)msg=`⚠️ ${name} 벌점 ${tot.bad}점! 경고`;
   }
-  if(type==='good'&&tot.good>=50)msg=`🎉 ${name} 상점 ${tot.good}점! 독서실비 3만원 할인 대상!`;
+  if(type==='good'&&tot.good>=50)msg=`🎉 ${name} 상점 ${tot.good}점! 독서실비 할인!`;
   showToast(msg);
   renderPtsTable();
-  renderAll(); // 카드의 상벌점 배지 갱신
+  renderAll();
 }
- 
+
 function selectPtsType(t){
   selectedPtsType=t;
   document.getElementById('btnGood').classList.toggle('sel',t==='good');
@@ -513,19 +472,18 @@ function selectPtsType(t){
   document.getElementById('ptsScore').max=t==='good'?100:30;
   document.getElementById('ptsScore').value=t==='good'?5:1;
 }
- 
+
 function openPts(){
   document.getElementById('ptsModal').style.display='flex';
   const sel=document.getElementById('ptsStudent');
   sel.innerHTML=students.map(s=>`<option value="${s.name}|||${s.school}">${s.name} (${s.school})</option>`).join('');
-  // 날짜 기본값 오늘
   document.getElementById('ptsDate').value=todayKey();
   document.getElementById('ptsJumpDate').value=todayKey();
   currentPtsWeek=getWeekKey(todayKey());
   renderPtsTabs();
   renderPtsTable();
 }
- 
+
 function renderPtsTabs(){
   const data=getPtsData();
   const weeks={};
@@ -536,13 +494,12 @@ function renderPtsTabs(){
     `<button class="week-tab${wk===currentPtsWeek?' active':''}" onclick="currentPtsWeek='${wk}';renderPtsTabs();renderPtsTable()">${weekLabel(wk)}</button>`
   ).join('');
 }
- 
+
 function renderPtsTable(){
   const data=getPtsData();
   const wkKey=currentPtsWeek||getWeekKey(todayKey());
   const days=Object.keys(data).filter(d=>getWeekKey(d)===wkKey).sort();
- 
-  // 학생 집계
+
   const map={};
   students.forEach(s=>{map[`${s.name}_${s.school}`]={name:s.name,school:s.school,grade:s.grade,good:0,bad:0,logs:[]};});
   days.forEach(day=>{
@@ -553,17 +510,17 @@ function renderPtsTable(){
       map[key].logs=[...map[key].logs,...(rec.logs||[]).map(l=>({...l,date:day}))];
     });
   });
- 
+
   const list=Object.values(map).filter(s=>s.good>0||s.bad>0).sort((a,b)=>(b.good-b.bad)-(a.good-a.bad));
   if(!list.length){
-    document.getElementById('ptsTableWrap').innerHTML=`<div class="no-data">이번 주 상벌점 기록이 없습니다.<br>위에서 학생을 선택해 상벌점을 부여하세요.</div>`;
+    document.getElementById('ptsTableWrap').innerHTML=`<div class="no-data">이번 주 상벌점 기록이 없습니다.</div>`;
     return;
   }
- 
+
   let html=`<table class="pts-table"><thead><tr>
     <th>학생</th><th>학교/학년</th><th>🌟 상점</th><th>⚠️ 벌점</th><th>상태</th><th>최근 기록</th><th>삭제</th>
   </tr></thead><tbody>`;
- 
+
   list.forEach(s=>{
     const net=s.good-s.bad;
     let statusHtml='정상';
@@ -571,11 +528,11 @@ function renderPtsTable(){
     if(s.bad>=30){statusHtml='🚨 퇴원 위기';tdClass='danger-cell';}
     else if(s.bad>=15){statusHtml='⚠️ 경고 (15점↑)';tdClass='warn-cell';}
     if(s.good>=50){statusHtml+=(statusHtml==='정상'?'':' / ')+'💰 할인 대상';tdClass=tdClass||'discount-cell';}
- 
+
     const recentLogs=s.logs.slice(-3).reverse().map(l=>
       `<div class="pts-log-item"><span style="color:${l.type==='good'?'#22c55e':'#ef4444'}">${l.type==='good'?'+':'−'}${l.score} ${l.reason}</span><span>${l.date.slice(5)} ${l.time}</span></div>`
     ).join('');
- 
+
     html+=`<tr>
       <td class="left" style="font-weight:700">${s.name}</td>
       <td class="left" style="font-size:10px;color:var(--text2)">${s.school} ${s.grade}</td>
@@ -589,7 +546,7 @@ function renderPtsTable(){
   html+=`</tbody></table>`;
   document.getElementById('ptsTableWrap').innerHTML=html;
 }
- 
+
 function deleteStudentPts(name,school,wkKey){
   if(!confirm(`${name}의 이번 주 상벌점 기록을 모두 삭제할까요?`))return;
   const data=getPtsData();
@@ -597,18 +554,93 @@ function deleteStudentPts(name,school,wkKey){
   Object.keys(data).filter(d=>getWeekKey(d)===wkKey).forEach(day=>{if(data[day][key])delete data[day][key];});
   setPtsData(data);renderPtsTable();renderAll();showToast(`${name} 상벌점 삭제 완료`);
 }
- 
+
 // ════ 직렬화 ════
 const ser=arr=>arr.map(s=>({...s,entryTime:s.entryTime?+new Date(s.entryTime):null,checkOutTime:s.checkOutTime?+new Date(s.checkOutTime):null,currentSessionStart:s.currentSessionStart?+new Date(s.currentSessionStart):null,outingLogs:(s.outingLogs||[]).map(l=>({outingTime:l.outingTime?+new Date(l.outingTime):null,returnTime:l.returnTime?+new Date(l.returnTime):null}))}));
 const des=data=>{if(!data)return null;const arr=Array.isArray(data)?data:Object.values(data);return arr.map(s=>({...s,entryTime:s.entryTime?new Date(s.entryTime):null,checkOutTime:s.checkOutTime?new Date(s.checkOutTime):null,currentSessionStart:s.currentSessionStart?new Date(s.currentSessionStart):null,outingLogs:(s.outingLogs||[]).map(l=>({outingTime:l.outingTime?new Date(l.outingTime):null,returnTime:l.returnTime?new Date(l.returnTime):null}))}));};
- 
+
 async function save(){
   if(isFirebase&&dbRef)await dbRef.set(ser(students));
   else{localStorage.setItem('sc_local',JSON.stringify(ser(students)));renderAll();}
 }
- 
-// ════ 액션 ════
-async function action(type,id){
+
+// ════ 액션 핸들러 (모달 연동) ════
+function triggerAction(type, id) {
+  // 복귀(return), 초기화(reset)는 카톡 복사 불필요 -> 모달 없이 바로 실행
+  if(type === 'return' || type === 'reset') {
+    executeAction(type, id);
+    return;
+  }
+
+  const s = students.find(x => x.id === id);
+  if(!s) return;
+
+  pendingActionType = type;
+  pendingActionId = id;
+  const content = document.getElementById('amContent');
+  
+  if(type === 'checkin') {
+    document.getElementById('amTitle').innerText = '▶ 입실 알림 생성';
+    content.innerHTML = `
+      <label>예상 하원 시간</label>
+      <input type="text" id="amTimeInput" placeholder="예: 밤 10시">
+    `;
+  } else if(type === 'outing') {
+    document.getElementById('amTitle').innerText = '⏸ 외출 알림 생성';
+    content.innerHTML = `
+      <label>외출 사유</label>
+      <select id="amReasonSelect" onchange="document.getElementById('amReasonOther').style.display=this.value==='other'?'block':'none'">
+        <option>점심</option>
+        <option>저녁</option>
+        <option>타학원</option>
+        <option value="other">기타(직접입력)</option>
+      </select>
+      <input type="text" id="amReasonOther" placeholder="기타 사유를 입력하세요" style="display:none; margin-top:6px;">
+    `;
+  } else if(type === 'checkout') {
+    document.getElementById('amTitle').innerText = '⏹ 퇴실 알림 생성';
+    content.innerHTML = `
+      <label>다음날 등원 예정 시간</label>
+      <input type="text" id="amTimeInput" placeholder="예: 오후 4시">
+    `;
+  }
+  
+  document.getElementById('actionModal').style.display = 'flex';
+}
+
+function closeActionModal() {
+  document.getElementById('actionModal').style.display = 'none';
+  pendingActionType = null;
+  pendingActionId = null;
+}
+
+function confirmAction(withCopy) {
+  if(!pendingActionType || !pendingActionId) return;
+  const type = pendingActionType;
+  const id = pendingActionId;
+  const s = students.find(x => x.id === id);
+  const nowStr = new Date().toLocaleTimeString('ko-KR', {hour: '2-digit', minute:'2-digit'});
+  let copyMsg = '';
+
+  if(withCopy) {
+    if(type === 'checkin') {
+      const expect = document.getElementById('amTimeInput').value || '미정';
+      copyMsg = `[스터디센터 알림]\n${s.name} 학생이 ${nowStr}에 입실하였습니다.\n${expect}에 하원할 예정입니다.`;
+    } else if(type === 'outing') {
+      let reason = document.getElementById('amReasonSelect').value;
+      if(reason === 'other') reason = document.getElementById('amReasonOther').value || '기타 사유';
+      copyMsg = `[스터디센터 알림]\n${s.name} 학생이 ${nowStr}에 ${reason}(으)로 외출하였습니다.`;
+    } else if(type === 'checkout') {
+      const expect = document.getElementById('amTimeInput').value || '미정';
+      copyMsg = `[스터디센터 알림]\n${s.name} 원생이 ${nowStr}에 퇴실하였습니다.\n다음날 ${expect}에 등원할 예정입니다.`;
+    }
+  }
+
+  closeActionModal();
+  executeAction(type, id, copyMsg);
+}
+
+async function executeAction(type, id, copyText = ''){
   const now=new Date();
   students=students.map(s=>{
     if(s.id!==id)return s;
@@ -619,17 +651,23 @@ async function action(type,id){
     if(type==='reset')return{...s,status:'미입실',entryTime:null,checkOutTime:null,outingLogs:[],currentSessionStart:null,totalStudySeconds:0};
     return s;
   });
+  
   await save();
+  
+  if(copyText) {
+    copyReport(copyText);
+  }
 }
+
 async function deleteStudent(id,name){if(!confirm(`${name} 삭제?`))return;students=students.filter(s=>s.id!==id);await save();showToast(`${name} 삭제 완료`);}
 async function addStudent(){const name=document.getElementById('nName').value.trim(),school=document.getElementById('nSchool').value.trim(),grade=document.getElementById('nGrade').value;if(!name||!school){showToast('이름과 학교를 입력하세요');return;}const newId=students.length>0?Math.max(...students.map(s=>s.id))+1:1;students=[{id:newId,name,school,grade,status:'미입실',entryTime:null,checkOutTime:null,outingLogs:[],currentSessionStart:null,totalStudySeconds:0},...students];await save();document.getElementById('nName').value='';document.getElementById('nSchool').value='';document.getElementById('addForm').style.display='none';showToast(`${name} 등록 완료!`);}
 async function hardReset(){if(!confirm('전체 초기화?'))return;students=JSON.parse(JSON.stringify(INIT_DATA));await save();showToast('초기화 완료');}
- 
+
 // ════ 렌더링 ════
 const fmt=d=>d?new Date(d).toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit'}):'-';
 const fmtS=s=>{const h=Math.floor(s/3600),m=Math.floor((s%3600)/60),sec=s%60;return`${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(sec).padStart(2,'0')}`;};
 const getLive=s=>{let t=s.totalStudySeconds||0;if(s.status==='재실'&&s.currentSessionStart)t+=Math.floor((Date.now()-new Date(s.currentSessionStart).getTime())/1000);return t;};
- 
+
 function renderAll(){
   document.getElementById('stTotal').textContent=students.length;
   document.getElementById('stIn').textContent=students.filter(s=>s.status==='재실').length;
@@ -641,7 +679,6 @@ function renderAll(){
   e.style.display='none';
   const thisWeek=getWeekKey(todayKey());
   g.innerHTML=list.map(s=>{
-    // 상벌점 배지
     const pts=getCurrentWeekPts(s.name,s.school);
     let ptsBadges='';
     if(pts.good>0||pts.bad>0){
@@ -656,18 +693,18 @@ function renderAll(){
         ptsBadges+=`<span class="${cls}">⚠️${pts.bad}${pts.bad>=30?'🚨':pts.bad>=15?'!':''}</span>`;
       }
     }
- 
+
     const logs=s.outingLogs||[],multi=logs.length>1;
     let lr=`<div class="lr"><span class="ll en">입실</span><span class="lv">${fmt(s.entryTime)}</span></div>`;
     logs.forEach((l,i)=>{lr+=`<div class="lr"><span class="ll og">${multi?`외출${i+1}`:'외출'}</span><span class="lv">${fmt(l.outingTime)}</span></div>`;if(l.returnTime)lr+=`<div class="lr"><span class="ll rt">${multi?`복귀${i+1}`:'복귀'}</span><span class="lv">${fmt(l.returnTime)}</span></div>`;});
     lr+=`<div class="lr"><span class="ll co">퇴실</span><span class="lv">${fmt(s.checkOutTime)}</span></div>`;
- 
+
     let btns='';
-    if(s.status==='미입실')btns=`<button class="ab c2 a-in" onclick="action('checkin',${s.id})">▶ 입실</button>`;
-    else if(s.status==='재실')btns=`<button class="ab a-og" onclick="action('outing',${s.id})">⏸ 외출</button><button class="ab a-co" onclick="action('checkout',${s.id})">⏹ 퇴실</button>`;
-    else if(s.status==='외출')btns=`<button class="ab c2 a-rt" onclick="action('return',${s.id})">▶ 복귀</button>`;
-    else if(s.status==='퇴실')btns=`<button class="ab c2 a-rs" onclick="action('reset',${s.id})">↩ 초기화</button>`;
- 
+    if(s.status==='미입실')btns=`<button class="ab c2 a-in" onclick="triggerAction('checkin',${s.id})">▶ 입실</button>`;
+    else if(s.status==='재실')btns=`<button class="ab a-og" onclick="triggerAction('outing',${s.id})">⏸ 외출</button><button class="ab a-co" onclick="triggerAction('checkout',${s.id})">⏹ 퇴실</button>`;
+    else if(s.status==='외출')btns=`<button class="ab c2 a-rt" onclick="triggerAction('return',${s.id})">▶ 복귀</button>`;
+    else if(s.status==='퇴실')btns=`<button class="ab c2 a-rs" onclick="triggerAction('reset',${s.id})">↩ 초기화</button>`;
+
     return`<div class="card card-${s.status}">
       <div class="card-head">
         <div><div class="sg">${s.school} ${s.grade}</div><div class="nm">${s.name}</div><span class="badge b-${s.status}">${s.status}</span></div>
@@ -679,13 +716,13 @@ function renderAll(){
     </div>`;
   }).join('');
 }
- 
+
 setInterval(()=>{
   document.getElementById('clock').textContent=new Date().toLocaleTimeString('ko-KR');
   students.forEach(s=>{if(s.status==='재실'&&s.currentSessionStart){const el=document.getElementById(`t-${s.id}`);if(el)el.textContent=fmtS(getLive(s));}});
   document.getElementById('stIn').textContent=students.filter(s=>s.status==='재실').length;
 },1000);
- 
+
 // ════ 주간 리포트 ════
 function openWeekly(){
   document.getElementById('weeklyModal').style.display='flex';
@@ -693,15 +730,14 @@ function openWeekly(){
   document.getElementById('weekJumpDate').value=todayKey();
   renderWeeklyReport();
 }
- 
+
 function getWeekDays(weekStartKey){
-  // 월~일 7일 배열 반환 ['YYYY-MM-DD', ...]
   const base=new Date(weekStartKey+'T00:00:00');
   const days=[];
   for(let i=0;i<7;i++){const d=new Date(base);d.setDate(base.getDate()+i);days.push(`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`)}
   return days;
 }
- 
+
 function renderWeeklyReport(){
   const data=getWeeklyData();
   const allDates=Object.keys(data).sort();
@@ -709,27 +745,22 @@ function renderWeeklyReport(){
   allDates.forEach(d=>{const wk=getWeekKey(d);if(!weeks[wk])weeks[wk]=[];weeks[wk].push(d);});
   const weekKeys=Object.keys(weeks).sort().reverse();
   const sel=document.getElementById('weekSelector');
- 
-  // 저장 기록이 없어도 이번 주는 항상 표시
+
   const thisWk=getWeekKey(todayKey());
   if(!weeks[thisWk]) weeks[thisWk]=[];
   if(!weekKeys.includes(thisWk)) weekKeys.unshift(thisWk);
- 
+
   if(!currentWeekStart) currentWeekStart=weekKeys[0];
-  // 선택된 주가 목록에 없으면(직접 이동 등) 추가
   if(!weekKeys.includes(currentWeekStart)) weekKeys.unshift(currentWeekStart);
- 
+
   sel.innerHTML=weekKeys.map(wk=>{
     const d=new Date(wk+'T00:00:00');
     const e=new Date(d);e.setDate(d.getDate()+6);
     const savedCount=(weeks[wk]||[]).length;
     return`<button class="week-tab${wk===currentWeekStart?' active':''}" onclick="currentWeekStart='${wk}';renderWeeklyReport()">${d.getMonth()+1}/${d.getDate()}(월)~${e.getMonth()+1}/${e.getDate()}(일)${savedCount?' · '+savedCount+'일 저장':' · 기록없음'}</button>`;
   }).join('');
- 
-  // 월~일 7일 고정 컬럼
+
   const weekDays=getWeekDays(currentWeekStart);
- 
-  // 학생별 집계 (7일 전체 기준)
   const studentMap={};
   weekDays.forEach(date=>{
     (data[date]||[]).forEach(rec=>{
@@ -740,9 +771,9 @@ function renderWeeklyReport(){
       studentMap[key].attendDays++;
     });
   });
- 
+
   const sList=Object.values(studentMap).sort((a,b)=>b.totalSec-a.totalSec);
- 
+
   const DAY_NAMES=['월','화','수','목','금','토','일'];
   let html=`<table class="report-table"><thead><tr><th>순위</th><th>학교</th><th>이름</th>`;
   weekDays.forEach((d,i)=>{
@@ -752,7 +783,7 @@ function renderWeeklyReport(){
     html+=`<th style="${isToday?'color:var(--green)':!hasSave?'color:var(--text3)':''}">${dt.getMonth()+1}/${dt.getDate()}<br>${DAY_NAMES[i]}</th>`;
   });
   html+=`<th>🌟상점</th><th>⚠️벌점</th><th>주간합계</th><th>출석</th></tr></thead><tbody>`;
- 
+
   if(!sList.length){
     html+=`<tr><td colspan="${7+6}" class="no-data" style="padding:30px;text-align:center;color:var(--text2)">이 주에 저장된 기록이 없습니다.</td></tr>`;
   } else {
@@ -781,26 +812,24 @@ function renderWeeklyReport(){
   html+=`</tbody></table>`;
   document.getElementById('reportContent').innerHTML=html;
 }
- 
-// ════ 개별 학생 리포트 (부모님용) ════
+
+// 개별 학생 리포트
 function showStudentReport(name,school,weekStart){
   const wData=getWeeklyData();
-  // 월~일 7일 고정
   const weekDays7=getWeekDays(weekStart);
   const DAY_NAMES7=['월','화','수','목','금','토','일'];
   const d=new Date(weekStart+'T00:00:00');const endD=new Date(d);endD.setDate(d.getDate()+6);
   const wkLabel=d.getFullYear()+'년 '+String(d.getMonth()+1)+'월 '+String(d.getDate())+'일(월) ~ '+String(endD.getMonth()+1)+'월 '+String(endD.getDate())+'일(일)';
- 
+
   let totalSec=0,attendDays=0,dayRows='';
-  // 학년 찾기
   let grade='';
   weekDays7.forEach(dk=>{if(!grade){const r=(wData[dk]||[]).find(r=>r.name===name&&r.school===school);if(r)grade=r.grade||'';}});
- 
+
   weekDays7.forEach((dateKey,di)=>{
     const rec=(wData[dateKey]||[]).find(r=>r.name===name&&r.school===school);
     const dt=new Date(dateKey+'T00:00:00');
     const label=(dt.getMonth()+1)+'/'+dt.getDate()+'('+DAY_NAMES7[di]+')';
-    const hasSave=Object.keys(wData).includes(dateKey); // 이날 전체 저장 여부
+    const hasSave=Object.keys(wData).includes(dateKey); 
     if(rec){
       totalSec+=rec.totalStudySeconds;attendDays++;
       dayRows+='<div class="sr-day-row"><div class="sr-day-label">📅 '+label+'</div><div class="sr-day-time">'+fmtS(rec.totalStudySeconds)+'</div></div>';
@@ -810,24 +839,21 @@ function showStudentReport(name,school,weekStart){
       dayRows+='<div class="sr-day-row"><div class="sr-day-label" style="color:#bbb">📅 '+label+'</div><div class="sr-day-absent">미운영</div></div>';
     }
   });
- 
+
   const pts=getStudentWeekPts(name,school,weekStart);
   const todayStr=new Date().toLocaleDateString('ko-KR');
- 
-  // 상벌점 경고/혜택 박스
+
   let alertHtml='';
   if(pts.bad>=30)alertHtml+=`<div class="sr-alert sr-alert-danger">🚨 벌점 ${pts.bad}점 — 퇴원 위기 상태입니다. 원장님과 면담이 필요합니다.</div>`;
   else if(pts.bad>=15)alertHtml+=`<div class="sr-alert sr-alert-warn">⚠️ 벌점 ${pts.bad}점 — 15점 이상 2회 누적 시 퇴원 처리될 수 있습니다.</div>`;
   if(pts.good>=50)alertHtml+=`<div class="sr-alert sr-alert-good">🎉 상점 ${pts.good}점 달성! 이번 달 독서실비 3만원 할인 혜택이 적용됩니다.</div>`;
- 
-  // 최근 상벌점 로그
+
   const ptsData=getPtsData();
   const ptsWkDays=Object.keys(ptsData).filter(d=>getWeekKey(d)===weekStart);
   let ptsLogs=[];
   ptsWkDays.forEach(day=>{const key=`${name}_${school}`;const rec=ptsData[day]?.[key];if(rec)(rec.logs||[]).forEach(l=>ptsLogs.push({...l,date:day}));});
   const ptsLogHtml=ptsLogs.length?ptsLogs.map(l=>`<div class="sr-day-row"><div class="sr-day-label">${l.date.slice(5)} ${l.type==='good'?'🌟 상점':'⚠️ 벌점'} +${l.score}점</div><div style="font-size:11px;color:#666">${l.reason}</div></div>`).join(''):'<div style="color:#bbb;font-size:12px;padding:8px 0">이번 주 상벌점 기록 없음</div>';
- 
-  // 문자 복사용 텍스트 (월~일 7일 고정)
+
   const DAY_NAMES7s=['월','화','수','목','금','토','일'];
   const dayLines=weekDays7.map((dk,di)=>{
     const rec=(wData[dk]||[]).find(r=>r.name===name&&r.school===school);
@@ -837,7 +863,7 @@ function showStudentReport(name,school,weekStart){
     return lbl+': '+(rec?fmtS(rec.totalStudySeconds):hasSave?'결석':'미운영');
   }).join('\n');
   const shareText='[스터디센터 주간 학습 리포트]\n━━━━━━━━━━━━━━━━━\n학생: '+name+' ('+school+' '+grade+')\n기간: '+wkLabel+'\n출석: '+attendDays+'일 / 7일\n총 공부시간: '+fmtS(totalSec)+'\n\n📅 일별 공부시간\n'+dayLines+'\n\n⭐ 이번 주 상벌점\n상점: '+pts.good+'점'+(pts.good>=50?' (독서실비 3만원 할인 대상!)':'')+'\n벌점: '+pts.bad+'점'+(pts.bad>=30?' ⚠️ 퇴원 위기':pts.bad>=15?' ⚠️ 경고':'')+'\n\n발송일: '+todayStr+'\n━━━━━━━━━━━━━━━━━';
- 
+
   document.getElementById('studentReportContent').innerHTML=`
     <div class="sr-header">
       <h3>📚 ${name} 학생</h3>
@@ -847,7 +873,7 @@ function showStudentReport(name,school,weekStart){
       <div class="sr-section">📊 주간 공부 기록</div>
       ${dayRows}
       <div class="sr-total">
-        <div><div class="sr-total-label">📈 주간 총 공부시간</div><div class="sr-days-count">출석 ${attendDays}일 / ${selDates.length}일</div></div>
+        <div><div class="sr-total-label">📈 주간 총 공부시간</div><div class="sr-days-count">출석 ${attendDays}일 / ${weekDays7.length}일</div></div>
         <div class="sr-total-val">${fmtS(totalSec)}</div>
       </div>
       <div class="sr-section">⭐ 이번 주 상벌점</div>
@@ -865,19 +891,19 @@ function showStudentReport(name,school,weekStart){
     <div class="sr-footer">스터디센터 자동 생성 리포트 · ${todayStr}</div>`;
   document.getElementById('studentReportModal').style.display='flex';
 }
- 
+
 function copyReport(text){
   const t=text.replace(/\\n/g,'\n');
   navigator.clipboard.writeText(t).then(()=>showToast('✅ 복사 완료! 카카오톡에 붙여넣기 하세요.')).catch(()=>{const ta=document.createElement('textarea');ta.value=t;document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta);showToast('✅ 복사 완료!');});
 }
- 
+
 // ════ UI ════
 function setFilter(f,btn){filterVal=f;document.querySelectorAll('.fb').forEach(b=>b.className='fb');btn.className=`fb f-${f}`;renderAll();}
 function toggleAdd(){const el=document.getElementById('addForm');el.style.display=el.style.display==='none'?'flex':'none';}
 let _t;function showToast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');clearTimeout(_t);_t=setTimeout(()=>t.classList.remove('show'),3500);}
 document.getElementById('searchInput').addEventListener('input',e=>{searchVal=e.target.value;renderAll();});
 function openSetup(){localStorage.removeItem('sc_cfg');localStorage.removeItem('sc_local_mode');location.reload();}
- 
+
 // ════ Firebase ════
 function saveConfig(){
   const key=document.getElementById('cfgKey').value.trim(),proj=document.getElementById('cfgProj').value.trim(),db=document.getElementById('cfgDb').value.trim(),app=document.getElementById('cfgApp').value.trim();
@@ -893,19 +919,18 @@ function goLocal(){
 }
 function startFirebase(cfg){
   try{
-    // 이미 초기화된 앱 재사용 or 새로 초기화
     let app;
     try{ app=firebase.app(); }
     catch(e){ app=firebase.initializeApp(cfg); }
- 
+
     isFirebase=true;
     const db=firebase.database();
     dbRef=db.ref('studyCenter/students');
- 
+
     document.getElementById('modeLabel').textContent='🔥 Firebase 실시간 연동';
     document.getElementById('syncTxt').textContent='연동됨';
     document.getElementById('setupModal').style.display='none';
- 
+
     dbRef.on('value', function(snap){
       var data=snap.val();
       if(!data){ students=JSON.parse(JSON.stringify(INIT_DATA)); dbRef.set(ser(students)); }
@@ -918,54 +943,15 @@ function startFirebase(cfg){
       document.getElementById('syncTxt').textContent='연결 오류';
       showToast('Firebase 연결 오류! 설정을 확인하세요.');
     });
- 
+
   }catch(err){
     console.error('startFirebase error:', err);
     showToast('Firebase 오류: '+err.message);
     document.getElementById('setupModal').style.display='flex';
   }
 }
- 
- 
-// ════ 로그인 ════
-const LOGIN_ID = 'bestian';
-const LOGIN_PW = '1111';
- 
-function doLogin(){
-  const id = document.getElementById('loginId').value.trim();
-  const pw = document.getElementById('loginPw').value.trim();
-  if(id === LOGIN_ID && pw === LOGIN_PW){
-    document.getElementById('loginScreen').style.display = 'none';
-    localStorage.setItem('sc_auth', '1');
-    startApp();
-  } else {
-    const box = document.getElementById('loginBox');
-    const err = document.getElementById('loginError');
-    err.style.display = 'block';
-    box.classList.remove('shake');
-    void box.offsetWidth; // reflow for re-trigger
-    box.classList.add('shake');
-    document.getElementById('loginPw').value = '';
-    document.getElementById('loginPw').focus();
-    setTimeout(()=>box.classList.remove('shake'), 500);
-  }
-}
- 
-function checkLogin(){
-  if(localStorage.getItem('sc_auth') === '1'){
-    document.getElementById('loginScreen').style.display = 'none';
-    startApp();
-  }
-  // 로그인 안 됐으면 loginScreen 유지
-}
- 
-function doLogout(){
-  if(!confirm('로그아웃 하시겠습니까?'))return;
-  localStorage.removeItem('sc_auth');
-  location.reload();
-}
- 
-// ════ 앱 시작 (로그인 후 실행) ════
+
+// ════ 앱 시작 ════
 function startApp(){
   if(localStorage.getItem('sc_local_mode')==='1'){goLocal();return;}
   const cfgRaw=localStorage.getItem('sc_cfg');
@@ -976,9 +962,8 @@ function startApp(){
   document.getElementById('cfgApp').value='1:979740491220:web:1592c5d6b861e3c22cea41';
   document.getElementById('setupModal').style.display='flex';
 }
- 
-// ════ 진입점 ════
-checkLogin();
+
+startApp();
 </script>
 </body>
 </html>
