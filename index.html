@@ -1161,7 +1161,7 @@ function buildTimeGrid(containerId, times, selVar, inputId, onSelect){
   var container = document.getElementById(containerId);
   if(!container) return;
   container.innerHTML = times.map(function(t){
-    return '<button class="time-chip'+(selVar===t.val?' sel-green':'')+'" onclick="'+onSelect+'(''+t.val+'',''+t.label+'')">'+t.label+'</button>';
+    return '<button class="time-chip'+(selVar===t.val?' sel-green':'')+'" onclick="'+onSelect+'(\''+t.val+'\',\''+t.label+'\')">'+t.label+'</button>';
   }).join('');
 }
 
@@ -1233,8 +1233,7 @@ async function confirmCheckin(){
   document.getElementById('checkinModal').style.display='none';
   // 카톡
   var msg='📚 '+s.name+' 학생이 '+fmtTime(checkinDate)+'에 입실하였습니다.';
-  if(leaveVal) msg+='
-🏠 오늘 '+timeValToStr(leaveVal)+'에 하원할 예정입니다.';
+  if(leaveVal) msg+='\n🏠 오늘 '+timeValToStr(leaveVal)+'에 하원할 예정입니다.';
   showKakao(msg);
 }
 
@@ -1260,13 +1259,11 @@ async function confirmCheckout(){
   var arriveVal=document.getElementById('checkoutArriveTime').value;
   await action('checkout', _checkoutId);
   document.getElementById('checkoutModal').style.display='none';
-  var msg='🏠 '+s.name+' 원생이 '+fmtTime(now)+'에 퇴실하였습니다.
-오늘 총 공부시간: '+fmtHM(liveSec);
+  var msg='🏠 '+s.name+' 원생이 '+fmtTime(now)+'에 퇴실하였습니다.\n오늘 총 공부시간: '+fmtHM(liveSec);
   if(arriveVal){
     var tomorrow=new Date(now);
     tomorrow.setDate(tomorrow.getDate()+1);
-    msg+='
-📅 '+( tomorrow.getMonth()+1)+'/'+tomorrow.getDate()+'(내일) '+timeValToStr(arriveVal)+'에 등원할 예정입니다.';
+    msg+='\n📅 '+( tomorrow.getMonth()+1)+'/'+tomorrow.getDate()+'(내일) '+timeValToStr(arriveVal)+'에 등원할 예정입니다.';
   }
   showKakao(msg);
 }
@@ -1417,7 +1414,7 @@ function renderMonthly(){
     const rankLabel=i===0?'🥇':i===1?'🥈':i===2?'🥉':(i+1)+'위';
     html+='<tr>';
     html+='<td style="font-weight:700;color:'+(i===0?'#ffd700':i===1?'#c0c0c0':i===2?'#cd7f32':'var(--text2)')+'">'+rankLabel+'</td>';
-    html+='<td class="left"><a href="#" onclick="showMonthlyDetail(''+s.name+'',''+s.school+'',''+monthVal+'');return false;" style="color:var(--accent);text-decoration:none;font-weight:700">'+s.name+'</a></td>';
+    html+='<td class="left"><a href="#" onclick="showMonthlyDetail(\''+s.name+'\',\''+s.school+'\',\''+monthVal+'\');return false;" style="color:var(--accent);text-decoration:none;font-weight:700">'+s.name+'</a></td>';
     html+='<td class="left" style="font-size:10px;color:var(--text2)">'+s.school+' '+s.grade+'</td>';
     html+='<td>'+s.days+'일</td>';
     html+='<td style="font-family:JetBrains Mono,monospace;color:var(--accent);font-weight:700">'+fmtS(s.totalSec)+'</td>';
@@ -1434,25 +1431,18 @@ function showMonthlyDetail(name,school,monthVal){
   const data=getWeeklyData();
   const monthDates=Object.keys(data).filter(d=>{const dt=new Date(d+'T00:00:00');return dt.getFullYear()===year&&dt.getMonth()+1===month;}).sort();
   const DAY_KO2=['일','월','화','수','목','금','토'];
-  let msg='📊 ['+name+'] '+year+'년 '+month+'월 공부기록
-━━━━━━━━━━━━━━━
-';
+  let msg='📊 ['+name+'] '+year+'년 '+month+'월 공부기록\n━━━━━━━━━━━━━━━\n';
   let total=0,days=0;
   monthDates.forEach(d=>{
     const rec=(data[d]||[]).find(r=>r.name===name&&r.school===school);
     const dt=new Date(d+'T00:00:00');
     const label=month+'/'+dt.getDate()+'('+DAY_KO2[dt.getDay()]+')';
-    if(rec){msg+=label+': '+fmtHM(rec.totalStudySeconds)+'
-';total+=rec.totalStudySeconds;days++;}
-    else msg+=label+': -
-';
+    if(rec){msg+=label+': '+fmtHM(rec.totalStudySeconds)+'\n';total+=rec.totalStudySeconds;days++;}
+    else msg+=label+': -\n';
   });
-  msg+='━━━━━━━━━━━━━━━
-';
-  msg+='출석: '+days+'일 / '+monthDates.length+'일
-';
-  msg+='총 공부시간: '+fmtHM(total)+'
-';
+  msg+='━━━━━━━━━━━━━━━\n';
+  msg+='출석: '+days+'일 / '+monthDates.length+'일\n';
+  msg+='총 공부시간: '+fmtHM(total)+'\n';
   msg+='하루 평균: '+fmtHM(days>0?Math.floor(total/days):0);
   showKakao(msg);
 }
@@ -1470,8 +1460,7 @@ function exportExcel(){
   let csv='﻿'; // BOM for Korean
   csv+='이름,학교,학년';
   monthDates.forEach(d=>{const dt=new Date(d+'T00:00:00');csv+=','+month+'/'+dt.getDate()+'('+DAY_KO2[dt.getDay()]+')'});
-  csv+=',출석일,총공부시간(분),하루평균(분)
-';
+  csv+=',출석일,총공부시간(분),하루평균(분)\n';
 
   // 학생 목록
   const map={};
@@ -1481,8 +1470,7 @@ function exportExcel(){
     csv+=s.name+','+s.school+','+s.grade;
     let total=0,days=0;
     monthDates.forEach(d=>{const sec=s.dayMap[d];if(sec!=null){csv+=','+Math.round(sec/60);total+=sec;days++;}else csv+=','});
-    csv+=','+days+','+Math.round(total/60)+','+(days>0?Math.round(total/days/60):0)+'
-';
+    csv+=','+days+','+Math.round(total/60)+','+(days>0?Math.round(total/days/60):0)+'\n';
   });
 
   const blob=new Blob([csv],{type:'text/csv;charset=utf-8'});
