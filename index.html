@@ -1735,9 +1735,18 @@ async function returnWithKakao(id){
   var logs=s.outingLogs||[];
   var lastLog=logs.length>0?logs[logs.length-1]:null;
   var outType=lastLog&&lastLog.outingType?lastLog.outingType:'외출';
-  var msg='✅ '+s.name+' 학생이 '+fmtTime(now)+'에 복귀하였습니다. ('+outType+' 후 복귀)';
+  var msg='[베스티안 스터디센터]\n✅ '+s.name+' 학생이 '+fmtTime(now)+'에 복귀하였습니다. ('+outType+' 후 복귀)';
   await action('return', id);
-  showKakao(msg);
+  var kakaoEl=document.getElementById('kakaoMsg');
+  var popEl=document.getElementById('kakaoPopup');
+  if(kakaoEl&&popEl){
+    kakaoEl.textContent=msg;
+    popEl.style.cssText='display:block !important;position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:#fee500;border-radius:14px;padding:14px 18px;z-index:10000;box-shadow:0 8px 30px rgba(0,0,0,.5);max-width:360px;width:90%;';
+    clearTimeout(window._kakaoTimer);
+    window._kakaoTimer=setTimeout(function(){popEl.style.display='none';},15000);
+  } else {
+    alert(msg);
+  }
   pushReturnNotif(s.name, s.school, s.grade, outType);
 }
 
