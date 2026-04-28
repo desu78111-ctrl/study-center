@@ -468,12 +468,14 @@
     </div>
     <input type="text" class="custom-reason" id="customOutingReason" placeholder="외출 사유 직접 입력 (예: 병원)">
     <p style="font-size:11px;color:var(--text2);margin-bottom:8px;text-align:center;">예상 복귀 시간 (선택)</p>
-    <div class="outing-duration">
-      <button class="dur-btn" id="dur-none" onclick="selectDuration(0)">미지정</button>
+    <div class="outing-duration" style="flex-wrap:wrap;gap:6px;">
+      <button class="dur-btn" id="dur-30" onclick="selectDuration(30)">30분</button>
       <button class="dur-btn" id="dur-60" onclick="selectDuration(60)">1시간</button>
       <button class="dur-btn sel" id="dur-90" onclick="selectDuration(90)">1시간 30분</button>
       <button class="dur-btn" id="dur-120" onclick="selectDuration(120)">2시간</button>
+      <button class="dur-btn" id="dur-custom" onclick="selectDuration(-1)">✏️ 직접 입력</button>
     </div>
+    <input type="time" id="customDurTime" style="display:none;width:100%;margin-top:8px;background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:8px 12px;border-radius:9px;font-size:14px;font-family:inherit;outline:none;" placeholder="복귀 예정 시각 직접 입력">
     <div style="display:flex;gap:8px;">
       <button class="btn btn-p" style="flex:1;justify-content:center" onclick="confirmOuting()">✅ 외출 처리</button>
       <button class="btn btn-g" onclick="document.getElementById('outingModal').style.display='none'">취소</button>
@@ -597,10 +599,10 @@
 <!-- PC 입실 알림 패널 -->
 <div class="notif-panel" id="notifPanel">
   <div class="notif-panel-title">
-    📋 입실 알림 <span id="notifCount">0건</span>
+    📋 카톡 알림 <span id="notifCount">0건</span>
   </div>
   <button class="notif-copy-all-btn" id="notifCopyAllBtn" onclick="copyAllNotifs()" style="display:none">📋 전체 복사 (카톡 전송용)</button>
-  <div id="notifList"><div class="notif-empty">아직 입실 알림이 없습니다.<br>태블릿에서 입실 버튼을 누르면<br>여기에 표시됩니다.</div></div>
+  <div id="notifList"><div class="notif-empty">아직 알림이 없습니다.<br>태블릿에서 입실·외출·복귀 버튼을 누르면<br>여기에 표시됩니다.</div></div>
   <button class="notif-clear-btn" id="notifClearBtn" onclick="clearAllNotifs()" style="display:none">🗑 전체 지우기</button>
 </div>
 
@@ -1161,6 +1163,8 @@ function fmtHM(sec){
 
 // ════ 카톡 팝업 ════
 function showKakao(msg){
+  // 태블릿 모드에서는 카톡 팝업 없음 (알림 패널로만 전송)
+  if(_appMode === 'tablet') return;
   try {
     var kakaoEl=document.getElementById('kakaoMsg');
     var popEl=document.getElementById('kakaoPopup');
@@ -1408,8 +1412,10 @@ function openOutingModal(id){
   // 버튼 초기화
   ['lunch','dinner','academy','custom'].forEach(t=>document.getElementById('ot-'+t).classList.remove('sel'));
   document.getElementById('ot-lunch').classList.add('sel');
-  ['none','60','90','120'].forEach(d=>document.getElementById('dur-'+d).classList.remove('sel'));
+  ['30','60','90','120','custom'].forEach(d=>document.getElementById('dur-'+d)&&document.getElementById('dur-'+d).classList.remove('sel'));
   document.getElementById('dur-90').classList.add('sel');
+  var customDur = document.getElementById('customDurTime');
+  if(customDur){ customDur.style.display='none'; customDur.value=''; }
   document.getElementById('customOutingReason').style.display='none';
   document.getElementById('customOutingReason').value='';
   document.getElementById('outingModal').style.display='flex';
@@ -1425,8 +1431,14 @@ function selectOutingType(type){
 
 function selectDuration(min){
   _outingDuration=min;
-  ['none','60','90','120'].forEach(d=>document.getElementById('dur-'+d).classList.remove('sel'));
-  document.getElementById('dur-'+(min===0?'none':min)).classList.add('sel');
+  ['30','60','90','120','custom'].forEach(d=>document.getElementById('dur-'+d)&&document.getElementById('dur-'+d).classList.remove('sel'));
+  if(min===30) document.getElementById('dur-30').classList.add('sel');
+  else if(min===60) document.getElementById('dur-60').classList.add('sel');
+  else if(min===90) document.getElementById('dur-90').classList.add('sel');
+  else if(min===120) document.getElementById('dur-120').classList.add('sel');
+  else if(min===-1) document.getElementById('dur-custom').classList.add('sel');
+  var customInput = document.getElementById('customDurTime');
+  if(customInput) customInput.style.display = (min===-1) ? 'block' : 'none';
 }
 
 async function confirmOuting(){
@@ -1465,16 +1477,28 @@ async function confirmOuting(){
   } else {
     msg='⏸ '+s.name+' 학생이 '+timeStr+'에 외출하였습니다.\n사유: '+outType;
   }
-  if(_outingDuration>0){
-    var ret=new Date(now.getTime()+_outingDuration*60000);
-    var durLabel=_outingDuration===60?'1시간':_outingDuration===90?'1시간 30분':'2시간';
-    msg+='\n🕐 예상 복귀시간: '+fmtTime(ret)+' ('+durLabel+')';
+  document.getElementById('outingModal').style.display='none';
+  // 예상 복귀 시간 계산
+  var expectedRet = null;
+  var durLabel = '';
+  if(_outingDuration === -1){
+    // 직접 입력한 시각
+    var customVal = document.getElementById('customDurTime').value;
+    if(customVal){
+      var parts = customVal.split(':');
+      var retDate = new Date(now);
+      retDate.setHours(parseInt(parts[0]), parseInt(parts[1]), 0, 0);
+      if(retDate <= now) retDate.setDate(retDate.getDate()+1); // 자정 넘으면 내일
+      expectedRet = retDate;
+      durLabel = timeValToStr(customVal);
+    }
+  } else if(_outingDuration > 0){
+    expectedRet = new Date(now.getTime()+_outingDuration*60000);
+    durLabel = _outingDuration===30?'30분':_outingDuration===60?'1시간':_outingDuration===90?'1시간 30분':'2시간';
   }
 
-  document.getElementById('outingModal').style.display='none';
+  if(expectedRet) msg+='\n🕐 예상 복귀시간: '+fmtTime(expectedRet)+(durLabel?' ('+durLabel+')':'');
   showKakao(msg);
-  // 패널에도 전송
-  var expectedRet = _outingDuration>0 ? new Date(now.getTime()+_outingDuration*60000) : null;
   pushOutingNotif(s.name, s.school, s.grade, outType, expectedRet);
 }
 
