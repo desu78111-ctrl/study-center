@@ -310,6 +310,18 @@
     .admin-badge{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--green);background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.3);padding:4px 9px;border-radius:7px;cursor:pointer;}
     .admin-badge:hover{background:rgba(34,197,94,.2);}
 
+    /* ── 학생 정보 수정 모달 ── */
+    .student-edit-modal{background:var(--surface);border:1px solid var(--border);border-radius:16px;max-width:720px;width:100%;max-height:90vh;overflow:hidden;display:flex;flex-direction:column;}
+    .student-edit-head{padding:16px 20px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;}
+    .student-edit-body{overflow-y:auto;padding:16px 20px;flex:1;}
+    .student-edit-table{width:100%;border-collapse:collapse;font-size:12px;}
+    .student-edit-table th{background:var(--surface2);color:var(--text2);font-weight:700;padding:8px 10px;text-align:center;border:1px solid var(--border);font-size:11px;}
+    .student-edit-table td{padding:6px 8px;border:1px solid var(--border);text-align:center;vertical-align:middle;}
+    .student-edit-table input[type=text],.student-edit-table select{background:var(--bg);border:1px solid rgba(91,106,240,.4);color:var(--text);padding:4px 8px;border-radius:6px;font-size:12px;font-family:inherit;outline:none;width:100%;}
+    .student-edit-table input[type=text]:focus,.student-edit-table select:focus{border-color:var(--accent);}
+    .student-edit-table tr.row-changed td{background:rgba(91,106,240,.06);}
+    .btn-edit-student{background:rgba(91,106,240,.15);border-color:rgba(91,106,240,.4);color:var(--accent);font-size:11px;}
+    .btn-edit-student:hover{background:rgba(91,106,240,.3);}
     /* ── 주간 기록 수정 모달 ── */
     .edit-modal{background:var(--surface);border:1px solid var(--border);border-radius:16px;max-width:680px;width:100%;max-height:90vh;overflow:hidden;display:flex;flex-direction:column;}
     .edit-modal-head{padding:16px 20px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;}
@@ -389,6 +401,29 @@
     <div class="login-error" id="loginError">❌ 아이디 또는 비밀번호가 올바르지 않습니다.</div>
     <button class="login-btn" onclick="doLogin()">🔓 로그인</button>
     <button class="btn btn-g" style="width:100%;margin-top:8px;justify-content:center;" onclick="document.getElementById('loginModal').style.display='none'">취소</button>
+  </div>
+</div>
+
+<!-- ══ 학생 정보 수정 모달 (PC 전용) ══ -->
+<div class="modal-bg" id="studentEditModal" style="display:none" onclick="if(event.target===this)this.style.display='none'">
+  <div class="student-edit-modal">
+    <div class="student-edit-head">
+      <div>
+        <h2>✏️ 학생 정보 수정 <span style="font-size:11px;color:var(--yellow);background:rgba(245,158,11,.15);border:1px solid rgba(245,158,11,.3);border-radius:5px;padding:2px 7px;margin-left:6px;">💻 PC 전용</span></h2>
+        <p style="font-size:11px;color:var(--text2);margin-top:2px;">이름·학교·학년을 수정하세요. 수정 후 반드시 💾 저장을 눌러야 반영됩니다.</p>
+      </div>
+      <div style="display:flex;gap:7px;flex-wrap:wrap;align-items:center;">
+        <input type="text" id="editStudentSearch" placeholder="🔍 이름/학교 검색..." style="background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:5px 10px;border-radius:8px;font-size:12px;font-family:inherit;outline:none;min-width:160px;" oninput="renderStudentEditTable()">
+        <button class="btn btn-p" onclick="saveStudentEdits()">💾 저장</button>
+        <button class="btn btn-g" onclick="document.getElementById('studentEditModal').style.display='none'">✕ 닫기</button>
+      </div>
+    </div>
+    <div class="student-edit-body">
+      <div style="background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.2);border-radius:8px;padding:9px 13px;font-size:11px;color:var(--text2);margin-bottom:12px;">
+        ⚠️ <strong style="color:var(--red)">주의:</strong> 이름/학교를 변경하면 기존 공부 기록·상벌점과 연결이 끊어질 수 있습니다. 오탈자 수정 등 간단한 변경에만 사용하세요.
+      </div>
+      <div id="studentEditTableWrap"></div>
+    </div>
   </div>
 </div>
 
@@ -756,6 +791,7 @@
   <button class="btn" style="background:rgba(59,130,246,.15);border-color:rgba(59,130,246,.4);color:var(--blue)" onclick="openMonthly()">📅 월간통계</button>
   <button class="btn btn-weekly" onclick="openWeekly()">📊 주간 기록</button>
   <span id="pcOnlyBtns" style="display:flex;gap:7px;">
+    <button class="btn btn-edit-student btn-g" onclick="openStudentEdit()">👤 학생수정</button>
     <button class="btn" style="background:rgba(239,68,68,.12);border-color:rgba(239,68,68,.35);color:var(--red);font-size:11px;" onclick="openEditWeekly()">✏️ 기록수정</button>
     <button class="btn" style="background:rgba(245,158,11,.12);border-color:rgba(245,158,11,.35);color:var(--yellow);font-size:11px;" onclick="openDutyHours()">⏱ 의무시간</button>
     <button class="btn" style="background:rgba(34,197,94,.12);border-color:rgba(34,197,94,.35);color:var(--green);font-size:11px;font-weight:900;" onclick="openParentReport()">📮 리포트발송</button>
@@ -1014,6 +1050,80 @@ async function action(type,id){
 async function deleteStudent(id,name){if(!confirm(`${name} 삭제?`))return;students=students.filter(s=>s.id!==id);await save();showToast(`${name} 삭제 완료`);}
 async function addStudent(){const name=document.getElementById('nName').value.trim(),school=document.getElementById('nSchool').value.trim(),grade=document.getElementById('nGrade').value;if(!name||!school){showToast('이름과 학교를 입력하세요');return;}const newId=students.length>0?Math.max(...students.map(s=>s.id))+1:1;students=[{id:newId,name,school,grade,status:'미입실',entryTime:null,checkOutTime:null,outingLogs:[],currentSessionStart:null,totalStudySeconds:0},...students];await save();document.getElementById('nName').value='';document.getElementById('nSchool').value='';document.getElementById('addForm').style.display='none';showToast(`${name} 등록 완료!`);}
 async function hardReset(){if(!confirm('전체 초기화?'))return;students=JSON.parse(JSON.stringify(INIT_DATA));await save();showToast('초기화 완료');}
+
+// ════ 학생 정보 수정 (PC 전용) ════
+function openStudentEdit(){
+  if(_appMode!=='pc'){showToast('PC 모드에서만 사용 가능합니다');return;}
+  document.getElementById('editStudentSearch').value='';
+  renderStudentEditTable();
+  document.getElementById('studentEditModal').style.display='flex';
+}
+
+function renderStudentEditTable(){
+  const q=(document.getElementById('editStudentSearch').value||'').toLowerCase();
+  const list=students.filter(s=>!q||s.name.includes(q)||s.school.includes(q));
+  if(!list.length){
+    document.getElementById('studentEditTableWrap').innerHTML='<div style="text-align:center;color:var(--text2);padding:30px;font-size:13px;">검색 결과가 없습니다.</div>';
+    return;
+  }
+  let html=`<table class="student-edit-table">
+    <thead><tr>
+      <th style="width:50px">번호</th>
+      <th style="width:120px">이름</th>
+      <th style="width:120px">학교</th>
+      <th style="width:100px">학년</th>
+      <th style="width:70px">현재상태</th>
+    </tr></thead><tbody>`;
+  list.forEach(s=>{
+    const statusColor=s.status==='재실'?'var(--green)':s.status==='외출'?'var(--yellow)':s.status==='퇴실'?'var(--blue)':'var(--text3)';
+    html+=`<tr id="edit-row-${s.id}">
+      <td style="color:var(--text3);font-size:10px">#${s.id}</td>
+      <td><input type="text" id="edit-name-${s.id}" value="${s.name.replace(/"/g,'&quot;')}" oninput="markEditChanged(${s.id})"></td>
+      <td><input type="text" id="edit-school-${s.id}" value="${s.school.replace(/"/g,'&quot;')}" oninput="markEditChanged(${s.id})"></td>
+      <td><select id="edit-grade-${s.id}" onchange="markEditChanged(${s.id})">
+        <option${s.grade==='1학년'?' selected':''}>1학년</option>
+        <option${s.grade==='2학년'?' selected':''}>2학년</option>
+        <option${s.grade==='3학년'?' selected':''}>3학년</option>
+        <option${s.grade==='기타'?' selected':''}>기타</option>
+      </select></td>
+      <td style="color:${statusColor};font-weight:700;font-size:11px">${s.status}</td>
+    </tr>`;
+  });
+  html+=`</tbody></table>`;
+  document.getElementById('studentEditTableWrap').innerHTML=html;
+}
+
+function markEditChanged(id){
+  const row=document.getElementById('edit-row-'+id);
+  if(row) row.classList.add('row-changed');
+}
+
+async function saveStudentEdits(){
+  let changed=0;
+  let hasError=false;
+  const newStudents=students.map(s=>{
+    const nameEl=document.getElementById('edit-name-'+s.id);
+    const schoolEl=document.getElementById('edit-school-'+s.id);
+    const gradeEl=document.getElementById('edit-grade-'+s.id);
+    if(!nameEl||!schoolEl||!gradeEl) return s;
+    const newName=nameEl.value.trim();
+    const newSchool=schoolEl.value.trim();
+    const newGrade=gradeEl.value;
+    if(!newName||!newSchool){hasError=true;return s;}
+    if(newName!==s.name||newSchool!==s.school||newGrade!==s.grade){
+      changed++;
+      return{...s,name:newName,school:newSchool,grade:newGrade};
+    }
+    return s;
+  });
+  if(hasError){showToast('⚠️ 이름과 학교는 비워둘 수 없습니다');return;}
+  if(!changed){showToast('변경된 항목이 없습니다');return;}
+  students=newStudents;
+  await save();
+  renderStudentEditTable();
+  renderAll();
+  showToast(`✅ ${changed}명 학생 정보 수정 완료!`);
+}
 
 // ════ 렌더링 ════
 const fmt=d=>d?new Date(d).toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit'}):'-';
