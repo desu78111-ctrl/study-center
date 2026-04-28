@@ -257,6 +257,42 @@
     .time-chip:hover{border-color:var(--accent);color:var(--accent);}
     .time-chip.sel{background:rgba(91,106,240,.2);border-color:var(--accent);color:var(--accent);}
     .time-chip.sel-green{background:rgba(34,197,94,.2);border-color:var(--green);color:var(--green);}
+
+    /* ── PC 입실 알림 패널 ── */
+    .app-layout{display:flex;align-items:flex-start;}
+    .main-content{flex:1;min-width:0;}
+    .notif-panel{width:300px;min-width:300px;background:var(--surface);border-left:1px solid var(--border);min-height:100vh;padding:14px 12px;display:flex;flex-direction:column;gap:10px;position:sticky;top:0;max-height:100vh;overflow-y:auto;}
+    .notif-panel.hidden{display:none;}
+    .notif-panel-title{font-size:13px;font-weight:900;color:var(--accent);display:flex;align-items:center;justify-content:space-between;padding-bottom:8px;border-bottom:1px solid var(--border);}
+    .notif-panel-title span{font-size:10px;color:var(--text3);font-weight:400;}
+    .notif-empty{font-size:12px;color:var(--text3);text-align:center;padding:30px 0;}
+    .notif-item{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 11px;display:flex;flex-direction:column;gap:5px;animation:notifIn .3s ease;}
+    @keyframes notifIn{from{opacity:0;transform:translateX(20px)}to{opacity:1;transform:translateX(0)}}
+    .notif-item-head{display:flex;justify-content:space-between;align-items:center;}
+    .notif-seq{font-size:9px;color:var(--text3);background:var(--bg);border-radius:4px;padding:1px 5px;font-weight:700;}
+    .notif-name{font-size:14px;font-weight:900;color:var(--text);}
+    .notif-time{font-size:11px;color:var(--green);font-family:'JetBrains Mono',monospace;font-weight:700;}
+    .notif-leave{font-size:11px;color:var(--yellow);}
+    .notif-msg{font-size:11px;color:var(--text2);line-height:1.5;background:var(--bg);border-radius:6px;padding:6px 8px;white-space:pre-wrap;word-break:break-all;}
+    .notif-copy-btn{width:100%;padding:6px;border-radius:7px;border:none;background:rgba(91,106,240,.2);color:var(--accent);font-size:11px;font-weight:900;cursor:pointer;font-family:inherit;transition:all .15s;border:1px solid rgba(91,106,240,.4);}
+    .notif-copy-btn:hover{background:rgba(91,106,240,.4);}
+    .notif-copy-btn.copied{background:rgba(34,197,94,.2);border-color:rgba(34,197,94,.4);color:var(--green);}
+    .notif-del-btn{background:none;border:none;cursor:pointer;color:var(--text3);font-size:12px;padding:2px 5px;}
+    .notif-del-btn:hover{color:var(--red);}
+    .notif-clear-btn{width:100%;padding:6px;border-radius:7px;border:1px solid rgba(239,68,68,.3);background:transparent;color:var(--red);font-size:10px;font-weight:700;cursor:pointer;font-family:inherit;}
+    .notif-clear-btn:hover{background:rgba(239,68,68,.1);}
+    .notif-copy-all-btn{width:100%;padding:7px;border-radius:7px;border:1px solid rgba(34,197,94,.4);background:rgba(34,197,94,.1);color:var(--green);font-size:11px;font-weight:900;cursor:pointer;font-family:inherit;}
+    .notif-copy-all-btn:hover{background:rgba(34,197,94,.25);}
+
+    /* ── 태블릿 간편 입실 모달 ── */
+    .tab-checkin-modal{background:var(--surface);border:1px solid var(--border);border-radius:18px;padding:24px;max-width:380px;width:100%;}
+    .tab-checkin-modal h3{font-size:17px;font-weight:900;text-align:center;margin-bottom:4px;}
+    .tab-checkin-modal .sub{font-size:12px;color:var(--text2);text-align:center;margin-bottom:16px;}
+    .leave-big-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px;}
+    .lbg-btn{padding:12px 6px;border-radius:10px;border:1.5px solid var(--border);background:var(--surface2);color:var(--text);font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;text-align:center;transition:all .15s;}
+    .lbg-btn:hover{border-color:var(--accent);color:var(--accent);}
+    .lbg-btn.sel{border-color:var(--green);background:rgba(34,197,94,.15);color:var(--green);}
+    .lbg-skip{grid-column:span 3;padding:9px;border-radius:9px;border:1px solid var(--border);background:transparent;color:var(--text2);font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;}
   </style>
 </head>
 <body>
@@ -445,6 +481,26 @@
   </div>
 </div>
 
+<!-- 태블릿 간편 입실 모달 -->
+<div class="modal-bg" id="tabCheckinModal" style="display:none" onclick="if(event.target===this)this.style.display='none'">
+  <div class="tab-checkin-modal">
+    <h3>📚 입실</h3>
+    <p class="sub" id="tabCheckinName">학생 이름</p>
+    <div style="background:var(--surface2);border-radius:10px;padding:12px;margin-bottom:14px;">
+      <div style="font-size:11px;color:var(--text2);margin-bottom:8px;font-weight:700;">🏠 오늘 하원 예정 시간</div>
+      <div class="leave-big-grid" id="tabLeaveGrid"></div>
+      <div style="display:flex;align-items:center;gap:6px;margin-top:4px;">
+        <span style="font-size:11px;color:var(--text2);">직접입력:</span>
+        <input type="time" id="tabLeaveCustom" style="flex:1;background:var(--bg);border:1px solid var(--border);color:var(--text);padding:7px;border-radius:8px;font-size:13px;font-family:inherit;outline:none;" onchange="tabLeaveCustomChanged()">
+      </div>
+    </div>
+    <div style="display:flex;gap:8px;">
+      <button class="btn btn-p" style="flex:1;justify-content:center;padding:11px;font-size:13px;" onclick="confirmTabCheckin()">✅ 입실</button>
+      <button class="btn btn-g" onclick="document.getElementById('tabCheckinModal').style.display='none'">취소</button>
+    </div>
+  </div>
+</div>
+
 <!-- 카톡 메시지 팝업 -->
 <div class="kakao-popup" id="kakaoPopup">
   <div class="kakao-popup-title">
@@ -495,6 +551,8 @@
   <span id="modeDesc" style="color:var(--accent);font-weight:700;">카톡 문구 작성 가능</span>
 </div>
 
+<div class="app-layout">
+<div class="main-content">
 
 <div class="stats">
   <div class="chip c-total">전체 <span id="stTotal">0</span>명</div>
@@ -533,6 +591,20 @@
   <div class="empty" id="emptyMsg" style="display:none">검색 결과가 없습니다.</div>
 </div>
 <div class="toast" id="toast"></div>
+
+</div><!-- /main-content -->
+
+<!-- PC 입실 알림 패널 -->
+<div class="notif-panel" id="notifPanel">
+  <div class="notif-panel-title">
+    📋 입실 알림 <span id="notifCount">0건</span>
+  </div>
+  <button class="notif-copy-all-btn" id="notifCopyAllBtn" onclick="copyAllNotifs()" style="display:none">📋 전체 복사 (카톡 전송용)</button>
+  <div id="notifList"><div class="notif-empty">아직 입실 알림이 없습니다.<br>태블릿에서 입실 버튼을 누르면<br>여기에 표시됩니다.</div></div>
+  <button class="notif-clear-btn" id="notifClearBtn" onclick="clearAllNotifs()" style="display:none">🗑 전체 지우기</button>
+</div>
+
+</div><!-- /app-layout -->
 
 <script>
 // ════ 초기 학생 데이터 ════
@@ -798,15 +870,15 @@ function renderAll(){
     if(s.status==='미입실'){
       btns=isPc
         ?`<button class="ab c2 a-in" onclick="openCheckinModal(${s.id})">▶ 입실 (카톡)</button>`
-        :`<button class="ab c2 a-in" onclick="action('checkin',${s.id})">▶ 입실</button>`;
+        :`<button class="ab c2 a-in" onclick="openTabCheckinModal(${s.id})">▶ 입실</button>`;
     } else if(s.status==='재실'){
       btns=isPc
         ?`<button class="ab a-og" onclick="openOutingModal(${s.id})">⏸ 외출</button><button class="ab a-co" onclick="openCheckoutModal(${s.id})">⏹ 퇴실 (카톡)</button>`
-        :`<button class="ab a-og" onclick="openOutingModal(${s.id})">⏸ 외출</button><button class="ab a-co" onclick="action('checkout',${s.id})">⏹ 퇴실</button>`;
+        :`<button class="ab a-og" onclick="openOutingModal(${s.id})">⏸ 외출</button><button class="ab a-co" onclick="tabCheckout(${s.id})">⏹ 퇴실</button>`;
     } else if(s.status==='외출'){
       btns=isPc
         ?`<button class="ab c2 a-rt" onclick="returnWithKakao(${s.id})">▶ 복귀 (카톡)</button>`
-        :`<button class="ab c2 a-rt" onclick="action('return',${s.id})">▶ 복귀</button>`;
+        :`<button class="ab c2 a-rt" onclick="returnWithKakao(${s.id})">▶ 복귀</button>`;
     } else if(s.status==='퇴실'){
       btns=`<button class="ab c2 a-rs" onclick="action('reset',${s.id})">↩ 초기화</button>`;
     }
@@ -1031,8 +1103,8 @@ function saveConfig(){
 function goLocal(){
   localStorage.setItem('sc_local_mode','1');document.getElementById('setupModal').style.display='none';
   document.getElementById('modeLabel').textContent='이 기기 단독 사용';document.getElementById('syncTxt').textContent='로컬';document.getElementById('syncDot').classList.add('err');
-  const raw=localStorage.getItem('sc_local');if(raw){const d=des(JSON.parse(raw));if(d){students=d;renderAll();return;}}
-  students=JSON.parse(JSON.stringify(INIT_DATA));save();
+  const raw=localStorage.getItem('sc_local');if(raw){const d=des(JSON.parse(raw));if(d){students=d;renderAll();loadLocalNotifs();return;}}
+  students=JSON.parse(JSON.stringify(INIT_DATA));save();loadLocalNotifs();
 }
 function startFirebase(cfg){
   try{
@@ -1055,6 +1127,8 @@ function startFirebase(cfg){
       else{ var d=des(data); if(d) students=d; }
       document.getElementById('syncDot').classList.remove('err');
       renderAll();
+      // 알림 큐 초기화 (최초 1회)
+      if (!notifQueueRef) initNotifQueue();
     }, function(err){
       console.error('Firebase error:', err);
       document.getElementById('syncDot').classList.add('err');
@@ -1132,6 +1206,10 @@ function setMode(m){
   document.getElementById('modePcBtn').classList.toggle('active', m==='pc');
   document.getElementById('modeTabBtn').classList.toggle('active', m==='tablet');
   document.getElementById('modeDesc').textContent = m==='pc'?'카톡 문구 작성 가능':'입실/외출/복귀/퇴실만 표시';
+  // 알림 패널 표시/숨김
+  var panel = document.getElementById('notifPanel');
+  if (panel) panel.classList.toggle('hidden', m!=='pc');
+  if (m==='pc') renderNotifPanel();
   renderAll();
 }
 
@@ -1266,7 +1344,41 @@ async function confirmCheckout(){
     msg+='\n📅 '+( tomorrow.getMonth()+1)+'/'+tomorrow.getDate()+'(내일) '+timeValToStr(arriveVal)+'에 등원할 예정입니다.';
   }
   showKakao(msg);
+  // 퇴실 시 오늘 주간 통계 자동 저장
+  autoSaveToday();
 }
+
+// 오늘 입실 기록이 있으면 자동 저장 (덮어쓰기)
+function autoSaveToday(){
+  var key=todayKey();
+  var snap=students.filter(function(s){return s.status!=='미입실';}).map(function(s){
+    return{id:s.id,name:s.name,school:s.school,grade:s.grade,
+      totalStudySeconds:s.status==='재실'&&s.currentSessionStart?s.totalStudySeconds+Math.floor((Date.now()-new Date(s.currentSessionStart).getTime())/1000):s.totalStudySeconds,
+      entryTime:s.entryTime?+new Date(s.entryTime):null,checkOutTime:s.checkOutTime?+new Date(s.checkOutTime):null,outingCount:(s.outingLogs||[]).length};
+  });
+  if(!snap.length) return;
+  var data=getWeeklyData();
+  data[key]=snap;
+  setWeeklyData(data);
+}
+
+// 태블릿 퇴실: 통계 자동저장 + Firebase 알림
+async function tabCheckout(id){
+  var s=students.find(function(x){return x.id===id;});
+  if(!s) return;
+  var now=new Date();
+  var liveSec=getLive(s);
+  await action('checkout', id);
+  autoSaveToday();
+  // Firebase 알림 패널에 퇴실 알림 전송
+  var msg='🏠 '+s.name+' 원생이 '+fmtTime(now)+'에 퇴실하였습니다.\n오늘 총 공부시간: '+fmtHM(liveSec);
+  _pushNotifItem({name:s.name, school:s.school||'', grade:s.grade||'',
+    type:'checkout', msg:msg, seq:Date.now(), ts:Date.now()});
+  showToast('⏹ '+s.name+' 퇴실 처리 완료! PC에 알림 전송됨');
+}
+
+// 10분마다 자동 저장 (운영 중 데이터 보호)
+setInterval(function(){ autoSaveToday(); }, 10*60*1000);
 
 // ════ 복귀 + 카톡 ════
 async function returnWithKakao(id){
@@ -1279,6 +1391,7 @@ async function returnWithKakao(id){
   var msg='✅ '+s.name+' 학생이 '+fmtTime(now)+'에 복귀하였습니다. ('+outType+' 후 복귀)';
   await action('return', id);
   showKakao(msg);
+  pushReturnNotif(s.name, s.school, s.grade, outType);
 }
 
 
@@ -1360,6 +1473,9 @@ async function confirmOuting(){
 
   document.getElementById('outingModal').style.display='none';
   showKakao(msg);
+  // 패널에도 전송
+  var expectedRet = _outingDuration>0 ? new Date(now.getTime()+_outingDuration*60000) : null;
+  pushOutingNotif(s.name, s.school, s.grade, outType, expectedRet);
 }
 
 // ════ 월간 통계 ════
@@ -1482,6 +1598,237 @@ function exportExcel(){
   showToast('📊 엑셀 파일 다운로드 완료!');
 }
 
+// ════ 입실 알림 큐 (Firebase) ════
+var notifQueueRef = null;
+var _notifItems = []; // {id, name, school, grade, entryTime, leaveTime, msg, seq}
+
+function initNotifQueue() {
+  if (!isFirebase || !firebase.database) return;
+  try {
+    notifQueueRef = firebase.database().ref('studyCenter/checkinNotifs');
+    notifQueueRef.on('value', function(snap) {
+      var data = snap.val();
+      if (!data) { _notifItems = []; }
+      else {
+        _notifItems = Object.entries(data)
+          .map(function(e) { return Object.assign({fbKey: e[0]}, e[1]); })
+          .sort(function(a,b) { return (a.seq||0)-(b.seq||0); });
+      }
+      if (_appMode === 'pc') renderNotifPanel();
+    });
+  } catch(e) { console.error('notifQueue init error', e); }
+}
+
+function pushNotif(name, school, grade, entryTime, leaveTimeStr) {
+  var now = Date.now();
+  var msg = '📚 ' + name + ' 학생이 ' + fmtTime(entryTime) + '에 입실하였습니다.';
+  if (leaveTimeStr) msg += '\n🏠 오늘 ' + timeValToStr(leaveTimeStr) + '에 하원할 예정입니다.';
+  _pushNotifItem({name:name, school:school, grade:grade||'',
+    type:'checkin', entryTime: +new Date(entryTime), leaveTime: leaveTimeStr||'',
+    msg: msg, seq: now, ts: now});
+}
+
+function pushOutingNotif(name, school, grade, outType, expectedReturn) {
+  var now = Date.now();
+  var msg;
+  if(outType==='점심') msg='🍱 '+name+' 학생이 '+fmtTime(new Date(now))+'에 점심을 먹으러 외출하였습니다.';
+  else if(outType==='저녁') msg='🍜 '+name+' 학생이 '+fmtTime(new Date(now))+'에 저녁을 먹으러 외출하였습니다.';
+  else if(outType==='타학원') msg='🏫 '+name+' 학생이 '+fmtTime(new Date(now))+'에 타학원으로 외출하였습니다.';
+  else msg='⏸ '+name+' 학생이 '+fmtTime(new Date(now))+'에 외출하였습니다.\n사유: '+outType;
+  if(expectedReturn) msg+='\n🕐 예상 복귀시간: '+fmtTime(new Date(expectedReturn));
+  _pushNotifItem({name:name, school:school, grade:grade||'',
+    type:'outing', outType:outType, msg:msg, seq:now, ts:now});
+}
+
+function pushReturnNotif(name, school, grade, outType) {
+  var now = Date.now();
+  var msg = '✅ '+name+' 학생이 '+fmtTime(new Date(now))+'에 복귀하였습니다. ('+outType+' 후 복귀)';
+  _pushNotifItem({name:name, school:school, grade:grade||'',
+    type:'return', outType:outType, msg:msg, seq:now, ts:now});
+}
+
+function _pushNotifItem(item) {
+  if (notifQueueRef) {
+    notifQueueRef.push(item);
+  } else {
+    try {
+      var local = JSON.parse(localStorage.getItem('sc_notifs')||'[]');
+      item.fbKey = 'local_'+item.ts;
+      local.push(item);
+      localStorage.setItem('sc_notifs', JSON.stringify(local));
+      _notifItems = local.slice().sort(function(a,b){return (a.seq||0)-(b.seq||0);});
+    } catch(e){}
+    renderNotifPanel();
+  }
+}
+
+function deleteNotif(fbKey) {
+  if (notifQueueRef) {
+    notifQueueRef.child(fbKey).remove();
+  } else {
+    _notifItems = _notifItems.filter(function(x){return x.fbKey!==fbKey;});
+    try { localStorage.setItem('sc_notifs', JSON.stringify(_notifItems)); } catch(e){}
+    renderNotifPanel();
+  }
+}
+
+function clearAllNotifs() {
+  if (!confirm('알림을 모두 지울까요?')) return;
+  if (notifQueueRef) {
+    notifQueueRef.remove();
+  } else {
+    _notifItems = [];
+    try { localStorage.setItem('sc_notifs', '[]'); } catch(e){}
+    renderNotifPanel();
+  }
+}
+
+function copyAllNotifs() {
+  if (!_notifItems.length) { showToast('복사할 내용이 없습니다'); return; }
+  var text = _notifItems.map(function(item, i) {
+    return (i+1) + '. ' + item.msg;
+  }).join('\n\n');
+  copyText(text, '✅ 전체 복사 완료! 카톡에 붙여넣기 하세요.');
+}
+
+function copyNotifItem(fbKey) {
+  var item = _notifItems.find(function(x){return x.fbKey===fbKey;});
+  if (!item) return;
+  copyText(item.msg, '✅ 복사 완료!');
+  // 버튼 잠깐 변경
+  var btn = document.getElementById('ncopy_'+fbKey.replace(/[^a-zA-Z0-9_]/g,'_'));
+  if (btn) { btn.classList.add('copied'); btn.textContent='✅ 복사됨'; setTimeout(function(){btn.classList.remove('copied');btn.textContent='📋 카톡 복사';},2000); }
+}
+
+function copyText(text, toastMsg) {
+  if (navigator.clipboard) {
+    navigator.clipboard.writeText(text).then(function(){ showToast(toastMsg); }).catch(function(){
+      var ta=document.createElement('textarea');ta.value=text;ta.style.position='fixed';ta.style.opacity='0';document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta);showToast(toastMsg);
+    });
+  } else {
+    var ta=document.createElement('textarea');ta.value=text;ta.style.position='fixed';ta.style.opacity='0';document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta);showToast(toastMsg);
+  }
+}
+
+function renderNotifPanel() {
+  var panel = document.getElementById('notifPanel');
+  var list = document.getElementById('notifList');
+  var countEl = document.getElementById('notifCount');
+  var clearBtn = document.getElementById('notifClearBtn');
+  var copyAllBtn = document.getElementById('notifCopyAllBtn');
+  if (!panel || !list) return;
+
+  var cnt = _notifItems.length;
+  countEl.textContent = cnt + '건';
+  clearBtn.style.display = cnt ? 'block' : 'none';
+  copyAllBtn.style.display = cnt ? 'block' : 'none';
+
+  if (!cnt) {
+    list.innerHTML = '<div class="notif-empty">아직 알림이 없습니다.<br>태블릿에서 입실·외출·복귀 버튼을 누르면<br>여기에 표시됩니다.</div>';
+    return;
+  }
+
+  var typeIcon = {checkin:'📚', outing:'⏸', return:'✅', checkout:'🏠'};
+  var typeLabel = {checkin:'입실', outing:'외출', return:'복귀', checkout:'퇴실'};
+  var typeBorder = {checkin:'rgba(34,197,94,.4)', outing:'rgba(245,158,11,.4)', return:'rgba(91,106,240,.4)', checkout:'rgba(59,130,246,.4)'};
+  var typeColor = {checkin:'var(--green)', outing:'var(--yellow)', return:'var(--accent)', checkout:'var(--blue)'};
+
+  list.innerHTML = _notifItems.map(function(item, i) {
+    var safeKey = (item.fbKey||'').replace(/[^a-zA-Z0-9_]/g,'_');
+    var t = item.type || 'checkin';
+    var icon = typeIcon[t] || '📋';
+    var label = typeLabel[t] || '';
+    var border = typeBorder[t] || 'var(--border)';
+    var color = typeColor[t] || 'var(--text)';
+    var timeStr = fmtTime(new Date(item.ts || item.entryTime || Date.now()));
+    var subLine = '';
+    if (t==='checkin' && item.leaveTime) subLine = '<div class="notif-leave">🏠 하원 예정: '+timeValToStr(item.leaveTime)+'</div>';
+    if (t==='outing' && item.outType) subLine = '<div class="notif-leave" style="color:var(--yellow)">유형: '+item.outType+'</div>';
+    if (t==='return' && item.outType) subLine = '<div class="notif-leave" style="color:var(--accent)">'+item.outType+' 후 복귀</div>';
+    return '<div class="notif-item" style="border-color:'+border+'">' +
+      '<div class="notif-item-head">' +
+        '<span class="notif-seq" style="color:'+color+'">'+(i+1)+' '+icon+' '+label+'</span>' +
+        '<button class="notif-del-btn" onclick="deleteNotif(\''+(item.fbKey||'').replace(/'/g,"\\'")+'\')">✕</button>' +
+      '</div>' +
+      '<div class="notif-name">'+item.name+' <span style="font-size:10px;color:var(--text3);font-weight:400">'+( item.school||'')+' '+(item.grade||'')+'</span></div>' +
+      '<div class="notif-time" style="color:'+color+'">'+icon+' '+timeStr+'</div>' +
+      subLine +
+      '<div class="notif-msg">'+item.msg+'</div>' +
+      '<button class="notif-copy-btn" id="ncopy_'+safeKey+'" onclick="copyNotifItem(\''+(item.fbKey||'').replace(/'/g,"\\'")+'\')">📋 카톡 복사</button>' +
+    '</div>';
+  }).join('');
+}
+
+// 로컬 모드에서 알림 불러오기
+function loadLocalNotifs() {
+  try {
+    var local = JSON.parse(localStorage.getItem('sc_notifs')||'[]');
+    _notifItems = local.slice().sort(function(a,b){return (a.seq||0)-(b.seq||0);});
+  } catch(e){ _notifItems=[]; }
+  if (_appMode==='pc') renderNotifPanel();
+}
+
+// ════ 태블릿 간편 입실 모달 ════
+var _tabCheckinId = null;
+var _tabLeaveTime = '';
+var TAB_LEAVE_TIMES = [
+  {label:'오후 10:00', val:'22:00'},
+  {label:'오후 10:30', val:'22:30'},
+  {label:'오후 11:00', val:'23:00'},
+  {label:'오후 11:30', val:'23:30'},
+  {label:'자정 12:00', val:'00:00'},
+  {label:'오전 12:30', val:'00:30'},
+  {label:'오전 1:00',  val:'01:00'},
+];
+
+function openTabCheckinModal(id) {
+  var s = students.find(function(x){return x.id===id;});
+  if (!s) return;
+  _tabCheckinId = id;
+  _tabLeaveTime = '';
+  document.getElementById('tabCheckinName').textContent = s.name + ' 학생';
+  document.getElementById('tabLeaveCustom').value = '';
+  buildTabLeaveGrid('');
+  document.getElementById('tabCheckinModal').style.display = 'flex';
+}
+
+function buildTabLeaveGrid(selVal) {
+  var container = document.getElementById('tabLeaveGrid');
+  if (!container) return;
+  container.innerHTML = TAB_LEAVE_TIMES.map(function(t) {
+    return '<button class="lbg-btn' + (selVal===t.val?' sel':'') + '" onclick="selectTabLeave(\'' + t.val + '\',\'' + t.label + '\')">' + t.label + '</button>';
+  }).join('') + '<button class="lbg-skip" onclick="confirmTabCheckin(true)">⏭ 하원시간 없이 입실</button>';
+}
+
+function selectTabLeave(val, label) {
+  _tabLeaveTime = val;
+  document.getElementById('tabLeaveCustom').value = val;
+  buildTabLeaveGrid(val);
+}
+
+function tabLeaveCustomChanged() {
+  _tabLeaveTime = document.getElementById('tabLeaveCustom').value;
+  buildTabLeaveGrid('');
+}
+
+async function confirmTabCheckin(skipLeave) {
+  if (!_tabCheckinId) return;
+  var s = students.find(function(x){return x.id===_tabCheckinId;});
+  if (!s) return;
+  var leaveVal = skipLeave ? '' : (_tabLeaveTime || document.getElementById('tabLeaveCustom').value || '');
+  var now = new Date();
+  students = students.map(function(x) {
+    if (x.id !== _tabCheckinId) return x;
+    return Object.assign({}, x, {status:'재실', entryTime:now, checkOutTime:null, outingLogs:[], currentSessionStart:now, totalStudySeconds:0});
+  });
+  await save();
+  if (!isFirebase) renderAll();
+  document.getElementById('tabCheckinModal').style.display = 'none';
+  // Firebase 알림 큐에 푸시
+  pushNotif(s.name, s.school, s.grade, now, leaveVal);
+  showToast('✅ ' + s.name + ' 입실 처리 완료! PC에 알림 전송됨');
+}
+
 // ════ 모드 초기화 ════
 (function(){
   var m=localStorage.getItem('sc_mode')||'pc';
@@ -1490,6 +1837,9 @@ function exportExcel(){
   document.getElementById('modeTabBtn').classList.toggle('active',m==='tablet');
   if(document.getElementById('modeDesc'))
     document.getElementById('modeDesc').textContent=m==='pc'?'카톡 문구 작성 가능':'입실/외출/복귀/퇴실만 표시';
+  // 알림 패널 초기 표시
+  var panel = document.getElementById('notifPanel');
+  if (panel) panel.classList.toggle('hidden', m!=='pc');
 })();
 
 // ════ 진입점 ════
