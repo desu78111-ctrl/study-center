@@ -1165,6 +1165,7 @@ function fmtHM(sec){
 function showKakao(msg){
   // 태블릿 모드에서는 카톡 팝업 없음 (알림 패널로만 전송)
   if(_appMode === 'tablet') return;
+  msg = '[베스티안 스터디센터]\n' + msg;
   try {
     var kakaoEl=document.getElementById('kakaoMsg');
     var popEl=document.getElementById('kakaoPopup');
@@ -1709,7 +1710,7 @@ function clearAllNotifs() {
 
 function copyAllNotifs() {
   if (!_notifItems.length) { showToast('복사할 내용이 없습니다'); return; }
-  var text = _notifItems.map(function(item, i) {
+  var text = '[베스티안 스터디센터]\n\n' + _notifItems.map(function(item, i) {
     return (i+1) + '. ' + item.msg;
   }).join('\n\n');
   copyText(text, '✅ 전체 복사 완료! 카톡에 붙여넣기 하세요.');
@@ -1718,7 +1719,7 @@ function copyAllNotifs() {
 function copyNotifItem(fbKey) {
   var item = _notifItems.find(function(x){return x.fbKey===fbKey;});
   if (!item) return;
-  copyText(item.msg, '✅ 복사 완료!');
+  copyText('[베스티안 스터디센터]\n' + item.msg, '✅ 복사 완료!');
   // 버튼 잠깐 변경
   var btn = document.getElementById('ncopy_'+fbKey.replace(/[^a-zA-Z0-9_]/g,'_'));
   if (btn) { btn.classList.add('copied'); btn.textContent='✅ 복사됨'; setTimeout(function(){btn.classList.remove('copied');btn.textContent='📋 카톡 복사';},2000); }
