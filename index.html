@@ -380,9 +380,30 @@
     .wr-copy-all-btn{padding:9px 20px;border-radius:9px;border:1px solid rgba(34,197,94,.5);background:rgba(34,197,94,.15);color:var(--green);font-size:13px;font-weight:900;cursor:pointer;font-family:inherit;width:100%;margin-top:10px;}
     .wr-copy-all-btn:hover{background:rgba(34,197,94,.3);}
     .wr-filter-row{display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap;align-items:center;}
+
+    /* ── 태블릿 학년 탭 ── */
+    .tablet-grade-tabs{display:none;padding:8px 20px 0;gap:6px;background:var(--surface);border-bottom:1px solid var(--border);}
+    body.mode-tablet .tablet-grade-tabs{display:flex;}
+    body.mode-pc .tablet-grade-tabs{display:none !important;}
+    .tg-tab{padding:8px 22px;border-radius:10px 10px 0 0;border:1px solid var(--border);border-bottom:none;background:var(--surface2);color:var(--text2);font-size:13px;font-weight:900;cursor:pointer;font-family:inherit;transition:all .15s;position:relative;bottom:-1px;}
+    .tg-tab.active{background:var(--bg);border-color:var(--border);color:var(--text);border-bottom:2px solid var(--bg);}
+    .tg-tab.active.tab-12{color:#7dd3fc;border-top:2px solid #3b82f6;}
+    .tg-tab.active.tab-3{color:#f9a8d4;border-top:2px solid #ec4899;}
+    .tg-tab.active.tab-all{color:var(--accent);border-top:2px solid var(--accent);}
+    .tg-tab-count{display:inline-block;background:rgba(255,255,255,.1);border-radius:10px;padding:1px 7px;font-size:10px;margin-left:5px;font-weight:700;}
+    .tg-tab.active.tab-12 .tg-tab-count{background:rgba(59,130,246,.25);color:#93c5fd;}
+    .tg-tab.active.tab-3 .tg-tab-count{background:rgba(236,72,153,.25);color:#f9a8d4;}
+    .tg-tab.active.tab-all .tg-tab-count{background:rgba(91,106,240,.25);color:#a5b4fc;}
+    /* 섹션 헤더 (PC에서 학년 구분선) */
+    .grade-section-header{display:none;}
+    body.mode-pc .grade-section-header{display:flex;align-items:center;gap:10px;padding:10px 20px 4px;margin-top:4px;}
+    .grade-section-line{flex:1;height:1px;background:var(--border);}
+    .grade-section-label{font-size:11px;font-weight:900;padding:3px 10px;border-radius:6px;}
+    .gsl-12{background:rgba(59,130,246,.15);border:1px solid rgba(59,130,246,.35);color:#7dd3fc;}
+    .gsl-3{background:rgba(236,72,153,.15);border:1px solid rgba(236,72,153,.35);color:#f9a8d4;}
   </style>
 </head>
-<body>
+<body class="mode-tablet">
 
 <!-- 관리자 로그인 모달 -->
 <div class="modal-bg" id="loginModal" style="display:none">
@@ -817,8 +838,31 @@
   <button class="btn btn-g" onclick="toggleAdd()">취소</button>
 </div>
 
+<!-- 태블릿 학년 탭 -->
+<div class="tablet-grade-tabs" id="tabletGradeTabs">
+  <button class="tg-tab tab-12 active" id="tgTab12" onclick="setTabletGrade('12')">📗 태블릿 (고1,2)<span class="tg-tab-count" id="tgCount12">0</span></button>
+  <button class="tg-tab tab-3" id="tgTab3" onclick="setTabletGrade('3')">📕 태블릿 (고3)<span class="tg-tab-count" id="tgCount3">0</span></button>
+</div>
+
 <div class="grid-wrap">
-  <div class="grid" id="grid"></div>
+  <!-- PC모드: 고1/2 섹션 헤더 -->
+  <div class="grade-section-header" id="pcSection12">
+    <div class="grade-section-line"></div>
+    <span class="grade-section-label gsl-12">📗 고1 · 고2</span>
+    <div class="grade-section-line"></div>
+  </div>
+  <div class="grid" id="grid12"></div>
+
+  <!-- PC모드: 고3 섹션 헤더 -->
+  <div class="grade-section-header" id="pcSection3">
+    <div class="grade-section-line"></div>
+    <span class="grade-section-label gsl-3">📕 고3</span>
+    <div class="grade-section-line"></div>
+  </div>
+  <div class="grid" id="grid3"></div>
+
+  <!-- 기존 id="grid" 호환용 (숨김) -->
+  <div class="grid" id="grid" style="display:none"></div>
   <div class="empty" id="emptyMsg" style="display:none">검색 결과가 없습니다.</div>
 </div>
 <div class="toast" id="toast"></div>
@@ -1138,67 +1182,136 @@ const fmt=d=>d?new Date(d).toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-
 const fmtS=s=>{const h=Math.floor(s/3600),m=Math.floor((s%3600)/60),sec=s%60;return`${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(sec).padStart(2,'0')}`;};
 const getLive=s=>{let t=s.totalStudySeconds||0;if(s.status==='재실'&&s.currentSessionStart)t+=Math.floor((Date.now()-new Date(s.currentSessionStart).getTime())/1000);return t;};
 
+// 태블릿 학년 탭 상태
+var _tabletGrade = '12'; // '12' | '3'
+
+function setTabletGrade(g){
+  _tabletGrade = g;
+  document.getElementById('tgTab12').className = 'tg-tab tab-12' + (g==='12'?' active':'');
+  document.getElementById('tgTab3').className  = 'tg-tab tab-3'  + (g==='3'?' active':'');
+  renderAll();
+}
+
+function isGrade12(s){ return s.grade==='1학년'||s.grade==='2학년'; }
+function isGrade3(s) { return s.grade==='3학년'; }
+
+function buildCardHtml(s){
+  // 상벌점 배지
+  const pts=getCurrentWeekPts(s.name,s.school);
+  let ptsBadges='';
+  if(pts.good>0||pts.bad>0){
+    if(pts.good>0){
+      const cls=pts.good>=50?'pts-badge pts-discount':'pts-badge pts-good';
+      ptsBadges+=`<span class="${cls}">🌟${pts.good}${pts.good>=50?' 💰할인':''}</span>`;
+    }
+    if(pts.bad>0){
+      let cls='pts-badge pts-bad';
+      if(pts.bad>=30)cls='pts-badge pts-danger';
+      else if(pts.bad>=15)cls='pts-badge pts-warn';
+      ptsBadges+=`<span class="${cls}">⚠️${pts.bad}${pts.bad>=30?'🚨':pts.bad>=15?'!':''}</span>`;
+    }
+  }
+  const logs=s.outingLogs||[],multi=logs.length>1;
+  let lr=`<div class="lr"><span class="ll en">입실</span><span class="lv">${fmt(s.entryTime)}</span></div>`;
+  logs.forEach((l,i)=>{lr+=`<div class="lr"><span class="ll og">${multi?`외출${i+1}`:'외출'}</span><span class="lv">${fmt(l.outingTime)}</span></div>`;if(l.returnTime)lr+=`<div class="lr"><span class="ll rt">${multi?`복귀${i+1}`:'복귀'}</span><span class="lv">${fmt(l.returnTime)}</span></div>`;});
+  lr+=`<div class="lr"><span class="ll co">하원</span><span class="lv">${fmt(s.checkOutTime)}</span></div>`;
+  let btns='';
+  var isPc=(_appMode==='pc');
+  if(s.status==='미입실'){
+    btns=isPc
+      ?`<button class="ab c2 a-in" onclick="openCheckinModal(${s.id})">▶ 입실 (카톡)</button>`
+      :`<button class="ab c2 a-in" onclick="openTabCheckinModal(${s.id})">▶ 입실</button>`;
+  } else if(s.status==='재실'){
+    btns=isPc
+      ?`<button class="ab a-og" onclick="openOutingModal(${s.id})">⏸ 외출</button><button class="ab a-co" onclick="openCheckoutModal(${s.id})">⏹ 하원 (카톡)</button>`
+      :`<button class="ab a-og" onclick="openOutingModal(${s.id})">⏸ 외출</button><button class="ab a-co" onclick="tabCheckout(${s.id})">⏹ 하원</button>`;
+  } else if(s.status==='외출'){
+    btns=isPc
+      ?`<button class="ab c2 a-rt" onclick="returnWithKakao(${s.id})">▶ 복귀 (카톡)</button>`
+      :`<button class="ab c2 a-rt" onclick="returnWithKakao(${s.id})">▶ 복귀</button>`;
+  } else if(s.status==='퇴실'){
+    btns=`<button class="ab c2 a-rs" onclick="action('reset',${s.id})">↩ 초기화</button>`;
+  }
+  return`<div class="card card-${s.status}">
+    <div class="card-head">
+      <div><div class="sg">${s.school} ${s.grade}</div><div class="nm">${s.name}</div><span class="badge b-${s.status}">${s.status}</span></div>
+      <div class="card-right"><button class="del-btn" onclick="deleteStudent(${s.id},'${s.name}')">✕</button><div class="st${s.status==='재실'?' on':''}" id="t-${s.id}">${fmtS(getLive(s))}</div></div>
+    </div>
+    ${ptsBadges?`<div class="pts-mini">${ptsBadges}</div>`:''}
+    <div class="log">${lr}</div>
+    <div class="acts">${btns}</div>
+  </div>`;
+}
+
 function renderAll(){
   document.getElementById('stTotal').textContent=students.length;
   document.getElementById('stIn').textContent=students.filter(s=>s.status==='재실').length;
   document.getElementById('stOut').textContent=students.filter(s=>s.status==='외출').length;
   document.getElementById('stDone').textContent=students.filter(s=>s.status==='퇴실').length;
-  const g=document.getElementById('grid'),e=document.getElementById('emptyMsg'),q=searchVal.toLowerCase();
+  const e=document.getElementById('emptyMsg'),q=searchVal.toLowerCase();
   const list=students.filter(s=>(!q||s.name.includes(q)||s.school.includes(q))&&(filterVal==='전체'||s.status===filterVal));
-  if(!list.length){g.innerHTML='';e.style.display='block';return;}
-  e.style.display='none';
-  const thisWeek=getWeekKey(todayKey());
-  g.innerHTML=list.map(s=>{
-    // 상벌점 배지
-    const pts=getCurrentWeekPts(s.name,s.school);
-    let ptsBadges='';
-    if(pts.good>0||pts.bad>0){
-      if(pts.good>0){
-        const cls=pts.good>=50?'pts-badge pts-discount':'pts-badge pts-good';
-        ptsBadges+=`<span class="${cls}">🌟${pts.good}${pts.good>=50?' 💰할인':''}</span>`;
-      }
-      if(pts.bad>0){
-        let cls='pts-badge pts-bad';
-        if(pts.bad>=30)cls='pts-badge pts-danger';
-        else if(pts.bad>=15)cls='pts-badge pts-warn';
-        ptsBadges+=`<span class="${cls}">⚠️${pts.bad}${pts.bad>=30?'🚨':pts.bad>=15?'!':''}</span>`;
-      }
-    }
 
-    const logs=s.outingLogs||[],multi=logs.length>1;
-    let lr=`<div class="lr"><span class="ll en">입실</span><span class="lv">${fmt(s.entryTime)}</span></div>`;
-    logs.forEach((l,i)=>{lr+=`<div class="lr"><span class="ll og">${multi?`외출${i+1}`:'외출'}</span><span class="lv">${fmt(l.outingTime)}</span></div>`;if(l.returnTime)lr+=`<div class="lr"><span class="ll rt">${multi?`복귀${i+1}`:'복귀'}</span><span class="lv">${fmt(l.returnTime)}</span></div>`;});
-    lr+=`<div class="lr"><span class="ll co">하원</span><span class="lv">${fmt(s.checkOutTime)}</span></div>`;
+  const isPc=(_appMode==='pc');
 
-    let btns='';
-    var isPc=(_appMode==='pc');
-    if(s.status==='미입실'){
-      btns=isPc
-        ?`<button class="ab c2 a-in" onclick="openCheckinModal(${s.id})">▶ 입실 (카톡)</button>`
-        :`<button class="ab c2 a-in" onclick="openTabCheckinModal(${s.id})">▶ 입실</button>`;
-    } else if(s.status==='재실'){
-      btns=isPc
-        ?`<button class="ab a-og" onclick="openOutingModal(${s.id})">⏸ 외출</button><button class="ab a-co" onclick="openCheckoutModal(${s.id})">⏹ 하원 (카톡)</button>`
-        :`<button class="ab a-og" onclick="openOutingModal(${s.id})">⏸ 외출</button><button class="ab a-co" onclick="tabCheckout(${s.id})">⏹ 하원</button>`;
-    } else if(s.status==='외출'){
-      btns=isPc
-        ?`<button class="ab c2 a-rt" onclick="returnWithKakao(${s.id})">▶ 복귀 (카톡)</button>`
-        :`<button class="ab c2 a-rt" onclick="returnWithKakao(${s.id})">▶ 복귀</button>`;
-    } else if(s.status==='퇴실'){
-      btns=`<button class="ab c2 a-rs" onclick="action('reset',${s.id})">↩ 초기화</button>`;
-    }
+  if(isPc){
+    // PC 모드: 고1/2 + 고3 섹션 분리, 전체 표시
+    const list12=list.filter(s=>isGrade12(s));
+    const list3 =list.filter(s=>isGrade3(s));
+    const listOther=list.filter(s=>!isGrade12(s)&&!isGrade3(s));
 
-    return`<div class="card card-${s.status}">
-      <div class="card-head">
-        <div><div class="sg">${s.school} ${s.grade}</div><div class="nm">${s.name}</div><span class="badge b-${s.status}">${s.status}</span></div>
-        <div class="card-right"><button class="del-btn" onclick="deleteStudent(${s.id},'${s.name}')">✕</button><div class="st${s.status==='재실'?' on':''}" id="t-${s.id}">${fmtS(getLive(s))}</div></div>
-      </div>
-      ${ptsBadges?`<div class="pts-mini">${ptsBadges}</div>`:''}
-      <div class="log">${lr}</div>
-      <div class="acts">${btns}</div>
-    </div>`;
-  }).join('');
+    const g12=document.getElementById('grid12');
+    const g3=document.getElementById('grid3');
+    document.getElementById('grid').innerHTML='';
+
+    // 고1/2 섹션
+    const all12=[...list12,...listOther]; // 기타(기타학년)도 고1/2 섹션에 포함
+    g12.innerHTML=all12.map(s=>buildCardHtml(s)).join('');
+    document.getElementById('pcSection12').style.display=all12.length?'flex':'none';
+
+    // 고3 섹션
+    g3.innerHTML=list3.map(s=>buildCardHtml(s)).join('');
+    document.getElementById('pcSection3').style.display=list3.length?'flex':'none';
+
+    if(!list.length){e.style.display='block';}else{e.style.display='none';}
+
+    // 탭 카운트 업데이트 (PC에서도 배지 갱신)
+    _updateGradeTabCounts(list);
+    return;
+  }
+
+  // 태블릿 모드: 탭으로 분리
+  _updateGradeTabCounts(list);
+  const g12=document.getElementById('grid12');
+  const g3=document.getElementById('grid3');
+  document.getElementById('grid').innerHTML='';
+
+  if(_tabletGrade==='12'){
+    const tabList=list.filter(s=>isGrade12(s)||(!isGrade12(s)&&!isGrade3(s))); // 기타도 여기
+    g12.innerHTML=tabList.map(s=>buildCardHtml(s)).join('');
+    g3.innerHTML='';
+    document.getElementById('pcSection12').style.display='none';
+    document.getElementById('pcSection3').style.display='none';
+    if(!tabList.length){e.style.display='block';}else{e.style.display='none';}
+  } else {
+    const tabList=list.filter(s=>isGrade3(s));
+    g3.innerHTML=tabList.map(s=>buildCardHtml(s)).join('');
+    g12.innerHTML='';
+    document.getElementById('pcSection12').style.display='none';
+    document.getElementById('pcSection3').style.display='none';
+    if(!tabList.length){e.style.display='block';}else{e.style.display='none';}
+  }
 }
+
+function _updateGradeTabCounts(list){
+  const c12=list.filter(s=>isGrade12(s)||(!isGrade12(s)&&!isGrade3(s))).length;
+  const c3=list.filter(s=>isGrade3(s)).length;
+  const el12=document.getElementById('tgCount12');
+  const el3=document.getElementById('tgCount3');
+  if(el12)el12.textContent=c12;
+  if(el3)el3.textContent=c3;
+}
+
+
 
 setInterval(()=>{
   document.getElementById('clock').textContent=new Date().toLocaleTimeString('ko-KR');
@@ -1604,6 +1717,8 @@ function setMode(m){
   // 알림 패널: PC 모드에서만 표시
   var panel = document.getElementById('notifPanel');
   if(panel) panel.classList.toggle('hidden', m!=='pc');
+  // body 클래스로 모드 표시 (CSS 연동)
+  document.body.className = m==='pc'?'mode-pc':'mode-tablet';
   renderNotifPanel();
   renderAll();
 }
