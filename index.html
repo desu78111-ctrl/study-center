@@ -655,14 +655,22 @@
       </div>
     </div>
     <div class="duty-modal-body">
-      <div style="background:rgba(91,106,240,.08);border:1px solid rgba(91,106,240,.2);border-radius:8px;padding:9px 13px;font-size:11px;color:var(--text2);margin-bottom:12px;">
-        💡 의무시간 미달 시 리포트에 <strong style="color:var(--red)">몇 시간 몇 분 부족</strong> 표시 + 학부모 발송 메시지에 포함됩니다.
+      <div style="background:rgba(91,106,240,.08);border:1px solid rgba(91,106,240,.2);border-radius:8px;padding:9px 13px;font-size:11px;color:var(--text2);margin-bottom:10px;">
+        💡 학생마다 <strong style="color:var(--accent)">개별 의무시간</strong>을 직접 입력하세요. 의무시간 미달 시 리포트에 <strong style="color:var(--red)">몇 시간 몇 분 부족</strong> 표시 + 카카오 발송 메시지에 포함됩니다.
       </div>
-      <div style="display:flex;gap:8px;margin-bottom:12px;align-items:center;background:var(--surface2);border-radius:9px;padding:9px 13px;">
-        <span style="font-size:12px;color:var(--text2);">전체 일괄 설정:</span>
-        <input type="number" id="bulkDutyHours" min="0" max="80" value="40" style="width:70px;background:var(--bg);border:1px solid var(--border);color:var(--text);padding:5px 8px;border-radius:7px;font-size:13px;font-family:inherit;outline:none;text-align:center;">
-        <span style="font-size:12px;color:var(--text2);">시간</span>
-        <button class="btn btn-p" style="padding:5px 12px" onclick="applyBulkDuty()">적용</button>
+      <!-- 빠른 일괄입력: 선택 학생에게만 적용 -->
+      <div style="display:flex;gap:8px;margin-bottom:14px;align-items:center;flex-wrap:wrap;background:rgba(245,158,11,.07);border:1px solid rgba(245,158,11,.25);border-radius:9px;padding:9px 13px;">
+        <span style="font-size:11px;color:var(--yellow);font-weight:700;">⚡ 전체 빠른 입력:</span>
+        <span style="font-size:11px;color:var(--text2);">아래 개별 칸을 직접 수정하세요 (각자 다른 시간 설정 가능)</span>
+        <div style="display:flex;align-items:center;gap:6px;margin-left:auto;">
+          <input type="number" id="bulkDutyHours" min="0" max="168" value="40" style="width:65px;background:var(--bg);border:1px solid var(--border);color:var(--text);padding:5px 8px;border-radius:7px;font-size:13px;font-family:inherit;outline:none;text-align:center;">
+          <span style="font-size:11px;color:var(--text2);">시간으로</span>
+          <button class="btn btn-p" style="padding:5px 12px;font-size:10px" onclick="applyBulkDuty()">전체 일괄 적용</button>
+        </div>
+      </div>
+      <!-- 학생 검색 -->
+      <div style="margin-bottom:10px;">
+        <input type="text" id="dutySearchInput" placeholder="🔍 이름 검색..." oninput="renderDutyTable()" style="width:100%;background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:7px 12px;border-radius:8px;font-size:12px;font-family:inherit;outline:none;">
       </div>
       <div id="dutyTableWrap"></div>
     </div>
@@ -1348,7 +1356,46 @@ function showStudentReport(name,school,weekStart){
     const hasSave=Object.keys(wData).includes(dk);
     return lbl+': '+(rec?fmtS(rec.totalStudySeconds):hasSave?'결석':'미운영');
   }).join('\n');
-  const shareText='[스터디센터 주간 학습 리포트]\n━━━━━━━━━━━━━━━━━\n학생: '+name+' ('+school+' '+grade+')\n기간: '+wkLabel+'\n출석: '+attendDays+'일 / 7일\n총 공부시간: '+fmtS(totalSec)+'\n\n📅 일별 공부시간\n'+dayLines+'\n\n⭐ 이번 주 상벌점\n상점: '+pts.good+'점'+(pts.good>=50?' (독서실비 3만원 할인 대상!)':'')+'\n벌점: '+pts.bad+'점'+(pts.bad>=30?' ⚠️ 퇴원 위기':pts.bad>=15?' ⚠️ 경고':'')+'\n\n발송일: '+todayStr+'\n━━━━━━━━━━━━━━━━━';
+  // 의무시간 계산
+  const duty2=getDutyData();
+  const dutyKey2=`${name}_${school}`;
+  const dutyH2=duty2[dutyKey2]!==undefined?duty2[dutyKey2]:0;
+  let dutyShareLine='';
+  if(dutyH2>0){
+    const diff2=totalSec-dutyH2*3600;
+    dutyShareLine='\n\n⏱ 의무시간: '+dutyH2+'시간 기준\n';
+    dutyShareLine+=diff2>=0?'✅ 달성! (+'+fmtHM(diff2)+')':'❌ 미달 ('+fmtHM(-diff2)+' 부족)';
+  }
+
+  // 상벌점 텍스트 (사유 상세 포함)
+  let ptsShareLine='\n\n⭐ 이번 주 상벌점';
+  if(pts.good>0){
+    ptsShareLine+='\n🌟 상점: '+pts.good+'점'+(pts.good>=50?' (독서실비 3만원 할인 대상!)':'');
+    const gLogs=pts.logs.filter(l=>l.type==='good');
+    if(gLogs.length) gLogs.forEach(l=>{ptsShareLine+='\n  · '+l.reason+' (+'+l.score+'점)';});
+  } else {
+    ptsShareLine+='\n🌟 상점: 0점';
+  }
+  if(pts.bad>0){
+    ptsShareLine+='\n⚠️ 벌점: '+pts.bad+'점'+(pts.bad>=30?' 🚨 퇴원 위기':pts.bad>=15?' ⚠️ 경고':'');
+    const bLogs=pts.logs.filter(l=>l.type==='bad');
+    if(bLogs.length) bLogs.forEach(l=>{ptsShareLine+='\n  · '+l.reason+' ('+l.score+'점)';});
+  } else {
+    ptsShareLine+='\n⚠️ 벌점: 0점';
+  }
+
+  const shareText='[베스티안 스터디센터 주간 학습 리포트]\n━━━━━━━━━━━━━━━━━\n학생: '+name+' ('+school+' '+grade+')\n기간: '+wkLabel+'\n출석: '+attendDays+'일 / 7일\n총 공부시간: '+fmtS(totalSec)+'\n\n📅 일별 공부시간\n'+dayLines+dutyShareLine+ptsShareLine+'\n\n발송일: '+todayStr+'\n━━━━━━━━━━━━━━━━━\n베스티안 스터디센터';
+
+  // PNG용 데이터 저장
+  var pngDayRows=weekDays7.map(function(dk){
+    var rec=(wData[dk]||[]).find(function(r){return r.name===name&&r.school===school;});
+    var hasSave=Object.keys(wData).includes(dk);
+    if(rec) return {type:'study',sec:rec.totalStudySeconds};
+    if(hasSave) return {type:'absent',sec:0};
+    return {type:'none',sec:0};
+  });
+  var pngDutyInfo=dutyH2>0?{h:dutyH2,diff:totalSec-dutyH2*3600}:null;
+  storePngData(name,school,grade,wkLabel,totalSec,attendDays,weekDays7.length,todayStr,pngDayRows,pts,pngDutyInfo);
 
   document.getElementById('studentReportContent').innerHTML=`
     <div class="sr-header">
@@ -1371,6 +1418,7 @@ function showStudentReport(name,school,weekStart){
       <div style="margin-top:10px">${ptsLogHtml}</div>
       <div class="copy-btn-wrap">
         <button class="btn btn-p" style="width:100%;justify-content:center;margin-top:10px" onclick="copyReport(\`${shareText.replace(/`/g,"'").replace(/\n/g,'\\n')}\`)">📋 카카오톡·문자 내용 복사</button>
+        <button class="btn" style="width:100%;justify-content:center;background:linear-gradient(135deg,#22c55e,#16a34a);border:none;color:#fff;font-weight:900;padding:10px;border-radius:8px;cursor:pointer;font-family:inherit;font-size:11px;" onclick="downloadReportPng()">🖼️ PNG 이미지 저장 (카톡 전송용)</button>
         <button class="btn btn-g" style="width:100%;justify-content:center" onclick="document.getElementById('studentReportModal').style.display='none'">닫기</button>
       </div>
     </div>
@@ -2221,17 +2269,21 @@ function openDutyHours(){
 
 function renderDutyTable(){
   const duty=getDutyData();
+  const q=(document.getElementById('dutySearchInput')&&document.getElementById('dutySearchInput').value||'').toLowerCase();
+  const filtered=students.filter(s=>!q||s.name.includes(q)||s.school.includes(q));
   let html=`<table class="duty-table"><thead><tr>
-    <th>학생</th><th>학교/학년</th><th>주간 의무시간 (시간)</th><th>현재 설정</th>
+    <th>학생</th><th>학교/학년</th><th>주간 의무시간 (시간)</th><th>현재 설정</th><th>개별 저장</th>
   </tr></thead><tbody>`;
-  students.forEach(s=>{
+  filtered.forEach(s=>{
     const key=`${s.name}_${s.school}`;
-    const cur=duty[key]!==undefined?duty[key]:40;
-    html+=`<tr>
+    const cur=duty[key]!==undefined?duty[key]:0;
+    const safeKey=key.replace(/[^a-zA-Z0-9]/g,'_');
+    html+=`<tr id="duty-row-${safeKey}">
       <td style="font-weight:700;text-align:left">${s.name}</td>
       <td style="text-align:left;font-size:10px;color:var(--text2)">${s.school} ${s.grade}</td>
-      <td><input type="number" id="duty_${key.replace(/[^a-zA-Z0-9]/g,'_')}" min="0" max="168" value="${cur}" style="width:70px;background:var(--bg);border:1px solid var(--border);color:var(--text);padding:4px 7px;border-radius:6px;font-size:13px;font-family:inherit;outline:none;text-align:center;"></td>
-      <td style="color:var(--accent);font-family:'JetBrains Mono',monospace;font-size:11px">${cur}시간</td>
+      <td><input type="number" id="duty_${safeKey}" min="0" max="168" value="${cur}" oninput="liveUpdateDutyBadge('${safeKey}','${cur}')" style="width:70px;background:var(--bg);border:1px solid var(--border);color:var(--text);padding:4px 7px;border-radius:6px;font-size:13px;font-family:inherit;outline:none;text-align:center;"></td>
+      <td style="color:var(--accent);font-family:'JetBrains Mono',monospace;font-size:11px" id="duty-cur-${safeKey}">${cur}시간</td>
+      <td><button class="btn btn-p" style="padding:3px 9px;font-size:10px;" onclick="saveOneDuty('${s.name}','${s.school}','${safeKey}')">저장</button></td>
     </tr>`;
   });
   html+=`</tbody></table>`;
@@ -2244,17 +2296,20 @@ function setAllDutyHours(){
 }
 
 function applyBulkDuty(){
-  const v=parseInt(document.getElementById('bulkDutyHours').value)||40;
+  const v=parseInt(document.getElementById('bulkDutyHours').value)||0;
   students.forEach(s=>{
     const key=`${s.name}_${s.school}`;
-    const el=document.getElementById('duty_'+key.replace(/[^a-zA-Z0-9]/g,'_'));
-    if(el) el.value=v;
+    const safeKey=key.replace(/[^a-zA-Z0-9]/g,'_');
+    const el=document.getElementById('duty_'+safeKey);
+    const curEl=document.getElementById('duty-cur-'+safeKey);
+    if(el){el.value=v;}
+    if(curEl){curEl.textContent=v+'시간';curEl.style.color=v>0?'var(--accent)':'var(--text3)';}
   });
-  showToast('전체 '+v+'시간으로 설정됨 — 저장을 눌러 확정하세요');
+  showToast('전체 '+v+'시간으로 입력됨 — 💾 저장을 눌러 확정하세요');
 }
 
 function saveDutyHours(){
-  const duty={};
+  const duty=getDutyData();
   students.forEach(s=>{
     const key=`${s.name}_${s.school}`;
     const el=document.getElementById('duty_'+key.replace(/[^a-zA-Z0-9]/g,'_'));
@@ -2263,6 +2318,31 @@ function saveDutyHours(){
   setDutyData(duty);
   document.getElementById('dutyHoursModal').style.display='none';
   showToast('✅ 의무시간 저장 완료!');
+}
+
+// 개별 학생 의무시간 즉시 저장
+function saveOneDuty(name,school,safeKey){
+  const duty=getDutyData();
+  const key=`${name}_${school}`;
+  const el=document.getElementById('duty_'+safeKey);
+  if(!el) return;
+  const v=parseFloat(el.value)||0;
+  duty[key]=v;
+  setDutyData(duty);
+  // 현재 설정 표시 갱신
+  const curEl=document.getElementById('duty-cur-'+safeKey);
+  if(curEl) curEl.textContent=v+'시간';
+  showToast(`✅ ${name} 의무시간 ${v}시간 저장!`);
+}
+
+// 인풋 변경 시 실시간 배지 업데이트
+function liveUpdateDutyBadge(safeKey, prev){
+  const el=document.getElementById('duty_'+safeKey);
+  const curEl=document.getElementById('duty-cur-'+safeKey);
+  if(!el||!curEl) return;
+  const v=parseFloat(el.value)||0;
+  curEl.textContent=v+'시간';
+  curEl.style.color=v>0?'var(--accent)':'var(--text3)';
 }
 
 // ════ 주간 기록 수정 (PC 전용) ════
@@ -2544,22 +2624,34 @@ function buildStudentReportText(s,weekStart,weekDays,DAY_NAMES,wData,pts,duty,du
     dutyLine+=diff>=0?'✅ 달성! (+'+fmtHM(diff)+')':'❌ 미달 ('+fmtHM(-diff)+' 부족)';
   }
 
-  let ptsLine='\n\n⭐ 이번 주 상벌점\n상점: '+pts.good+'점'+(pts.good>=50?' (독서실비 3만원 할인 대상!)':'');
-  ptsLine+='\n벌점: '+pts.bad+'점'+(pts.bad>=30?' ⚠️ 퇴원 위기':pts.bad>=15?' ⚠️ 경고':'');
-  if(pts.bad>0&&pts.logs.length){
-    const badLogs=pts.logs.filter(l=>l.type==='bad');
-    if(badLogs.length) ptsLine+='\n벌점 사유: '+badLogs.map(l=>l.reason+'('+l.score+'점)').join(', ');
-  }
-  if(pts.good>0&&pts.logs.length){
+  // 상벌점 (사유 상세 포함)
+  let ptsLine='\n\n⭐ 이번 주 상벌점';
+
+  if(pts.good>0){
+    ptsLine+='\n🌟 상점: '+pts.good+'점'+(pts.good>=50?' (독서실비 3만원 할인 대상!)':'');
     const goodLogs=pts.logs.filter(l=>l.type==='good');
-    if(goodLogs.length) ptsLine+='\n상점 사유: '+goodLogs.map(l=>l.reason+'('+l.score+'점)').join(', ');
+    if(goodLogs.length){
+      goodLogs.forEach(l=>{ptsLine+='\n  · '+l.reason+' (+'+l.score+'점)';});
+    }
+  } else {
+    ptsLine+='\n🌟 상점: 0점';
   }
 
-  return '[스터디센터 주간 학습 리포트]\n━━━━━━━━━━━━━━━━━\n학생: '+s.name+' ('+s.school+' '+s.grade+')\n기간: '+wkLabel+
+  if(pts.bad>0){
+    ptsLine+='\n⚠️ 벌점: '+pts.bad+'점'+(pts.bad>=30?' 🚨 퇴원 위기':pts.bad>=15?' ⚠️ 경고':'');
+    const badLogs=pts.logs.filter(l=>l.type==='bad');
+    if(badLogs.length){
+      badLogs.forEach(l=>{ptsLine+='\n  · '+l.reason+' ('+l.score+'점)';});
+    }
+  } else {
+    ptsLine+='\n⚠️ 벌점: 0점';
+  }
+
+  return '[베스티안 스터디센터 주간 학습 리포트]\n━━━━━━━━━━━━━━━━━\n학생: '+s.name+' ('+s.school+' '+s.grade+')\n기간: '+wkLabel+
     '\n출석: '+s.attendDays+'일 / 7일\n총 공부시간: '+fmtHM(s.totalSec)+
     '\n\n📅 일별 공부시간\n'+dayLines+
     dutyLine+ptsLine+
-    '\n\n발송일: '+todayStr+'\n━━━━━━━━━━━━━━━━━';
+    '\n\n발송일: '+todayStr+'\n━━━━━━━━━━━━━━━━━\n베스티안 스터디센터';
 }
 
 function copyParentReport(text){
@@ -2631,6 +2723,168 @@ var selDates=[];
   document.getElementById('cfgApp').value='1:979740491220:web:1592c5d6b861e3c22cea41';
   document.getElementById('setupModal').style.display='flex';
 })();
+
+// ════════════════════════════════════════
+// PNG 리포트 생성 (html2canvas 방식)
+// ════════════════════════════════════════
+var _pngData = null;
+
+// showStudentReport 에서 호출 — 데이터 저장
+function storePngData(name, school, grade, wkLabel, totalSec, attendDays, totalDays, todayStr, dayRows, pts, dutyInfo) {
+  _pngData = {name:name, school:school, grade:grade, wkLabel:wkLabel,
+    totalTime:fmtHM(totalSec), attendDays:attendDays, totalDays:totalDays,
+    todayStr:todayStr, dayRows:dayRows, pts:pts, dutyInfo:dutyInfo};
+}
+
+function downloadReportPng() {
+  if(!_pngData){ showToast('리포트 데이터가 없습니다. 학생 이름을 다시 클릭하세요.'); return; }
+  var d = _pngData;
+  showToast('🖼️ PNG 생성 중...');
+
+  var DAY_KR = ['월','화','수','목','금','토','일'];
+  var days = d.dayRows || [];
+  var maxSec = 3600;
+  for(var i=0;i<days.length;i++){ if((days[i].sec||0)>maxSec) maxSec=days[i].sec; }
+
+  // 일별 바 HTML
+  var dayCols = days.map(function(row,i){
+    var isWE = i>=5;
+    var pct = row.type==='study' ? Math.max(5, Math.round((row.sec/maxSec)*100)) : 0;
+    var hh = Math.floor((row.sec||0)/3600);
+    var mm = Math.floor(((row.sec||0)%3600)/60);
+    var lbl = row.type==='study' ? hh+'h'+String(mm).padStart(2,'0') : (row.type==='absent'?'결석':'—');
+    var lblCol = row.type==='absent'?'#f59e0b': row.type==='study'?'#c7d2fe':'#4b5563';
+    return '<div style="flex:1;display:flex;flex-direction:column;align-items:center;">'
+      +'<div style="font-size:11px;font-weight:700;color:'+(isWE?'#fbbf24':'rgba(255,255,255,0.45)')+';margin-bottom:4px;">'+DAY_KR[i]+'</div>'
+      +'<div style="flex:1;width:100%;display:flex;align-items:flex-end;justify-content:center;padding:0 3px;">'
+      +(row.type==='study' && row.sec>0 ? '<div style="width:26px;height:'+pct+'%;min-height:6px;background:linear-gradient(to top,#3730a3,#818cf8);border-radius:4px 4px 0 0;"></div>' : '')
+      +(row.type==='absent' ? '<div style="width:26px;height:20px;background:rgba(245,158,11,0.2);border-radius:4px;display:flex;align-items:center;justify-content:center;"></div>' : '')
+      +'</div>'
+      +'<div style="font-size:10px;font-weight:700;color:'+lblCol+';margin-top:4px;text-align:center;">'+lbl+'</div>'
+      +'</div>';
+  }).join('');
+
+  // 의무시간
+  var dutyHtml = '';
+  if(d.dutyInfo){
+    var ok = d.dutyInfo.diff>=0;
+    dutyHtml = '<div style="background:'+(ok?'#052e16':'#1c0505')+';border:1.5px solid '+(ok?'#166534':'#7f1d1d')+';border-radius:10px;padding:11px 16px;margin-bottom:12px;">'
+      +'<span style="color:'+(ok?'#4ade80':'#f87171')+';font-size:13px;font-weight:700;">'
+      +(ok?'✅ 의무시간 달성 (+'+fmtHM(d.dutyInfo.diff)+')':'❌ 의무시간 미달 ('+fmtHM(-d.dutyInfo.diff)+' 부족)')
+      +' <span style="color:rgba(255,255,255,0.35);font-size:11px;"> — 기준 '+d.dutyInfo.h+'시간</span></span></div>';
+  }
+
+  // 상벌점 로그
+  var logsHtml = '';
+  var logs = (d.pts.logs||[]).slice(0,8);
+  if(logs.length){
+    logsHtml = '<div style="background:#161926;border:1px solid #252b47;border-radius:10px;padding:10px 12px;margin-top:10px;">'
+      + logs.map(function(l){
+        var g = l.type==='good';
+        return '<div style="display:flex;justify-content:space-between;align-items:center;padding:5px 8px;margin-bottom:3px;background:'+(g?'rgba(34,197,94,0.1)':'rgba(239,68,68,0.1)')+';border-radius:6px;">'
+          +'<span style="font-size:12px;color:'+(g?'#86efac':'#fca5a5')+';font-weight:600;">'+(g?'🌟 ':'⚠️ ')+l.reason+'</span>'
+          +'<span style="font-size:12px;font-weight:700;color:'+(g?'#4ade80':'#f87171')+';font-family:monospace;">'+(g?'+':'-')+l.score+'점</span>'
+          +'</div>';
+      }).join('')
+      +'</div>';
+  }
+
+  var badLv = (d.pts.bad||0)>=30?2:(d.pts.bad||0)>=15?1:0;
+  var goodBig = (d.pts.good||0)>=50;
+
+  var cardHtml = '<div id="_pngTarget" style="width:480px;background:linear-gradient(160deg,#0d1021,#131629);font-family:sans-serif;color:#e8eaf6;border-radius:16px;overflow:hidden;">'
+    // 헤더
+    +'<div style="background:linear-gradient(135deg,#312e81,#4f46e5,#6d28d9);padding:20px 22px 18px;position:relative;overflow:hidden;">'
+    +'<div style="position:absolute;top:-40px;right:-20px;width:150px;height:150px;border-radius:50%;border:2px solid rgba(255,255,255,0.1);"></div>'
+    +'<div style="position:absolute;top:15px;right:50px;width:80px;height:80px;border-radius:50%;border:2px solid rgba(255,255,255,0.07);"></div>'
+    +'<div style="font-size:10px;color:rgba(255,255,255,0.55);margin-bottom:5px;">베스티안 스터디센터 · 주간 학습 리포트</div>'
+    +'<div style="font-size:24px;font-weight:900;color:#fff;margin-bottom:3px;">📚 '+d.name+' 학생</div>'
+    +'<div style="font-size:11px;color:rgba(255,255,255,0.65);">'+d.school+' '+d.grade+' &nbsp;·&nbsp; '+d.wkLabel+'</div>'
+    +'<div style="position:absolute;right:22px;top:20px;text-align:right;">'
+    +'<div style="font-size:9px;color:rgba(255,255,255,0.35);">총 공부시간</div>'
+    +'<div style="font-size:20px;font-weight:900;color:#c7d2fe;font-family:monospace;">'+d.totalTime+'</div>'
+    +'</div></div>'
+    // 바디
+    +'<div style="padding:16px 18px;">'
+    // 총 공부시간
+    +'<div style="background:#1a1f3a;border:1px solid #2d3561;border-radius:12px;padding:13px 16px;margin-bottom:12px;display:flex;justify-content:space-between;align-items:center;">'
+    +'<div><div style="font-size:10px;color:rgba(255,255,255,0.35);margin-bottom:3px;">📈 주간 총 공부시간</div>'
+    +'<div style="font-size:32px;font-weight:900;color:#818cf8;font-family:monospace;">'+d.totalTime+'</div></div>'
+    +'<div style="background:rgba(99,102,241,0.18);border:1px solid rgba(99,102,241,0.4);border-radius:10px;padding:9px 14px;text-align:center;">'
+    +'<div style="font-size:9px;color:rgba(255,255,255,0.35);margin-bottom:2px;">출석</div>'
+    +'<div style="font-size:16px;font-weight:900;color:#a5b4fc;font-family:monospace;">'+d.attendDays+'일/'+d.totalDays+'일</div>'
+    +'</div></div>'
+    // 의무시간
+    + dutyHtml
+    // 일별
+    +'<div style="font-size:11px;font-weight:700;color:#a5b4fc;margin-bottom:7px;padding-bottom:5px;border-bottom:1px solid #1e2a4a;">📅 일별 공부시간</div>'
+    +'<div style="background:#161926;border:1px solid #252b47;border-radius:12px;padding:12px 8px;margin-bottom:12px;">'
+    +'<div style="display:flex;height:150px;gap:2px;">'+dayCols+'</div>'
+    +'</div>'
+    // 상벌점
+    +'<div style="font-size:11px;font-weight:700;color:#a5b4fc;margin-bottom:7px;padding-bottom:5px;border-bottom:1px solid #1e2a4a;">⭐ 이번 주 상벌점</div>'
+    +'<div style="display:flex;gap:10px;">'
+    +'<div style="flex:1;background:#052e16;border:1.5px solid '+(goodBig?'#16a34a':'#166534')+';border-radius:12px;padding:12px;">'
+    +'<div style="font-size:10px;color:rgba(255,255,255,0.4);margin-bottom:4px;">🌟 상점</div>'
+    +'<div style="font-size:30px;font-weight:900;color:'+(goodBig?'#4ade80':'#22c55e')+';font-family:monospace;">'+(d.pts.good||0)+'점</div>'
+    +(goodBig?'<div style="font-size:9px;color:#86efac;margin-top:2px;">💰 독서실비 3만원 할인!</div>':'')
+    +'</div>'
+    +'<div style="flex:1;background:'+(badLv===2?'#2d0000':badLv===1?'#1c0a00':'#160505')+';border:1.5px solid '+(badLv===2?'#dc2626':badLv===1?'#b45309':'#7f1d1d')+';border-radius:12px;padding:12px;">'
+    +'<div style="font-size:10px;color:rgba(255,255,255,0.4);margin-bottom:4px;">⚠️ 벌점</div>'
+    +'<div style="font-size:30px;font-weight:900;color:'+(badLv>=1?'#f87171':'#fca5a5')+';font-family:monospace;">'+(d.pts.bad||0)+'점</div>'
+    +(badLv===2?'<div style="font-size:9px;color:#fca5a5;margin-top:2px;">🚨 퇴원 위기!</div>':badLv===1?'<div style="font-size:9px;color:#fdba74;margin-top:2px;">⚠️ 경고</div>':'')
+    +'</div></div>'
+    + logsHtml
+    +'</div>'
+    // 푸터
+    +'<div style="background:#111827;border-top:1px solid #1e2a4a;padding:11px 18px;display:flex;justify-content:space-between;align-items:center;">'
+    +'<div><div style="font-size:13px;font-weight:900;color:#818cf8;">BESTIAN 베스티안 스터디센터</div>'
+    +'<div style="font-size:10px;color:rgba(255,255,255,0.3);margin-top:1px;">발송일: '+d.todayStr+'</div></div>'
+    +'<div style="background:rgba(99,102,241,0.2);border:1px solid rgba(99,102,241,0.4);border-radius:7px;padding:4px 11px;font-size:10px;color:#818cf8;font-weight:700;">주간 순공 리포트</div>'
+    +'</div>'
+    +'</div>';
+
+  // 숨겨진 컨테이너에 삽입
+  var wrap = document.createElement('div');
+  wrap.style.cssText = 'position:fixed;left:-9999px;top:0;z-index:-1;background:transparent;';
+  wrap.innerHTML = cardHtml;
+  document.body.appendChild(wrap);
+
+  function doCapture() {
+    window.html2canvas(document.getElementById('_pngTarget'), {
+      scale: 2,
+      backgroundColor: '#0d1021',
+      useCORS: true,
+      logging: false
+    }).then(function(canvas) {
+      canvas.toBlob(function(blob) {
+        var url = URL.createObjectURL(blob);
+        var a = document.createElement('a');
+        a.href = url;
+        a.download = d.name + '_주간리포트.png';
+        document.body.appendChild(a);
+        a.click();
+        setTimeout(function(){ URL.revokeObjectURL(url); document.body.removeChild(a); }, 1000);
+        document.body.removeChild(wrap);
+        showToast('🖼️ ' + d.name + ' PNG 저장 완료!');
+      }, 'image/png');
+    }).catch(function(err) {
+      document.body.removeChild(wrap);
+      showToast('PNG 오류: ' + err.message);
+    });
+  }
+
+  if(window.html2canvas) {
+    doCapture();
+  } else {
+    var s = document.createElement('script');
+    s.src = 'https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js';
+    s.onload = doCapture;
+    s.onerror = function(){ document.body.removeChild(wrap); showToast('라이브러리 로드 실패 (인터넷 확인)'); };
+    document.head.appendChild(s);
+  }
+}
+
 </script>
 </body>
 </html>
