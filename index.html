@@ -744,6 +744,27 @@
   </div>
 </div>
 
+<!-- 태블릿 하원 모달 -->
+<div class="modal-bg" id="tabCheckoutModal" style="display:none" onclick="if(event.target===this)this.style.display='none'">
+  <div class="tab-checkin-modal">
+    <h3>🏠 하원</h3>
+    <p class="sub" id="tabCheckoutName">학생 이름</p>
+    <div style="background:var(--surface2);border-radius:10px;padding:12px;margin-bottom:14px;">
+      <div style="font-size:11px;color:var(--text2);margin-bottom:8px;font-weight:700;">📅 내일 등원 예정 시간</div>
+      <div class="leave-big-grid" id="tabArriveGrid"></div>
+      <div style="display:flex;align-items:center;gap:6px;margin-top:6px;">
+        <span style="font-size:11px;color:var(--text2);">직접입력:</span>
+        <input type="time" id="tabArriveCustom" style="flex:1;background:var(--bg);border:1px solid var(--border);color:var(--text);padding:7px;border-radius:8px;font-size:13px;font-family:inherit;outline:none;" onchange="tabArriveCustomChanged()">
+      </div>
+    </div>
+    <div style="display:flex;gap:8px;">
+      <button class="btn btn-p" style="flex:1;justify-content:center;padding:11px;font-size:13px;" onclick="confirmTabCheckout()">⏹ 하원 처리</button>
+      <button class="btn btn-g" onclick="document.getElementById('tabCheckoutModal').style.display='none'">취소</button>
+    </div>
+    <button class="lbg-skip" style="width:100%;margin-top:8px;" onclick="confirmTabCheckout(true)">⏭ 등원시간 없이 하원</button>
+  </div>
+</div>
+
 <!-- 카톡 메시지 팝업 -->
 <div class="kakao-popup" id="kakaoPopup">
   <div class="kakao-popup-title">
@@ -1224,7 +1245,7 @@ function buildCardHtml(s){
   } else if(s.status==='재실'){
     btns=isPc
       ?`<button class="ab a-og" onclick="openOutingModal(${s.id})">⏸ 외출</button><button class="ab a-co" onclick="openCheckoutModal(${s.id})">⏹ 하원 (카톡)</button>`
-      :`<button class="ab a-og" onclick="openOutingModal(${s.id})">⏸ 외출</button><button class="ab a-co" onclick="tabCheckout(${s.id})">⏹ 하원</button>`;
+      :`<button class="ab a-og" onclick="openOutingModal(${s.id})">⏸ 외출</button><button class="ab a-co" onclick="openTabCheckoutModal(${s.id})">⏹ 하원</button>`;
   } else if(s.status==='외출'){
     btns=isPc
       ?`<button class="ab c2 a-rt" onclick="returnWithKakao(${s.id})">▶ 복귀 (카톡)</button>`
@@ -1847,43 +1868,129 @@ async function confirmCheckout(){
   var arriveVal=document.getElementById('checkoutArriveTime').value;
   await action('checkout', _checkoutId);
   document.getElementById('checkoutModal').style.display='none';
+  saveCheckoutRecord(s, liveSec);   // 확정 저장 (이후 덮어쓰기 금지)
   var msg='🏠 '+s.name+' 원생이 '+fmtTime(now)+'에 하원하였습니다.\n오늘 총 공부시간: '+fmtHM(liveSec);
   if(arriveVal){
     var tomorrow=new Date(now);
     tomorrow.setDate(tomorrow.getDate()+1);
-    msg+='\n📅 '+( tomorrow.getMonth()+1)+'/'+tomorrow.getDate()+'(내일) '+timeValToStr(arriveVal)+'에 등원할 예정입니다.';
+    msg+='\n📅 '+(tomorrow.getMonth()+1)+'/'+tomorrow.getDate()+'(내일) '+timeValToStr(arriveVal)+'에 등원할 예정입니다.';
   }
   showKakao(msg);
-  // 하원 시 오늘 주간 통계 자동 저장
-  autoSaveToday();
 }
 
-// 오늘 입실 기록이 있으면 자동 저장 (덮어쓰기)
+// ─── autoSaveToday: 하원 확정된 학생은 절대 덮어쓰지 않는 안전한 병합 저장 ───
 function autoSaveToday(){
   var key=todayKey();
-  var snap=students.filter(function(s){return s.status!=='미입실';}).map(function(s){
-    return{id:s.id,name:s.name,school:s.school,grade:s.grade,
-      totalStudySeconds:s.status==='재실'&&s.currentSessionStart?s.totalStudySeconds+Math.floor((Date.now()-new Date(s.currentSessionStart).getTime())/1000):s.totalStudySeconds,
-      entryTime:s.entryTime?+new Date(s.entryTime):null,checkOutTime:s.checkOutTime?+new Date(s.checkOutTime):null,outingCount:(s.outingLogs||[]).length};
-  });
-  if(!snap.length) return;
   var data=getWeeklyData();
-  data[key]=snap;
+  if(!data[key]) data[key]=[];
+
+  students.filter(function(s){return s.status!=='미입실';}).forEach(function(s){
+    // _checkout 플래그가 있는 확정 기록은 건드리지 않음
+    var existing=data[key].find(function(r){return r.id===s.id||(r.name===s.name&&r.school===s.school);});
+    if(existing&&existing._checkout) return;
+
+    var sec=s.status==='재실'&&s.currentSessionStart
+      ?s.totalStudySeconds+Math.floor((Date.now()-new Date(s.currentSessionStart).getTime())/1000)
+      :s.totalStudySeconds;
+    var rec={
+      id:s.id,name:s.name,school:s.school,grade:s.grade,
+      totalStudySeconds:sec,
+      entryTime:s.entryTime?+new Date(s.entryTime):null,
+      checkOutTime:s.checkOutTime?+new Date(s.checkOutTime):null,
+      outingCount:(s.outingLogs||[]).length
+    };
+    var idx=data[key].findIndex(function(r){return r.id===s.id||(r.name===s.name&&r.school===s.school);});
+    if(idx>=0){data[key][idx]=rec;}else{data[key].push(rec);}
+  });
+
+  if(data[key].length) setWeeklyData(data);
+}
+
+// ════ 태블릿 하원 모달 ════
+var _tabCheckoutId = null;
+var _tabArriveTime  = '';
+var TAB_ARRIVE_TIMES = [
+  {label:'오전 8:00',  val:'08:00'},
+  {label:'오전 8:30',  val:'08:30'},
+  {label:'오전 9:00',  val:'09:00'},
+  {label:'오전 9:30',  val:'09:30'},
+  {label:'오전 10:00', val:'10:00'},
+  {label:'오전 10:30', val:'10:30'},
+];
+
+function openTabCheckoutModal(id){
+  var s=students.find(function(x){return x.id===id;});
+  if(!s) return;
+  _tabCheckoutId=id;
+  _tabArriveTime='';
+  document.getElementById('tabCheckoutName').textContent=s.name+' 학생';
+  document.getElementById('tabArriveCustom').value='';
+  buildTabArriveGrid('');
+  document.getElementById('tabCheckoutModal').style.display='flex';
+}
+
+function buildTabArriveGrid(selVal){
+  var container=document.getElementById('tabArriveGrid');
+  if(!container) return;
+  container.innerHTML=TAB_ARRIVE_TIMES.map(function(t){
+    return '<button class="lbg-btn'+(selVal===t.val?' sel':'')+'" onclick="selectTabArrive(\''+t.val+'\',\''+t.label+'\')">'+t.label+'</button>';
+  }).join('');
+}
+
+function selectTabArrive(val,label){
+  _tabArriveTime=val;
+  document.getElementById('tabArriveCustom').value=val;
+  buildTabArriveGrid(val);
+}
+
+function tabArriveCustomChanged(){
+  _tabArriveTime=document.getElementById('tabArriveCustom').value;
+  buildTabArriveGrid('');
+}
+
+async function confirmTabCheckout(skipArrive){
+  if(!_tabCheckoutId) return;
+  var s=students.find(function(x){return x.id===_tabCheckoutId;});
+  if(!s) return;
+  var arriveVal=skipArrive?'':(_tabArriveTime||document.getElementById('tabArriveCustom').value||'');
+  document.getElementById('tabCheckoutModal').style.display='none';
+  await tabCheckout(_tabCheckoutId, arriveVal);
+}
+
+// ─── 하원 확정 기록: 최종 시간을 즉시 저장하고 이후 덮어쓰기 금지 ───
+function saveCheckoutRecord(s, finalSec){
+  var key=todayKey();
+  var data=getWeeklyData();
+  if(!data[key]) data[key]=[];
+  var rec={
+    id:s.id, name:s.name, school:s.school, grade:s.grade,
+    totalStudySeconds:finalSec,
+    entryTime:s.entryTime?+new Date(s.entryTime):null,
+    checkOutTime:+new Date(),
+    outingCount:(s.outingLogs||[]).length,
+    _checkout:true   // 덮어쓰기 금지 플래그
+  };
+  var idx=data[key].findIndex(function(r){return r.id===s.id||(r.name===s.name&&r.school===s.school);});
+  if(idx>=0){data[key][idx]=rec;}else{data[key].push(rec);}
   setWeeklyData(data);
 }
 
-// 태블릿 하원: 통계 자동저장 + Firebase 알림
-async function tabCheckout(id){
+// 태블릿 하원 처리 (등원시간 포함)
+async function tabCheckout(id, arriveVal){
   var s=students.find(function(x){return x.id===id;});
   if(!s) return;
   var now=new Date();
   var liveSec=getLive(s);
   await action('checkout', id);
-  autoSaveToday();
-  // Firebase 알림 패널에 하원 알림 전송
+  saveCheckoutRecord(s, liveSec);   // 확정 저장
   var msg='🏠 '+s.name+' 원생이 '+fmtTime(now)+'에 하원하였습니다.\n오늘 총 공부시간: '+fmtHM(liveSec);
+  if(arriveVal){
+    var tomorrow=new Date(now);
+    tomorrow.setDate(tomorrow.getDate()+1);
+    msg+='\n📅 '+(tomorrow.getMonth()+1)+'/'+tomorrow.getDate()+'(내일) '+timeValToStr(arriveVal)+'에 등원 예정';
+  }
   _pushNotifItem({name:s.name, school:s.school||'', grade:s.grade||'',
-    type:'checkout', msg:msg, seq:Date.now(), ts:Date.now()});
+    type:'checkout', arriveTime:arriveVal||'', msg:msg, seq:Date.now(), ts:Date.now()});
   showToast('⏹ '+s.name+' 하원 처리 완료! PC에 알림 전송됨');
 }
 
@@ -2287,6 +2394,7 @@ function renderNotifPanel() {
     if (t==='checkin' && item.leaveTime) subLine = '<div class="notif-leave">🏠 하원 예정: '+timeValToStr(item.leaveTime)+'</div>';
     if (t==='outing' && item.outType) subLine = '<div class="notif-leave" style="color:var(--yellow)">유형: '+item.outType+'</div>';
     if (t==='return' && item.outType) subLine = '<div class="notif-leave" style="color:var(--accent)">'+item.outType+' 후 복귀</div>';
+    if (t==='checkout' && item.arriveTime) subLine = '<div class="notif-leave" style="color:var(--blue)">📅 내일 '+timeValToStr(item.arriveTime)+' 등원 예정</div>';
     return '<div class="notif-item" style="border-color:'+border+'">' +
       '<div class="notif-item-head">' +
         '<span class="notif-seq" style="color:'+color+'">'+(i+1)+' '+icon+' '+label+'</span>' +
