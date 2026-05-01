@@ -1608,6 +1608,8 @@ function startFirebase(cfg){
       renderAll();
       // 알림 큐 초기화 (최초 1회)
       if (!notifQueueRef) initNotifQueue();
+      // 의무시간 Firebase 연동 초기화 (최초 1회)
+      // 의무시간은 localStorage 전용 — Firebase 연동 없음
     }, function(err){
       console.error('Firebase error:', err);
       document.getElementById('syncDot').classList.add('err');
@@ -2480,9 +2482,15 @@ async function confirmTabCheckin(skipLeave) {
 }
 
 // ════ 의무시간 저장소 ════
-// 구조: { '이름_학교': 시간(숫자) }
-function getDutyData(){try{return JSON.parse(localStorage.getItem('sc_duty')||'{}');}catch(e){return{};}}
-function setDutyData(d){localStorage.setItem('sc_duty',JSON.stringify(d));}
+// ★ localStorage에만 저장 — Firebase 완전 분리 (덮어쓰기 원천 차단)
+function getDutyData(){
+  try{ return JSON.parse(localStorage.getItem('sc_duty')||'{}'); }catch(e){ return {}; }
+}
+function setDutyData(d){
+  try{ localStorage.setItem('sc_duty', JSON.stringify(d)); }catch(e){}
+}
+function setOneDutyToFirebase(){ /* 미사용 */ }
+function initDutyRef(){ /* 미사용 */ }
 
 function openDutyHours(){
   if(_appMode!=='pc'){showToast('💻 PC 모드에서만 사용 가능합니다');return;}
@@ -2497,16 +2505,17 @@ function renderDutyTable(){
   let html=`<table class="duty-table"><thead><tr>
     <th>학생</th><th>학교/학년</th><th>주간 의무시간 (시간)</th><th>현재 설정</th><th>개별 저장</th>
   </tr></thead><tbody>`;
-  filtered.forEach(s=>{
+  filtered.forEach((s,idx)=>{
     const key=`${s.name}_${s.school}`;
     const cur=duty[key]!==undefined?duty[key]:0;
-    const safeKey=key.replace(/[^a-zA-Z0-9]/g,'_');
+    // ★ 한글 깨짐 방지: 학생 고유 ID(숫자)를 safeKey로 사용
+    const safeKey=`sid_${s.id}`;
     html+=`<tr id="duty-row-${safeKey}">
       <td style="font-weight:700;text-align:left">${s.name}</td>
       <td style="text-align:left;font-size:10px;color:var(--text2)">${s.school} ${s.grade}</td>
-      <td><input type="number" id="duty_${safeKey}" min="0" max="168" value="${cur}" oninput="liveUpdateDutyBadge('${safeKey}','${cur}')" style="width:70px;background:var(--bg);border:1px solid var(--border);color:var(--text);padding:4px 7px;border-radius:6px;font-size:13px;font-family:inherit;outline:none;text-align:center;"></td>
+      <td><input type="number" id="duty_${safeKey}" data-key="${key}" min="0" max="168" value="${cur}" oninput="liveUpdateDutyBadge('${safeKey}')" style="width:70px;background:var(--bg);border:1px solid var(--border);color:var(--text);padding:4px 7px;border-radius:6px;font-size:13px;font-family:inherit;outline:none;text-align:center;"></td>
       <td style="color:var(--accent);font-family:'JetBrains Mono',monospace;font-size:11px" id="duty-cur-${safeKey}">${cur}시간</td>
-      <td><button class="btn btn-p" style="padding:3px 9px;font-size:10px;" onclick="saveOneDuty('${s.name}','${s.school}','${safeKey}')">저장</button></td>
+      <td><button class="btn btn-p" style="padding:3px 9px;font-size:10px;" onclick="saveOneDuty('${safeKey}')">저장</button></td>
     </tr>`;
   });
   html+=`</tbody></table>`;
@@ -2521,8 +2530,7 @@ function setAllDutyHours(){
 function applyBulkDuty(){
   const v=parseInt(document.getElementById('bulkDutyHours').value)||0;
   students.forEach(s=>{
-    const key=`${s.name}_${s.school}`;
-    const safeKey=key.replace(/[^a-zA-Z0-9]/g,'_');
+    const safeKey=`sid_${s.id}`;
     const el=document.getElementById('duty_'+safeKey);
     const curEl=document.getElementById('duty-cur-'+safeKey);
     if(el){el.value=v;}
@@ -2534,9 +2542,12 @@ function applyBulkDuty(){
 function saveDutyHours(){
   const duty=getDutyData();
   students.forEach(s=>{
-    const key=`${s.name}_${s.school}`;
-    const el=document.getElementById('duty_'+key.replace(/[^a-zA-Z0-9]/g,'_'));
-    if(el) duty[key]=parseFloat(el.value)||0;
+    const safeKey=`sid_${s.id}`;
+    const el=document.getElementById('duty_'+safeKey);
+    if(el){
+      const key=el.dataset.key||`${s.name}_${s.school}`;
+      duty[key]=parseFloat(el.value)||0;
+    }
   });
   setDutyData(duty);
   document.getElementById('dutyHoursModal').style.display='none';
@@ -2544,22 +2555,25 @@ function saveDutyHours(){
 }
 
 // 개별 학생 의무시간 즉시 저장
-function saveOneDuty(name,school,safeKey){
+function saveOneDuty(safeKey){
   const duty=getDutyData();
-  const key=`${name}_${school}`;
   const el=document.getElementById('duty_'+safeKey);
   if(!el) return;
+  const key=el.dataset.key;
+  if(!key) return;
   const v=parseFloat(el.value)||0;
   duty[key]=v;
   setDutyData(duty);
-  // 현재 설정 표시 갱신
   const curEl=document.getElementById('duty-cur-'+safeKey);
-  if(curEl) curEl.textContent=v+'시간';
-  showToast(`✅ ${name} 의무시간 ${v}시간 저장!`);
+  if(curEl){curEl.textContent=v+'시간';curEl.style.color=v>0?'var(--accent)':'var(--text3)';}
+  // 이름 표시용
+  const nameEl=el.closest('tr')&&el.closest('tr').querySelector('td:first-child');
+  const nm=nameEl?nameEl.textContent:'학생';
+  showToast(`✅ ${nm} 의무시간 ${v}시간 저장!`);
 }
 
 // 인풋 변경 시 실시간 배지 업데이트
-function liveUpdateDutyBadge(safeKey, prev){
+function liveUpdateDutyBadge(safeKey){
   const el=document.getElementById('duty_'+safeKey);
   const curEl=document.getElementById('duty-cur-'+safeKey);
   if(!el||!curEl) return;
