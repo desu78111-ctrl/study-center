@@ -1998,15 +1998,21 @@ async function confirmCheckout(){
   if(!s) return;
   var now=new Date();
   var liveSec=getLive(s);
-  var arriveVal=_pcArriveAmPm&&_pcArriveHour&&_pcArriveMin?getPcArriveVal():(_selArriveTime||'');
+  // 직접입력 버튼 값 우선, 없으면 칩 선택값
+  var arriveVal='';
+  if(_pcArriveAmPm&&_pcArriveHour&&_pcArriveMin){
+    arriveVal=getPcArriveVal();
+  } else {
+    arriveVal=_selArriveTime||'';
+  }
   await action('checkout', _checkoutId);
   document.getElementById('checkoutModal').style.display='none';
   saveCheckoutRecord(s, liveSec);   // 확정 저장 (이후 덮어쓰기 금지)
-  var msg='🏠 '+s.name+' 원생이 '+fmtTime(now)+'에 하원하였습니다.\n오늘 총 공부시간: '+fmtHM(liveSec);
+  var msg='🏠 '+s.name+' 학생이 '+fmtTime(now)+'에 하원하였습니다.\n오늘 총 공부시간: '+fmtHM(liveSec);
   if(arriveVal){
     var tomorrow=new Date(now);
     tomorrow.setDate(tomorrow.getDate()+1);
-    msg+='\n📅 '+(tomorrow.getMonth()+1)+'/'+tomorrow.getDate()+'(내일) '+timeValToStr(arriveVal)+'에 등원할 예정입니다.';
+    msg+='\n📅 '+(tomorrow.getMonth()+1)+'/'+(tomorrow.getDate())+'(내일) '+timeValToStr(arriveVal)+'에 등원 예정입니다.';
   }
   showKakao(msg);
 }
@@ -2084,7 +2090,18 @@ async function confirmTabCheckout(skipArrive){
   if(!_tabCheckoutId) return;
   var s=students.find(function(x){return x.id===_tabCheckoutId;});
   if(!s) return;
-  var arriveVal=skipArrive?'':_tabArriveTime;
+  // 직접입력 버튼 값 우선, 없으면 칩 선택값
+  var arriveVal='';
+  if(!skipArrive){
+    if(_arriveAmPm&&_arriveHour&&_arriveMin){
+      var h=parseInt(_arriveHour);
+      if(_arriveAmPm==='pm'&&h!==12) h+=12;
+      if(_arriveAmPm==='am'&&h===12) h=0;
+      arriveVal=String(h).padStart(2,'0')+':'+_arriveMin;
+    } else {
+      arriveVal=_tabArriveTime||'';
+    }
+  }
   document.getElementById('tabCheckoutModal').style.display='none';
   await tabCheckout(_tabCheckoutId, arriveVal);
 }
@@ -2115,7 +2132,7 @@ async function tabCheckout(id, arriveVal){
   var liveSec=getLive(s);
   await action('checkout', id);
   saveCheckoutRecord(s, liveSec);   // 확정 저장
-  var msg='🏠 '+s.name+' 원생이 '+fmtTime(now)+'에 하원하였습니다.\n오늘 총 공부시간: '+fmtHM(liveSec);
+  var msg='🏠 '+s.name+' 학생이 '+fmtTime(now)+'에 하원하였습니다.\n오늘 총 공부시간: '+fmtHM(liveSec);
   if(arriveVal){
     var tomorrow=new Date(now);
     tomorrow.setDate(tomorrow.getDate()+1);
