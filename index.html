@@ -1181,7 +1181,7 @@ async function action(type,id){
     if(type==='outing'&&s.status==='재실'){const sec=Math.floor((now-new Date(s.currentSessionStart))/1000);return{...s,status:'외출',outingLogs:[...(s.outingLogs||[]),{outingTime:now,returnTime:null}],totalStudySeconds:s.totalStudySeconds+sec,currentSessionStart:null};}
     if(type==='return'&&s.status==='외출'){const logs=[...(s.outingLogs||[])];if(logs.length>0)logs[logs.length-1]={...logs[logs.length-1],returnTime:now};return{...s,status:'재실',outingLogs:logs,currentSessionStart:now};}
     if(type==='checkout'){let e=0;if(s.status==='재실'&&s.currentSessionStart)e=Math.floor((now-new Date(s.currentSessionStart))/1000);return{...s,status:'퇴실',checkOutTime:now,totalStudySeconds:s.totalStudySeconds+e,currentSessionStart:null};}
-    if(type==='reset')return{...s,status:'미입실',entryTime:null,checkOutTime:null,outingLogs:[],currentSessionStart:null,totalStudySeconds:0};
+    if(type==='reset')return{...s,status:'미입실',entryTime:null,checkOutTime:null,outingLogs:[],currentSessionStart:null,totalStudySeconds:0,plannedLeaveTime:''};
     return s;
   });
   await save();
@@ -1301,7 +1301,7 @@ function buildCardHtml(s){
   const logs=s.outingLogs||[],multi=logs.length>1;
   let lr=`<div class="lr"><span class="ll en">입실</span><span class="lv">${fmt(s.entryTime)}</span></div>`;
   logs.forEach((l,i)=>{lr+=`<div class="lr"><span class="ll og">${multi?`외출${i+1}`:'외출'}</span><span class="lv">${fmt(l.outingTime)}</span></div>`;if(l.returnTime)lr+=`<div class="lr"><span class="ll rt">${multi?`복귀${i+1}`:'복귀'}</span><span class="lv">${fmt(l.returnTime)}</span></div>`;});
-  lr+=`<div class="lr"><span class="ll co">하원</span><span class="lv">${fmt(s.checkOutTime)}</span></div>`;
+  lr+=`<div class="lr"><span class="ll co">하원</span><span class="lv">${s.checkOutTime ? fmt(s.checkOutTime) : (s.plannedLeaveTime ? '<span style="color:#f59e0b;font-size:9px;">예정 '+timeValToStr(s.plannedLeaveTime)+'</span>' : '-')}</span></div>`;
   let btns='';
   var isPc=(_appMode==='pc');
   if(s.status==='미입실'){
@@ -1900,7 +1900,7 @@ async function confirmCheckin(){
   // action 처리 (직접 students 수정해서 입실시간 반영)
   students=students.map(function(x){
     if(x.id!==_checkinId) return x;
-    return Object.assign({},x,{status:'재실',entryTime:checkinDate,checkOutTime:null,outingLogs:[],currentSessionStart:checkinDate,totalStudySeconds:0});
+    return Object.assign({},x,{status:'재실',entryTime:checkinDate,checkOutTime:null,outingLogs:[],currentSessionStart:checkinDate,totalStudySeconds:0,plannedLeaveTime:leaveVal||''});
   });
   await save();
   if(!isFirebase) renderAll();
@@ -2626,7 +2626,7 @@ async function confirmTabCheckin(skipLeave) {
   var now = new Date();
   students = students.map(function(x) {
     if (x.id !== _tabCheckinId) return x;
-    return Object.assign({}, x, {status:'재실', entryTime:now, checkOutTime:null, outingLogs:[], currentSessionStart:now, totalStudySeconds:0});
+    return Object.assign({}, x, {status:'재실', entryTime:now, checkOutTime:null, outingLogs:[], currentSessionStart:now, totalStudySeconds:0, plannedLeaveTime:leaveVal||''});
   });
   await save();
   if (!isFirebase) renderAll();
@@ -3315,6 +3315,9 @@ function applyLeaveCustomTime(){
   if(_leaveAmPm==='pm'&&h!==12) h+=12;
   if(_leaveAmPm==='am'&&h===12) h=0;
   _tabLeaveTime=String(h).padStart(2,'0')+':'+_leaveMin;
+  // PC 입실 모달의 hidden input에도 반영 (카톡 메시지에 하원시간 포함되도록)
+  var ciLeave=document.getElementById('checkinLeaveTime');
+  if(ciLeave) ciLeave.value=_tabLeaveTime;
   updateLeavePreview();
 }
 function updateLeavePreview(){
