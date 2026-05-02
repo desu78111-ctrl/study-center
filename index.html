@@ -293,6 +293,18 @@
     .lbg-btn:hover{border-color:var(--accent);color:var(--accent);}
     .lbg-btn.sel{border-color:var(--green);background:rgba(34,197,94,.15);color:var(--green);}
     .lbg-skip{grid-column:span 3;padding:9px;border-radius:9px;border:1px solid var(--border);background:transparent;color:var(--text2);font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;}
+    /* 직접입력 오전/오후 UI */
+    .ampm-row{display:flex;gap:7px;margin-bottom:10px;}
+    .ampm-btn{flex:1;padding:10px 6px;border-radius:10px;border:1.5px solid var(--border);background:var(--surface2);color:var(--text2);font-size:14px;font-weight:900;cursor:pointer;font-family:inherit;transition:all .15s;text-align:center;}
+    .ampm-btn.sel{border-color:var(--green);background:rgba(34,197,94,.18);color:var(--green);}
+    .ampm-btn:hover:not(.sel){border-color:var(--accent);color:var(--accent);}
+    .hm-row{display:flex;gap:7px;align-items:flex-start;margin-bottom:6px;}
+    .hm-label{font-size:11px;color:var(--text2);font-weight:700;white-space:nowrap;padding-top:8px;}
+    .hm-grid{display:flex;flex-wrap:wrap;gap:5px;flex:1;}
+    .hm-btn{padding:7px 9px;border-radius:8px;border:1.5px solid var(--border);background:var(--surface2);color:var(--text);font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;transition:all .15s;min-width:34px;text-align:center;}
+    .hm-btn.sel{border-color:var(--green);background:rgba(34,197,94,.18);color:var(--green);}
+    .hm-btn:hover:not(.sel){border-color:var(--accent);color:var(--accent);}
+    .custom-time-preview{text-align:center;margin-top:8px;font-size:13px;font-weight:700;color:var(--green);min-height:20px;}
 
     /* ── 관리자 로그인 모달 ── */
     .login-modal{background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:32px 28px;max-width:360px;width:100%;text-align:center;}
@@ -592,9 +604,22 @@
     <div style="background:var(--surface2);border-radius:10px;padding:12px;margin-bottom:14px;">
       <div style="font-size:11px;color:var(--text2);margin-bottom:8px;font-weight:700;">📅 다음날 등원 예정 시간</div>
       <div class="time-grid" id="arriveTimeGrid"></div>
-      <div style="display:flex;align-items:center;gap:6px;margin-top:6px;">
-        <span style="font-size:11px;color:var(--text2);">직접입력:</span>
-        <input type="time" id="checkoutArriveTime" style="flex:1;background:var(--bg);border:1px solid var(--border);color:var(--text);padding:7px;border-radius:8px;font-size:13px;font-family:inherit;outline:none;" onchange="clearArriveChips()">
+      <!-- 직접입력: 오전/오후 버튼 UI -->
+      <div style="border-top:1px solid var(--border);margin-top:10px;padding-top:10px;">
+        <div style="font-size:11px;color:var(--text2);font-weight:700;margin-bottom:8px;">✏️ 직접 입력</div>
+        <div class="ampm-row">
+          <button class="ampm-btn" id="pcArriveAmBtn" onclick="setPcArriveAmPm('am')">오전</button>
+          <button class="ampm-btn" id="pcArrivePmBtn" onclick="setPcArriveAmPm('pm')">오후</button>
+        </div>
+        <div class="hm-row">
+          <span class="hm-label">시</span>
+          <div class="hm-grid" id="pcArriveHourGrid"></div>
+        </div>
+        <div class="hm-row">
+          <span class="hm-label">분</span>
+          <div class="hm-grid" id="pcArriveMinGrid"></div>
+        </div>
+        <div class="custom-time-preview" id="pcArriveTimePreview">—</div>
       </div>
     </div>
 
@@ -626,7 +651,22 @@
       <button class="dur-btn" id="dur-120" onclick="selectDuration(120)">2시간</button>
       <button class="dur-btn" id="dur-custom" onclick="selectDuration(-1)">✏️ 직접 입력</button>
     </div>
-    <input type="time" id="customDurTime" style="display:none;width:100%;margin-top:8px;background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:8px 12px;border-radius:9px;font-size:14px;font-family:inherit;outline:none;" placeholder="복귀 예정 시각 직접 입력">
+    <!-- 직접입력: 복귀 예정 시각 버튼 UI -->
+    <div id="customDurPanel" style="display:none;margin-top:8px;">
+      <div class="ampm-row">
+        <button class="ampm-btn" id="durAmBtn" onclick="setDurAmPm('am')">오전</button>
+        <button class="ampm-btn" id="durPmBtn" onclick="setDurAmPm('pm')">오후</button>
+      </div>
+      <div class="hm-row">
+        <span class="hm-label">시</span>
+        <div class="hm-grid" id="durHourGrid"></div>
+      </div>
+      <div class="hm-row">
+        <span class="hm-label">분</span>
+        <div class="hm-grid" id="durMinGrid"></div>
+      </div>
+      <div class="custom-time-preview" id="durTimePreview">—</div>
+    </div>
     <div style="display:flex;gap:8px;">
       <button class="btn btn-p" style="flex:1;justify-content:center" onclick="confirmOuting()">✅ 외출 처리</button>
       <button class="btn btn-g" onclick="document.getElementById('outingModal').style.display='none'">취소</button>
@@ -732,9 +772,22 @@
     <div style="background:var(--surface2);border-radius:10px;padding:12px;margin-bottom:14px;">
       <div style="font-size:11px;color:var(--text2);margin-bottom:8px;font-weight:700;">🏠 오늘 하원 예정 시간</div>
       <div class="leave-big-grid" id="tabLeaveGrid"></div>
-      <div style="display:flex;align-items:center;gap:6px;margin-top:4px;">
-        <span style="font-size:11px;color:var(--text2);">직접입력:</span>
-        <input type="time" id="tabLeaveCustom" style="flex:1;background:var(--bg);border:1px solid var(--border);color:var(--text);padding:7px;border-radius:8px;font-size:13px;font-family:inherit;outline:none;" onchange="tabLeaveCustomChanged()">
+      <!-- 직접입력: 오전/오후 버튼 UI -->
+      <div style="border-top:1px solid var(--border);margin-top:10px;padding-top:10px;">
+        <div style="font-size:11px;color:var(--text2);font-weight:700;margin-bottom:8px;">✏️ 직접 입력</div>
+        <div class="ampm-row">
+          <button class="ampm-btn" id="leaveAmBtn" onclick="setLeaveAmPm('am')">오전</button>
+          <button class="ampm-btn" id="leavePmBtn" onclick="setLeaveAmPm('pm')">오후</button>
+        </div>
+        <div class="hm-row">
+          <span class="hm-label">시</span>
+          <div class="hm-grid" id="leaveHourGrid"></div>
+        </div>
+        <div class="hm-row">
+          <span class="hm-label">분</span>
+          <div class="hm-grid" id="leaveMinGrid"></div>
+        </div>
+        <div class="custom-time-preview" id="leaveTimePreview">—</div>
       </div>
     </div>
     <div style="display:flex;gap:8px;">
@@ -752,9 +805,22 @@
     <div style="background:var(--surface2);border-radius:10px;padding:12px;margin-bottom:14px;">
       <div style="font-size:11px;color:var(--text2);margin-bottom:8px;font-weight:700;">📅 내일 등원 예정 시간</div>
       <div class="leave-big-grid" id="tabArriveGrid"></div>
-      <div style="display:flex;align-items:center;gap:6px;margin-top:6px;">
-        <span style="font-size:11px;color:var(--text2);">직접입력:</span>
-        <input type="time" id="tabArriveCustom" style="flex:1;background:var(--bg);border:1px solid var(--border);color:var(--text);padding:7px;border-radius:8px;font-size:13px;font-family:inherit;outline:none;" onchange="tabArriveCustomChanged()">
+      <!-- 직접입력: 오전/오후 버튼 UI -->
+      <div style="border-top:1px solid var(--border);margin-top:10px;padding-top:10px;">
+        <div style="font-size:11px;color:var(--text2);font-weight:700;margin-bottom:8px;">✏️ 직접 입력</div>
+        <div class="ampm-row">
+          <button class="ampm-btn" id="arriveAmBtn" onclick="setArriveAmPm('am')">오전</button>
+          <button class="ampm-btn" id="arrivePmBtn" onclick="setArriveAmPm('pm')">오후</button>
+        </div>
+        <div class="hm-row">
+          <span class="hm-label">시</span>
+          <div class="hm-grid" id="arriveHourGrid"></div>
+        </div>
+        <div class="hm-row">
+          <span class="hm-label">분</span>
+          <div class="hm-grid" id="arriveMinGrid"></div>
+        </div>
+        <div class="custom-time-preview" id="arriveTimePreview">—</div>
       </div>
     </div>
     <div style="display:flex;gap:8px;">
@@ -1642,8 +1708,6 @@ function fmtHM(sec){
 
 // ════ 카톡 팝업 ════
 function showKakao(msg){
-  // 태블릿 모드에서는 카톡 팝업 없음 (알림 패널로만 전송)
-  if(_appMode === 'tablet') return;
   msg = '[베스티안 스터디센터]\n' + msg;
   try {
     var kakaoEl=document.getElementById('kakaoMsg');
@@ -1771,8 +1835,9 @@ var _selArriveTime = '';
 function buildTimeGrid(containerId, times, selVar, inputId, onSelect){
   var container = document.getElementById(containerId);
   if(!container) return;
+  if(inputId){ var inp=document.getElementById(inputId); if(inp) inp.value=selVar||""; }
   container.innerHTML = times.map(function(t){
-    return '<button class="time-chip'+(selVar===t.val?' sel-green':'')+'" onclick="'+onSelect+'(\''+t.val+'\',\''+t.label+'\')">'+t.label+'</button>';
+    return '<button class="time-chip'+(selVar===t.val?' sel-green':'')+'" onclick="'+onSelect+'(\''+ t.val +'\',\''+ t.label +'\')">'+ t.label +'</button>';
   }).join('');
 }
 
@@ -1787,13 +1852,11 @@ function clearLeaveChips(){
 }
 function selectArriveTime(val, label){
   _selArriveTime = val;
-  document.getElementById('checkoutArriveTime').value = val;
-  buildTimeGrid('arriveTimeGrid', ARRIVE_TIMES, val, 'checkoutArriveTime', 'selectArriveTime');
+  _pcArriveAmPm=''; _pcArriveHour=''; _pcArriveMin='';
+  buildPcArriveCustomUI();
+  buildTimeGrid('arriveTimeGrid', ARRIVE_TIMES, val, null, 'selectArriveTime');
 }
-function clearArriveChips(){
-  _selArriveTime = document.getElementById('checkoutArriveTime').value;
-  buildTimeGrid('arriveTimeGrid', ARRIVE_TIMES, '', 'checkoutArriveTime', 'selectArriveTime');
-}
+function clearArriveChips(){ /* replaced by button UI */ }
 
 function timeValToStr(val){
   if(!val) return '';
@@ -1848,6 +1911,73 @@ async function confirmCheckin(){
   showKakao(msg);
 }
 
+
+// ── PC 하원 모달: 등원 예정시간 직접입력 ──
+var _pcArriveAmPm='', _pcArriveHour='', _pcArriveMin='';
+
+function buildPcArriveCustomUI(){
+  var amBtn=document.getElementById('pcArriveAmBtn');
+  var pmBtn=document.getElementById('pcArrivePmBtn');
+  if(amBtn) amBtn.className='ampm-btn'+(_pcArriveAmPm==='am'?' sel':'');
+  if(pmBtn) pmBtn.className='ampm-btn'+(_pcArriveAmPm==='pm'?' sel':'');
+  var hourGrid=document.getElementById('pcArriveHourGrid');
+  if(hourGrid){
+    var hours=[1,2,3,4,5,6,7,8,9,10,11,12];
+    hourGrid.innerHTML=hours.map(function(h){
+      var sel=String(h)===_pcArriveHour?' sel':'';
+      return '<button class="hm-btn'+sel+'" onclick="setPcArriveHour(this.dataset.h)" data-h="'+h+'">'+h+'</button>';
+    }).join('');
+  }
+  var minGrid=document.getElementById('pcArriveMinGrid');
+  if(minGrid){
+    var mins=['00','10','20','30','40','50'];
+    minGrid.innerHTML=mins.map(function(m){
+      var sel=m===_pcArriveMin?' sel':'';
+      return '<button class="hm-btn'+sel+'" onclick="setPcArriveMin(this.dataset.m)" data-m="'+m+'">'+m+'분</button>';
+    }).join('');
+  }
+  updatePcArrivePreview();
+}
+function setPcArriveAmPm(ap){
+  _pcArriveAmPm=ap;
+  _selArriveTime='';
+  buildTimeGrid('arriveTimeGrid', ARRIVE_TIMES, '', null, 'selectArriveTime');
+  buildPcArriveCustomUI();
+  applyPcArriveTime();
+}
+function setPcArriveHour(h){
+  _pcArriveHour=String(h);
+  _selArriveTime='';
+  buildTimeGrid('arriveTimeGrid', ARRIVE_TIMES, '', null, 'selectArriveTime');
+  buildPcArriveCustomUI();
+  applyPcArriveTime();
+}
+function setPcArriveMin(m){
+  _pcArriveMin=m;
+  _selArriveTime='';
+  buildTimeGrid('arriveTimeGrid', ARRIVE_TIMES, '', null, 'selectArriveTime');
+  buildPcArriveCustomUI();
+  applyPcArriveTime();
+}
+function applyPcArriveTime(){
+  if(!_pcArriveAmPm||!_pcArriveHour||!_pcArriveMin){updatePcArrivePreview();return;}
+  _selArriveTime=getPcArriveVal();
+  updatePcArrivePreview();
+}
+function getPcArriveVal(){
+  if(!_pcArriveAmPm||!_pcArriveHour||!_pcArriveMin) return '';
+  var h=parseInt(_pcArriveHour);
+  if(_pcArriveAmPm==='pm'&&h!==12) h+=12;
+  if(_pcArriveAmPm==='am'&&h===12) h=0;
+  return String(h).padStart(2,'0')+':'+_pcArriveMin;
+}
+function updatePcArrivePreview(){
+  var el=document.getElementById('pcArriveTimePreview');
+  if(!el) return;
+  el.textContent=(_pcArriveAmPm&&_pcArriveHour&&_pcArriveMin)?
+    '\u2705 '+(_pcArriveAmPm==='am'?'오전':'오후')+' '+_pcArriveHour+'시 '+_pcArriveMin+'분':'\u2014';
+}
+
 // ════ 하원 모달 ════
 var _checkoutId = null;
 function openCheckoutModal(id){
@@ -1855,9 +1985,10 @@ function openCheckoutModal(id){
   if(!s) return;
   _checkoutId=id;
   _selArriveTime='';
+  _pcArriveAmPm=''; _pcArriveHour=''; _pcArriveMin='';
   document.getElementById('checkoutStudentName').textContent=s.name+' 학생';
-  document.getElementById('checkoutArriveTime').value='';
-  buildTimeGrid('arriveTimeGrid', ARRIVE_TIMES, '', 'checkoutArriveTime', 'selectArriveTime');
+  buildTimeGrid('arriveTimeGrid', ARRIVE_TIMES, '', null, 'selectArriveTime');
+  buildPcArriveCustomUI();
   document.getElementById('checkoutModal').style.display='flex';
 }
 
@@ -1867,7 +1998,7 @@ async function confirmCheckout(){
   if(!s) return;
   var now=new Date();
   var liveSec=getLive(s);
-  var arriveVal=document.getElementById('checkoutArriveTime').value;
+  var arriveVal=_pcArriveAmPm&&_pcArriveHour&&_pcArriveMin?getPcArriveVal():(_selArriveTime||'');
   await action('checkout', _checkoutId);
   document.getElementById('checkoutModal').style.display='none';
   saveCheckoutRecord(s, liveSec);   // 확정 저장 (이후 덮어쓰기 금지)
@@ -1926,8 +2057,9 @@ function openTabCheckoutModal(id){
   _tabCheckoutId=id;
   _tabArriveTime='';
   document.getElementById('tabCheckoutName').textContent=s.name+' 학생';
-  document.getElementById('tabArriveCustom').value='';
+  _arriveAmPm=''; _arriveHour=''; _arriveMin='';
   buildTabArriveGrid('');
+  buildArriveCustomUI();
   document.getElementById('tabCheckoutModal').style.display='flex';
 }
 
@@ -1941,20 +2073,18 @@ function buildTabArriveGrid(selVal){
 
 function selectTabArrive(val,label){
   _tabArriveTime=val;
-  document.getElementById('tabArriveCustom').value=val;
+  _arriveAmPm=''; _arriveHour=''; _arriveMin='';
+  buildArriveCustomUI();
   buildTabArriveGrid(val);
 }
 
-function tabArriveCustomChanged(){
-  _tabArriveTime=document.getElementById('tabArriveCustom').value;
-  buildTabArriveGrid('');
-}
+// tabArriveCustomChanged: replaced by button UI
 
 async function confirmTabCheckout(skipArrive){
   if(!_tabCheckoutId) return;
   var s=students.find(function(x){return x.id===_tabCheckoutId;});
   if(!s) return;
-  var arriveVal=skipArrive?'':(_tabArriveTime||document.getElementById('tabArriveCustom').value||'');
+  var arriveVal=skipArrive?'':_tabArriveTime;
   document.getElementById('tabCheckoutModal').style.display='none';
   await tabCheckout(_tabCheckoutId, arriveVal);
 }
@@ -1993,6 +2123,7 @@ async function tabCheckout(id, arriveVal){
   }
   _pushNotifItem({name:s.name, school:s.school||'', grade:s.grade||'',
     type:'checkout', arriveTime:arriveVal||'', msg:msg, seq:Date.now(), ts:Date.now()});
+  showKakao(msg);
   showToast('⏹ '+s.name+' 하원 처리 완료! PC에 알림 전송됨');
 }
 
@@ -2038,8 +2169,9 @@ function openOutingModal(id){
   document.getElementById('ot-lunch').classList.add('sel');
   ['30','60','90','120','custom'].forEach(d=>document.getElementById('dur-'+d)&&document.getElementById('dur-'+d).classList.remove('sel'));
   document.getElementById('dur-90').classList.add('sel');
-  var customDur = document.getElementById('customDurTime');
-  if(customDur){ customDur.style.display='none'; customDur.value=''; }
+  var customDurPanel = document.getElementById('customDurPanel');
+  if(customDurPanel) customDurPanel.style.display='none';
+  _durAmPm=''; _durHour=''; _durMin='';
   document.getElementById('customOutingReason').style.display='none';
   document.getElementById('customOutingReason').value='';
   document.getElementById('outingModal').style.display='flex';
@@ -2061,8 +2193,16 @@ function selectDuration(min){
   else if(min===90) document.getElementById('dur-90').classList.add('sel');
   else if(min===120) document.getElementById('dur-120').classList.add('sel');
   else if(min===-1) document.getElementById('dur-custom').classList.add('sel');
-  var customInput = document.getElementById('customDurTime');
-  if(customInput) customInput.style.display = (min===-1) ? 'block' : 'none';
+  var panel=document.getElementById('customDurPanel');
+  if(panel){
+    if(min===-1){
+      panel.style.display='block';
+      _durAmPm=''; _durHour=''; _durMin='';
+      buildDurCustomUI();
+    } else {
+      panel.style.display='none';
+    }
+  }
 }
 
 async function confirmOuting(){
@@ -2106,8 +2246,7 @@ async function confirmOuting(){
   var expectedRet = null;
   var durLabel = '';
   if(_outingDuration === -1){
-    // 직접 입력한 시각
-    var customVal = document.getElementById('customDurTime').value;
+    var customVal = getDurCustomVal();
     if(customVal){
       var parts = customVal.split(':');
       var retDate = new Date(now);
@@ -2439,8 +2578,9 @@ function openTabCheckinModal(id) {
   _tabCheckinId = id;
   _tabLeaveTime = '';
   document.getElementById('tabCheckinName').textContent = s.name + ' 학생';
-  document.getElementById('tabLeaveCustom').value = '';
+  _leaveAmPm=''; _leaveHour=''; _leaveMin='';
   buildTabLeaveGrid('');
+  buildLeaveCustomUI();
   document.getElementById('tabCheckinModal').style.display = 'flex';
 }
 
@@ -2454,20 +2594,18 @@ function buildTabLeaveGrid(selVal) {
 
 function selectTabLeave(val, label) {
   _tabLeaveTime = val;
-  document.getElementById('tabLeaveCustom').value = val;
+  _leaveAmPm=''; _leaveHour=''; _leaveMin='';
+  buildLeaveCustomUI();
   buildTabLeaveGrid(val);
 }
 
-function tabLeaveCustomChanged() {
-  _tabLeaveTime = document.getElementById('tabLeaveCustom').value;
-  buildTabLeaveGrid('');
-}
+// tabLeaveCustomChanged: replaced by button UI
 
 async function confirmTabCheckin(skipLeave) {
   if (!_tabCheckinId) return;
   var s = students.find(function(x){return x.id===_tabCheckinId;});
   if (!s) return;
-  var leaveVal = skipLeave ? '' : (_tabLeaveTime || document.getElementById('tabLeaveCustom').value || '');
+  var leaveVal = skipLeave ? '' : _tabLeaveTime;
   var now = new Date();
   students = students.map(function(x) {
     if (x.id !== _tabCheckinId) return x;
@@ -3120,6 +3258,140 @@ function downloadReportPng() {
     s.onerror = function(){ document.body.removeChild(wrap); showToast('라이브러리 로드 실패 (인터넷 확인)'); };
     document.head.appendChild(s);
   }
+}
+
+
+// ════ 직접입력 버튼 UI 함수들 ════
+
+// ── 입실: 하원 예정시간 ──
+var _leaveAmPm='', _leaveHour='', _leaveMin='';
+
+function buildLeaveCustomUI(){
+  var amBtn=document.getElementById('leaveAmBtn');
+  var pmBtn=document.getElementById('leavePmBtn');
+  if(amBtn) amBtn.className='ampm-btn'+(_leaveAmPm==='am'?' sel':'');
+  if(pmBtn) pmBtn.className='ampm-btn'+(_leaveAmPm==='pm'?' sel':'');
+  var hourGrid=document.getElementById('leaveHourGrid');
+  if(hourGrid){
+    var hours=[1,2,3,4,5,6,7,8,9,10,11,12];
+    hourGrid.innerHTML=hours.map(function(h){
+      var sel=String(h)===_leaveHour?' sel':'';
+      return '<button class="hm-btn'+sel+'" onclick="setLeaveHour(this.dataset.h)" data-h="'+h+'">'+h+'</button>';
+    }).join('');
+  }
+  var minGrid=document.getElementById('leaveMinGrid');
+  if(minGrid){
+    var mins=['00','10','20','30','40','50'];
+    minGrid.innerHTML=mins.map(function(m){
+      var sel=m===_leaveMin?' sel':'';
+      return '<button class="hm-btn'+sel+'" onclick="setLeaveMin(this.dataset.m)" data-m="'+m+'">'+m+'분</button>';
+    }).join('');
+  }
+  updateLeavePreview();
+}
+function setLeaveAmPm(ap){_leaveAmPm=ap;buildLeaveCustomUI();applyLeaveCustomTime();}
+function setLeaveHour(h){_leaveHour=String(h);buildTabLeaveGrid('');buildLeaveCustomUI();applyLeaveCustomTime();}
+function setLeaveMin(m){_leaveMin=m;buildTabLeaveGrid('');buildLeaveCustomUI();applyLeaveCustomTime();}
+function applyLeaveCustomTime(){
+  if(!_leaveAmPm||!_leaveHour||!_leaveMin){updateLeavePreview();return;}
+  var h=parseInt(_leaveHour);
+  if(_leaveAmPm==='pm'&&h!==12) h+=12;
+  if(_leaveAmPm==='am'&&h===12) h=0;
+  _tabLeaveTime=String(h).padStart(2,'0')+':'+_leaveMin;
+  updateLeavePreview();
+}
+function updateLeavePreview(){
+  var el=document.getElementById('leaveTimePreview');
+  if(!el) return;
+  el.textContent=(_tabLeaveTime&&_leaveAmPm&&_leaveHour&&_leaveMin)?
+    '✅ '+(_leaveAmPm==='am'?'오전':'오후')+' '+_leaveHour+'시 '+_leaveMin+'분':'—';
+}
+
+// ── 하원: 등원 예정시간 ──
+var _arriveAmPm='', _arriveHour='', _arriveMin='';
+
+function buildArriveCustomUI(){
+  var amBtn=document.getElementById('arriveAmBtn');
+  var pmBtn=document.getElementById('arrivePmBtn');
+  if(amBtn) amBtn.className='ampm-btn'+(_arriveAmPm==='am'?' sel':'');
+  if(pmBtn) pmBtn.className='ampm-btn'+(_arriveAmPm==='pm'?' sel':'');
+  var hourGrid=document.getElementById('arriveHourGrid');
+  if(hourGrid){
+    var hours=[1,2,3,4,5,6,7,8,9,10,11,12];
+    hourGrid.innerHTML=hours.map(function(h){
+      var sel=String(h)===_arriveHour?' sel':'';
+      return '<button class="hm-btn'+sel+'" onclick="setArriveHour(this.dataset.h)" data-h="'+h+'">'+h+'</button>';
+    }).join('');
+  }
+  var minGrid=document.getElementById('arriveMinGrid');
+  if(minGrid){
+    var mins=['00','10','20','30','40','50'];
+    minGrid.innerHTML=mins.map(function(m){
+      var sel=m===_arriveMin?' sel':'';
+      return '<button class="hm-btn'+sel+'" onclick="setArriveMin(this.dataset.m)" data-m="'+m+'">'+m+'분</button>';
+    }).join('');
+  }
+  updateArrivePreview();
+}
+function setArriveAmPm(ap){_arriveAmPm=ap;buildArriveCustomUI();applyArriveCustomTime();}
+function setArriveHour(h){_arriveHour=String(h);buildTabArriveGrid('');buildArriveCustomUI();applyArriveCustomTime();}
+function setArriveMin(m){_arriveMin=m;buildTabArriveGrid('');buildArriveCustomUI();applyArriveCustomTime();}
+function applyArriveCustomTime(){
+  if(!_arriveAmPm||!_arriveHour||!_arriveMin){updateArrivePreview();return;}
+  var h=parseInt(_arriveHour);
+  if(_arriveAmPm==='pm'&&h!==12) h+=12;
+  if(_arriveAmPm==='am'&&h===12) h=0;
+  _tabArriveTime=String(h).padStart(2,'0')+':'+_arriveMin;
+  updateArrivePreview();
+}
+function updateArrivePreview(){
+  var el=document.getElementById('arriveTimePreview');
+  if(!el) return;
+  el.textContent=(_tabArriveTime&&_arriveAmPm&&_arriveHour&&_arriveMin)?
+    '✅ '+(_arriveAmPm==='am'?'오전':'오후')+' '+_arriveHour+'시 '+_arriveMin+'분':'—';
+}
+
+// ── 외출: 직접입력 복귀 시각 ──
+var _durAmPm='', _durHour='', _durMin='';
+
+function buildDurCustomUI(){
+  var amBtn=document.getElementById('durAmBtn');
+  var pmBtn=document.getElementById('durPmBtn');
+  if(amBtn) amBtn.className='ampm-btn'+(_durAmPm==='am'?' sel':'');
+  if(pmBtn) pmBtn.className='ampm-btn'+(_durAmPm==='pm'?' sel':'');
+  var hourGrid=document.getElementById('durHourGrid');
+  if(hourGrid){
+    var hours=[1,2,3,4,5,6,7,8,9,10,11,12];
+    hourGrid.innerHTML=hours.map(function(h){
+      var sel=String(h)===_durHour?' sel':'';
+      return '<button class="hm-btn'+sel+'" onclick="setDurHour(this.dataset.h)" data-h="'+h+'">'+h+'</button>';
+    }).join('');
+  }
+  var minGrid=document.getElementById('durMinGrid');
+  if(minGrid){
+    var mins=['00','10','20','30','40','50'];
+    minGrid.innerHTML=mins.map(function(m){
+      var sel=m===_durMin?' sel':'';
+      return '<button class="hm-btn'+sel+'" onclick="setDurMin(this.dataset.m)" data-m="'+m+'">'+m+'분</button>';
+    }).join('');
+  }
+  updateDurPreview();
+}
+function setDurAmPm(ap){_durAmPm=ap;buildDurCustomUI();}
+function setDurHour(h){_durHour=String(h);buildDurCustomUI();}
+function setDurMin(m){_durMin=m;buildDurCustomUI();}
+function getDurCustomVal(){
+  if(!_durAmPm||!_durHour||!_durMin) return '';
+  var h=parseInt(_durHour);
+  if(_durAmPm==='pm'&&h!==12) h+=12;
+  if(_durAmPm==='am'&&h===12) h=0;
+  return String(h).padStart(2,'0')+':'+_durMin;
+}
+function updateDurPreview(){
+  var el=document.getElementById('durTimePreview');
+  if(!el) return;
+  el.textContent=(_durAmPm&&_durHour&&_durMin)?
+    '✅ '+(_durAmPm==='am'?'오전':'오후')+' '+_durHour+'시 '+_durMin+'분':'—';
 }
 
 </script>
