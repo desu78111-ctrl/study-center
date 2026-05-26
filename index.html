@@ -320,23 +320,31 @@
         </div>
     </div>
 
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+
     <script>
+        // Firebase 설정
+        const firebaseConfig = {
+            apiKey: "AIzaSyBpR9RO7zL1EgK6gKx_q8L7K0WKBMKvB0c",
+            authDomain: "study-center-8a2cf.firebaseapp.com",
+            databaseURL: "https://study-center-8a2cf-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "study-center-8a2cf",
+            storageBucket: "study-center-8a2cf.firebasestorage.app",
+            messagingSenderId: "123456789",
+            appId: "1:123456789:web:abcdef123456"
+        };
+
+        // Firebase 초기화
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+
         let selectedEnterTime = '';
         let selectedOutReason = '';
         let selectedOutDuration = '';
         let selectedExitTime = '';
         let currentStudentName = '';
-
-        // 초기 더미 데이터
-        if (!localStorage.getItem('memberStatus')) {
-            localStorage.setItem('memberStatus', JSON.stringify({}));
-        }
-        if (!localStorage.getItem('accessLogs')) {
-            localStorage.setItem('accessLogs', JSON.stringify([]));
-        }
-        if (!localStorage.getItem('studentNames')) {
-            localStorage.setItem('studentNames', JSON.stringify([]));
-        }
 
         // 시간 포맷팅 헬퍼 함수
         function formatTime(date) {
@@ -356,26 +364,29 @@
 
         // 이름 자동완성 목록 업데이트
         function updateNameList() {
-            const names = JSON.parse(localStorage.getItem('studentNames')) || [];
-            const datalist = document.getElementById('nameList');
-            datalist.innerHTML = '';
-            
-            names.forEach(name => {
-                const option = document.createElement('option');
-                option.value = name;
-                datalist.appendChild(option);
+            database.ref('studentNames').once('value', (snapshot) => {
+                const names = snapshot.val() || [];
+                const datalist = document.getElementById('nameList');
+                datalist.innerHTML = '';
+                
+                names.forEach(name => {
+                    const option = document.createElement('option');
+                    option.value = name;
+                    datalist.appendChild(option);
+                });
             });
         }
 
         // 새로운 이름 저장
         function saveNewName(name) {
-            const names = JSON.parse(localStorage.getItem('studentNames')) || [];
-            if (!names.includes(name)) {
-                names.push(name);
-                names.sort(); // 가나다순 정렬
-                localStorage.setItem('studentNames', JSON.stringify(names));
-                updateNameList();
-            }
+            database.ref('studentNames').once('value', (snapshot) => {
+                const names = snapshot.val() || [];
+                if (!names.includes(name)) {
+                    names.push(name);
+                    names.sort(); // 가나다순 정렬
+                    database.ref('studentNames').set(names);
+                }
+            });
         }
 
         // 복귀만 즉시 처리
@@ -394,34 +405,37 @@
             const now = new Date();
             const timeInfo = formatTime(now);
 
-            const memberStatus = JSON.parse(localStorage.getItem('memberStatus')) || {};
-            memberStatus[name] = { 
-                status: status, 
-                time: timeInfo.full,
-                studyEndTime: memberStatus[name]?.studyEndTime || '',
-                outReason: '',
-                outDuration: '',
-                nextArrival: memberStatus[name]?.nextArrival || ''
-            };
-            localStorage.setItem('memberStatus', JSON.stringify(memberStatus));
+            // 기존 정보 가져오기
+            database.ref('memberStatus/' + name).once('value', (snapshot) => {
+                const existingData = snapshot.val() || {};
+                
+                const newData = {
+                    status: status,
+                    time: timeInfo.full,
+                    studyEndTime: existingData.studyEndTime || '',
+                    outReason: '',
+                    outDuration: '',
+                    nextArrival: existingData.nextArrival || ''
+                };
 
-            const accessLogs = JSON.parse(localStorage.getItem('accessLogs')) || [];
-            accessLogs.unshift({ 
-                name: name, 
-                status: status, 
-                time: timeInfo.full,
-                studyEndTime: '',
-                outReason: '',
-                outDuration: '',
-                nextArrival: ''
+                // Firebase에 상태 저장
+                database.ref('memberStatus/' + name).set(newData);
+
+                // 로그 추가
+                database.ref('accessLogs').push({
+                    name: name,
+                    status: status,
+                    time: timeInfo.full,
+                    timestamp: now.getTime(),
+                    studyEndTime: '',
+                    outReason: '',
+                    outDuration: '',
+                    nextArrival: ''
+                });
+
+                nameInput.value = '';
+                alert(`${name} 학생 ${timeInfo.period} ${timeInfo.hour}시 ${timeInfo.minutes}분에 복귀하였습니다.`);
             });
-            localStorage.setItem('accessLogs', JSON.stringify(accessLogs));
-
-            nameInput.value = '';
-            alert(`${name} 학생 ${timeInfo.period} ${timeInfo.hour}시 ${timeInfo.minutes}분에 복귀하였습니다.`);
-
-            // ✅ 즉시 PC 화면 갱신
-            updatePCScreen();
         }
 
         // 입실 모달 열기
@@ -464,35 +478,34 @@
             const now = new Date();
             const timeInfo = formatTime(now);
 
-            const memberStatus = JSON.parse(localStorage.getItem('memberStatus')) || {};
-            memberStatus[currentStudentName] = { 
-                status: '입실', 
+            const newData = {
+                status: '입실',
                 time: timeInfo.full,
                 studyEndTime: selectedEnterTime,
                 outReason: '',
                 outDuration: '',
                 nextArrival: ''
             };
-            localStorage.setItem('memberStatus', JSON.stringify(memberStatus));
 
-            const accessLogs = JSON.parse(localStorage.getItem('accessLogs')) || [];
-            accessLogs.unshift({ 
-                name: currentStudentName, 
-                status: '입실', 
+            // Firebase에 상태 저장
+            database.ref('memberStatus/' + currentStudentName).set(newData);
+
+            // 로그 추가
+            database.ref('accessLogs').push({
+                name: currentStudentName,
+                status: '입실',
                 time: timeInfo.full,
+                timestamp: now.getTime(),
                 studyEndTime: selectedEnterTime,
                 outReason: '',
                 outDuration: '',
                 nextArrival: ''
             });
-            localStorage.setItem('accessLogs', JSON.stringify(accessLogs));
 
             document.getElementById('studentName').value = '';
             alert(`${currentStudentName} 학생 ${timeInfo.period} ${timeInfo.hour}시 ${timeInfo.minutes}분에 입실하였습니다.\n${selectedEnterTime}에 하원할 예정입니다.`);
 
             closeModal();
-            // ✅ 즉시 PC 화면 갱신
-            updatePCScreen();
         }
 
         // 외출 모달 열기
@@ -561,35 +574,34 @@
             const returnTime = new Date(now.getTime() + addMinutes * 60000);
             const returnInfo = formatTime(returnTime);
 
-            const memberStatus = JSON.parse(localStorage.getItem('memberStatus')) || {};
-            memberStatus[currentStudentName] = { 
-                status: '외출', 
+            const newData = {
+                status: '외출',
                 time: timeInfo.full,
                 studyEndTime: '',
                 outReason: selectedOutReason,
                 outDuration: selectedOutDuration,
                 nextArrival: ''
             };
-            localStorage.setItem('memberStatus', JSON.stringify(memberStatus));
 
-            const accessLogs = JSON.parse(localStorage.getItem('accessLogs')) || [];
-            accessLogs.unshift({ 
-                name: currentStudentName, 
-                status: '외출', 
+            // Firebase에 상태 저장
+            database.ref('memberStatus/' + currentStudentName).set(newData);
+
+            // 로그 추가
+            database.ref('accessLogs').push({
+                name: currentStudentName,
+                status: '외출',
                 time: timeInfo.full,
+                timestamp: now.getTime(),
                 studyEndTime: '',
                 outReason: selectedOutReason,
                 outDuration: selectedOutDuration,
                 nextArrival: ''
             });
-            localStorage.setItem('accessLogs', JSON.stringify(accessLogs));
 
             document.getElementById('studentName').value = '';
             alert(`${currentStudentName} 학생 ${timeInfo.period} ${timeInfo.hour}시 ${timeInfo.minutes}분에 ${selectedOutReason} 가서 외출하여\n${returnInfo.period} ${returnInfo.hour}시 ${returnInfo.minutes}분에 복귀 예정입니다.`);
 
             closeModal();
-            // ✅ 즉시 PC 화면 갱신
-            updatePCScreen();
         }
 
         // 퇴실 모달 열기
@@ -632,35 +644,34 @@
             const now = new Date();
             const timeInfo = formatTime(now);
 
-            const memberStatus = JSON.parse(localStorage.getItem('memberStatus')) || {};
-            memberStatus[currentStudentName] = { 
-                status: '퇴실', 
+            const newData = {
+                status: '퇴실',
                 time: timeInfo.full,
                 studyEndTime: '',
                 outReason: '',
                 outDuration: '',
                 nextArrival: selectedExitTime
             };
-            localStorage.setItem('memberStatus', JSON.stringify(memberStatus));
 
-            const accessLogs = JSON.parse(localStorage.getItem('accessLogs')) || [];
-            accessLogs.unshift({ 
-                name: currentStudentName, 
-                status: '퇴실', 
+            // Firebase에 상태 저장
+            database.ref('memberStatus/' + currentStudentName).set(newData);
+
+            // 로그 추가
+            database.ref('accessLogs').push({
+                name: currentStudentName,
+                status: '퇴실',
                 time: timeInfo.full,
+                timestamp: now.getTime(),
                 studyEndTime: '',
                 outReason: '',
                 outDuration: '',
                 nextArrival: selectedExitTime
             });
-            localStorage.setItem('accessLogs', JSON.stringify(accessLogs));
 
             document.getElementById('studentName').value = '';
             alert(`${currentStudentName} 학생 ${timeInfo.period} ${timeInfo.hour}시 ${timeInfo.minutes}분에 하원하였습니다.\n내일 ${selectedExitTime}에 입실할 예정입니다.`);
 
             closeModal();
-            // ✅ 즉시 PC 화면 갱신
-            updatePCScreen();
         }
 
         // 모달 닫기
@@ -672,100 +683,101 @@
 
         // PC 화면 갱신
         function updatePCScreen() {
-            const memberStatus = JSON.parse(localStorage.getItem('memberStatus')) || {};
-            const accessLogs = JSON.parse(localStorage.getItem('accessLogs')) || [];
-
-            // 현황 테이블
-            const tableBody = document.getElementById('statusTableBody');
-            tableBody.innerHTML = '';
-            
-            const statusKeys = Object.keys(memberStatus);
-            
-            if (statusKeys.length === 0) {
-                tableBody.innerHTML = `
-                    <tr>
-                        <td colspan="4" class="empty-state">
-                            아직 등록된 학생이 없습니다.
-                        </td>
-                    </tr>
-                `;
-            } else {
-                statusKeys.forEach(name => {
-                    const data = memberStatus[name];
-                    const row = document.createElement('tr');
-                    
-                    let extraInfo = '';
-                    if (data.studyEndTime) {
-                        extraInfo = '<span class="next-arrival">공부 종료: ' + data.studyEndTime + '</span>';
-                    } else if (data.outReason && data.outDuration) {
-                        extraInfo = '<span class="next-arrival">' + data.outReason + ' (' + data.outDuration + ' 후 복귀)</span>';
-                    } else if (data.nextArrival) {
-                        extraInfo = '<span class="next-arrival">' + data.nextArrival + '</span>';
-                    }
-                    
-                    row.innerHTML = `
-                        <td><strong>${name}</strong></td>
-                        <td><span class="badge badge-${data.status}">${data.status}</span></td>
-                        <td>${data.time}</td>
-                        <td>${extraInfo || '-'}</td>
+            // 현황 테이블 업데이트
+            database.ref('memberStatus').on('value', (snapshot) => {
+                const memberStatus = snapshot.val() || {};
+                const tableBody = document.getElementById('statusTableBody');
+                tableBody.innerHTML = '';
+                
+                const statusKeys = Object.keys(memberStatus);
+                
+                if (statusKeys.length === 0) {
+                    tableBody.innerHTML = `
+                        <tr>
+                            <td colspan="4" class="empty-state">
+                                아직 등록된 학생이 없습니다.
+                            </td>
+                        </tr>
                     `;
-                    tableBody.appendChild(row);
-                });
-            }
+                } else {
+                    statusKeys.forEach(name => {
+                        const data = memberStatus[name];
+                        const row = document.createElement('tr');
+                        
+                        let extraInfo = '';
+                        if (data.studyEndTime) {
+                            extraInfo = '<span class="next-arrival">공부 종료: ' + data.studyEndTime + '</span>';
+                        } else if (data.outReason && data.outDuration) {
+                            extraInfo = '<span class="next-arrival">' + data.outReason + ' (' + data.outDuration + ' 후 복귀)</span>';
+                        } else if (data.nextArrival) {
+                            extraInfo = '<span class="next-arrival">' + data.nextArrival + '</span>';
+                        }
+                        
+                        row.innerHTML = `
+                            <td><strong>${name}</strong></td>
+                            <td><span class="badge badge-${data.status}">${data.status}</span></td>
+                            <td>${data.time}</td>
+                            <td>${extraInfo || '-'}</td>
+                        `;
+                        tableBody.appendChild(row);
+                    });
+                }
+            });
 
-            // 로그 리스트
-            const logList = document.getElementById('logList');
-            logList.innerHTML = '';
-
-            if (accessLogs.length === 0) {
-                logList.innerHTML = '<div class="empty-state">아직 기록이 없습니다.</div>';
-            } else {
-                accessLogs.forEach(log => {
-                    const logItem = document.createElement('div');
-                    logItem.className = `log-item ${log.status}`;
-                    
-                    // 시간을 오전/오후 형식으로 변환
-                    const timeParts = log.time.split(':');
-                    const hours = parseInt(timeParts[0]);
-                    const minutes = timeParts[1];
-                    const period = hours < 12 ? '오전' : '오후';
-                    const displayHour = hours === 0 ? 12 : (hours <= 12 ? hours : hours - 12);
-                    
-                    let logText = '';
-                    
-                    if (log.status === '입실') {
-                        logText = `<strong>${log.name}</strong> 학생 ${period} ${displayHour}시 ${minutes}분에 <span style="font-weight:bold; color:var(--color-${log.status})">입실</span>하였습니다.`;
-                        if (log.studyEndTime) {
-                            logText += `<br><span class="next-arrival">${log.studyEndTime}에 하원할 예정입니다.</span>`;
-                        }
-                    } else if (log.status === '외출') {
-                        logText = `<strong>${log.name}</strong> 학생 ${period} ${displayHour}시 ${minutes}분에 ${log.outReason} 가서 <span style="font-weight:bold; color:var(--color-${log.status})">외출</span>하였습니다.`;
-                        if (log.outDuration) {
-                            logText += `<br><span class="next-arrival">${log.outDuration} 후 복귀 예정입니다.</span>`;
-                        }
-                    } else if (log.status === '복귀') {
-                        logText = `<strong>${log.name}</strong> 학생 ${period} ${displayHour}시 ${minutes}분에 <span style="font-weight:bold; color:var(--color-${log.status})">복귀</span>하였습니다.`;
-                    } else if (log.status === '퇴실') {
-                        logText = `<strong>${log.name}</strong> 학생 ${period} ${displayHour}시 ${minutes}분에 <span style="font-weight:bold; color:var(--color-${log.status})">하원</span>하였습니다.`;
-                        if (log.nextArrival) {
-                            logText += `<br><span class="next-arrival">내일 ${log.nextArrival}에 입실할 예정입니다.</span>`;
-                        }
-                    }
-                    
-                    logText += `<span class="time-text">${log.time}</span>`;
-                    
-                    logItem.innerHTML = logText;
-                    logList.appendChild(logItem);
+            // 로그 리스트 업데이트 (최신 20개만)
+            database.ref('accessLogs').orderByChild('timestamp').limitToLast(20).on('value', (snapshot) => {
+                const accessLogs = [];
+                snapshot.forEach((childSnapshot) => {
+                    accessLogs.push(childSnapshot.val());
                 });
-            }
+                accessLogs.reverse(); // 최신순 정렬
+
+                const logList = document.getElementById('logList');
+                logList.innerHTML = '';
+
+                if (accessLogs.length === 0) {
+                    logList.innerHTML = '<div class="empty-state">아직 기록이 없습니다.</div>';
+                } else {
+                    accessLogs.forEach(log => {
+                        const logItem = document.createElement('div');
+                        logItem.className = `log-item ${log.status}`;
+                        
+                        // 시간을 오전/오후 형식으로 변환
+                        const timeParts = log.time.split(':');
+                        const hours = parseInt(timeParts[0]);
+                        const minutes = timeParts[1];
+                        const period = hours < 12 ? '오전' : '오후';
+                        const displayHour = hours === 0 ? 12 : (hours <= 12 ? hours : hours - 12);
+                        
+                        let logText = '';
+                        
+                        if (log.status === '입실') {
+                            logText = `<strong>${log.name}</strong> 학생 ${period} ${displayHour}시 ${minutes}분에 <span style="font-weight:bold; color:var(--color-${log.status})">입실</span>하였습니다.`;
+                            if (log.studyEndTime) {
+                                logText += `<br><span class="next-arrival">${log.studyEndTime}에 하원할 예정입니다.</span>`;
+                            }
+                        } else if (log.status === '외출') {
+                            logText = `<strong>${log.name}</strong> 학생 ${period} ${displayHour}시 ${minutes}분에 ${log.outReason} 가서 <span style="font-weight:bold; color:var(--color-${log.status})">외출</span>하였습니다.`;
+                            if (log.outDuration) {
+                                logText += `<br><span class="next-arrival">${log.outDuration} 후 복귀 예정입니다.</span>`;
+                            }
+                        } else if (log.status === '복귀') {
+                            logText = `<strong>${log.name}</strong> 학생 ${period} ${displayHour}시 ${minutes}분에 <span style="font-weight:bold; color:var(--color-${log.status})">복귀</span>하였습니다.`;
+                        } else if (log.status === '퇴실') {
+                            logText = `<strong>${log.name}</strong> 학생 ${period} ${displayHour}시 ${minutes}분에 <span style="font-weight:bold; color:var(--color-${log.status})">하원</span>하였습니다.`;
+                            if (log.nextArrival) {
+                                logText += `<br><span class="next-arrival">내일 ${log.nextArrival}에 입실할 예정입니다.</span>`;
+                            }
+                        }
+                        
+                        logText += `<span class="time-text">${log.time}</span>`;
+                        
+                        logItem.innerHTML = logText;
+                        logList.appendChild(logItem);
+                    });
+                }
+            });
         }
-
-        // 실시간 연동 (다른 탭/창에서 변경 시)
-        window.addEventListener('storage', (e) => {
-            if (e.key === 'memberStatus' || e.key === 'accessLogs') {
-                updatePCScreen();
-            }
-        });
 
         // 모드 전환
         function switchMode(mode) {
@@ -780,8 +792,6 @@
                 document.getElementById('pcMode').classList.add('active');
                 document.querySelectorAll('.mode-btn')[1].classList.add('active');
                 document.getElementById('pcToolbar').style.display = 'block';
-                // ✅ PC 모드로 전환 시 즉시 갱신
-                updatePCScreen();
             }
         }
 
@@ -791,13 +801,12 @@
                 return;
             }
             
-            // 로그만 삭제 (현재 상태는 유지)
-            localStorage.setItem('accessLogs', JSON.stringify([]));
-            updatePCScreen();
-            alert('✅ 로그가 모두 삭제되었습니다.');
+            database.ref('accessLogs').remove().then(() => {
+                alert('✅ 로그가 모두 삭제되었습니다.');
+            });
         }
 
-        // ✅ 초기 로드 시 이름 목록 및 PC 화면 업데이트
+        // 초기 로드
         updateNameList();
         updatePCScreen();
     </script>
