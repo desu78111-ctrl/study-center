@@ -332,6 +332,22 @@
             localStorage.setItem('studentNames', JSON.stringify([]));
         }
 
+        // 시간 포맷팅 헬퍼 함수
+        function formatTime(date) {
+            const hours = date.getHours();
+            const minutes = date.getMinutes();
+            const period = hours < 12 ? '오전' : '오후';
+            const displayHour = hours === 0 ? 12 : (hours > 12 ? hours - 12 : hours);
+            const paddedMinutes = String(minutes).padStart(2, '0');
+            
+            return {
+                full: `${String(hours).padStart(2, '0')}:${paddedMinutes}`,
+                period: period,
+                hour: displayHour,
+                minutes: paddedMinutes
+            };
+        }
+
         // 이름 자동완성 목록 업데이트
         function updateNameList() {
             const names = JSON.parse(localStorage.getItem('studentNames')) || [];
@@ -369,17 +385,13 @@
             // 이름 저장
             saveNewName(name);
 
-            const currentTime = new Date().toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' });
             const now = new Date();
-            const hours = now.getHours();
-            const minutes = now.getMinutes();
-            const period = hours < 12 ? '오전' : '오후';
-            const displayHour = hours === 0 ? 12 : (hours > 12 ? hours - 12 : hours);
+            const timeInfo = formatTime(now);
 
             const memberStatus = JSON.parse(localStorage.getItem('memberStatus')) || {};
             memberStatus[name] = { 
                 status: status, 
-                time: currentTime,
+                time: timeInfo.full,
                 studyEndTime: memberStatus[name]?.studyEndTime || '',
                 outReason: '',
                 outDuration: '',
@@ -391,7 +403,7 @@
             accessLogs.unshift({ 
                 name: name, 
                 status: status, 
-                time: currentTime,
+                time: timeInfo.full,
                 studyEndTime: '',
                 outReason: '',
                 outDuration: '',
@@ -400,7 +412,7 @@
             localStorage.setItem('accessLogs', JSON.stringify(accessLogs));
 
             nameInput.value = '';
-            alert(`${name} 학생 ${period} ${displayHour}시 ${minutes}분에 복귀하였습니다.`);
+            alert(`${name} 학생 ${timeInfo.period} ${timeInfo.hour}시 ${timeInfo.minutes}분에 복귀하였습니다.`);
 
             updatePCScreen();
         }
@@ -442,17 +454,13 @@
             // 이름 저장
             saveNewName(currentStudentName);
 
-            const currentTime = new Date().toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' });
             const now = new Date();
-            const hours = now.getHours();
-            const minutes = now.getMinutes();
-            const period = hours < 12 ? '오전' : '오후';
-            const displayHour = hours === 0 ? 12 : (hours > 12 ? hours - 12 : hours);
+            const timeInfo = formatTime(now);
 
             const memberStatus = JSON.parse(localStorage.getItem('memberStatus')) || {};
             memberStatus[currentStudentName] = { 
                 status: '입실', 
-                time: currentTime,
+                time: timeInfo.full,
                 studyEndTime: selectedEnterTime,
                 outReason: '',
                 outDuration: '',
@@ -464,7 +472,7 @@
             accessLogs.unshift({ 
                 name: currentStudentName, 
                 status: '입실', 
-                time: currentTime,
+                time: timeInfo.full,
                 studyEndTime: selectedEnterTime,
                 outReason: '',
                 outDuration: '',
@@ -473,7 +481,7 @@
             localStorage.setItem('accessLogs', JSON.stringify(accessLogs));
 
             document.getElementById('studentName').value = '';
-            alert(`${currentStudentName} 학생 ${period} ${displayHour}시 ${minutes}분에 입실하였습니다.\n${selectedEnterTime}에 하원할 예정입니다.`);
+            alert(`${currentStudentName} 학생 ${timeInfo.period} ${timeInfo.hour}시 ${timeInfo.minutes}분에 입실하였습니다.\n${selectedEnterTime}에 하원할 예정입니다.`);
 
             closeModal();
             updatePCScreen();
@@ -536,26 +544,19 @@
             // 이름 저장
             saveNewName(currentStudentName);
 
-            const currentTime = new Date().toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' });
             const now = new Date();
-            const hours = now.getHours();
-            const minutes = now.getMinutes();
-            const period = hours < 12 ? '오전' : '오후';
-            const displayHour = hours === 0 ? 12 : (hours > 12 ? hours - 12 : hours);
+            const timeInfo = formatTime(now);
 
             // 복귀 시간 계산
             const durationMap = {'30분': 30, '1시간': 60, '1시간 30분': 90, '2시간': 120};
             const addMinutes = durationMap[selectedOutDuration];
             const returnTime = new Date(now.getTime() + addMinutes * 60000);
-            const returnHours = returnTime.getHours();
-            const returnMinutes = returnTime.getMinutes();
-            const returnPeriod = returnHours < 12 ? '오전' : '오후';
-            const returnDisplayHour = returnHours === 0 ? 12 : (returnHours > 12 ? returnHours - 12 : returnHours);
+            const returnInfo = formatTime(returnTime);
 
             const memberStatus = JSON.parse(localStorage.getItem('memberStatus')) || {};
             memberStatus[currentStudentName] = { 
                 status: '외출', 
-                time: currentTime,
+                time: timeInfo.full,
                 studyEndTime: '',
                 outReason: selectedOutReason,
                 outDuration: selectedOutDuration,
@@ -567,7 +568,7 @@
             accessLogs.unshift({ 
                 name: currentStudentName, 
                 status: '외출', 
-                time: currentTime,
+                time: timeInfo.full,
                 studyEndTime: '',
                 outReason: selectedOutReason,
                 outDuration: selectedOutDuration,
@@ -576,7 +577,7 @@
             localStorage.setItem('accessLogs', JSON.stringify(accessLogs));
 
             document.getElementById('studentName').value = '';
-            alert(`${currentStudentName} 학생 ${period} ${displayHour}시 ${minutes}분에 ${selectedOutReason} 가서 외출하여\n${returnPeriod} ${returnDisplayHour}시 ${returnMinutes}분에 복귀 예정입니다.`);
+            alert(`${currentStudentName} 학생 ${timeInfo.period} ${timeInfo.hour}시 ${timeInfo.minutes}분에 ${selectedOutReason} 가서 외출하여\n${returnInfo.period} ${returnInfo.hour}시 ${returnInfo.minutes}분에 복귀 예정입니다.`);
 
             closeModal();
             updatePCScreen();
@@ -619,17 +620,13 @@
             // 이름 저장
             saveNewName(currentStudentName);
 
-            const currentTime = new Date().toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' });
             const now = new Date();
-            const hours = now.getHours();
-            const minutes = now.getMinutes();
-            const period = hours < 12 ? '오전' : '오후';
-            const displayHour = hours === 0 ? 12 : (hours > 12 ? hours - 12 : hours);
+            const timeInfo = formatTime(now);
 
             const memberStatus = JSON.parse(localStorage.getItem('memberStatus')) || {};
             memberStatus[currentStudentName] = { 
                 status: '퇴실', 
-                time: currentTime,
+                time: timeInfo.full,
                 studyEndTime: '',
                 outReason: '',
                 outDuration: '',
@@ -641,7 +638,7 @@
             accessLogs.unshift({ 
                 name: currentStudentName, 
                 status: '퇴실', 
-                time: currentTime,
+                time: timeInfo.full,
                 studyEndTime: '',
                 outReason: '',
                 outDuration: '',
@@ -650,7 +647,7 @@
             localStorage.setItem('accessLogs', JSON.stringify(accessLogs));
 
             document.getElementById('studentName').value = '';
-            alert(`${currentStudentName} 학생 ${period} ${displayHour}시 ${minutes}분에 하원하였습니다.\n내일 ${selectedExitTime}에 입실할 예정입니다.`);
+            alert(`${currentStudentName} 학생 ${timeInfo.period} ${timeInfo.hour}시 ${timeInfo.minutes}분에 하원하였습니다.\n내일 ${selectedExitTime}에 입실할 예정입니다.`);
 
             closeModal();
             updatePCScreen();
