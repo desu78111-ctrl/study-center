@@ -19,6 +19,25 @@
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Pretendard', sans-serif; }
         body { background-color: var(--bg-color); color: #333; padding: 20px; display: flex; flex-direction: column; gap: 20px; }
         
+        /* 디버그 패널 */
+        .debug-panel {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            background: #1e293b;
+            color: #10b981;
+            padding: 15px;
+            border-radius: 8px;
+            font-family: monospace;
+            font-size: 12px;
+            max-width: 300px;
+            z-index: 9999;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+        }
+        .debug-panel .status { margin: 5px 0; }
+        .debug-panel .error { color: #ef4444; }
+        .debug-panel .success { color: #10b981; }
+        
         .mode-selector {
             display: flex; gap: 10px; background: #e2e8f0; padding: 5px; border-radius: 8px; width: fit-content; margin: 0 auto;
         }
@@ -174,6 +193,14 @@
 </head>
 <body>
 
+    <!-- 디버그 패널 -->
+    <div class="debug-panel" id="debugPanel">
+        <div style="font-weight: bold; margin-bottom: 10px; color: #f59e0b;">🔍 연결 상태</div>
+        <div class="status" id="firebaseStatus">Firebase: 연결 중...</div>
+        <div class="status" id="dataStatus">데이터: 대기 중...</div>
+        <div class="status" id="updateCount">업데이트: 0회</div>
+    </div>
+
     <div class="mode-selector">
         <button class="mode-btn active" onclick="switchMode('tablet')">태블릿 모드 (학생용)</button>
         <button class="mode-btn" onclick="switchMode('pc')">PC 모드 (관리자용)</button>
@@ -181,6 +208,9 @@
 
     <!-- PC 모드 전용 툴바 -->
     <div id="pcToolbar" style="display: none; padding: 15px 20px; background: var(--panel-bg); border-bottom: 2px solid #e2e8f0; text-align: right; max-width: 1200px; margin: 0 auto; width: 100%;">
+        <button onclick="testFirebase()" style="background: #3b82f6; color: white; padding: 10px 20px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 14px; margin-right: 10px;">
+            🧪 Firebase 테스트
+        </button>
         <button onclick="clearLogs()" style="background: #ef4444; color: white; padding: 10px 20px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 14px;">
             🗑 로그 전체 삭제
         </button>
@@ -325,26 +355,77 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
 
     <script>
-        // Firebase 설정
+        let updateCounter = 0;
+        
+        // 디버그 로그 함수
+        function debugLog(message, type = 'info') {
+            console.log(`[${type.toUpperCase()}] ${message}`);
+            const statusDiv = document.getElementById('dataStatus');
+            if (statusDiv) {
+                statusDiv.className = type === 'error' ? 'status error' : 'status success';
+                statusDiv.textContent = message;
+            }
+        }
+
+        // Firebase 설정 (실제 프로젝트 정보로 업데이트 필요)
         const firebaseConfig = {
-            apiKey: "AIzaSyBpR9RO7zL1EgK6gKx_q8L7K0WKBMKvB0c",
+            apiKey: "YOUR_API_KEY",
             authDomain: "study-center-8a2cf.firebaseapp.com",
             databaseURL: "https://study-center-8a2cf-default-rtdb.asia-southeast1.firebasedatabase.app",
             projectId: "study-center-8a2cf",
-            storageBucket: "study-center-8a2cf.firebasestorage.app",
-            messagingSenderId: "123456789",
-            appId: "1:123456789:web:abcdef123456"
+            storageBucket: "study-center-8a2cf.appspot.com",
+            messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+            appId: "YOUR_APP_ID"
         };
 
         // Firebase 초기화
-        firebase.initializeApp(firebaseConfig);
-        const database = firebase.database();
+        try {
+            firebase.initializeApp(firebaseConfig);
+            const database = firebase.database();
+            document.getElementById('firebaseStatus').className = 'status success';
+            document.getElementById('firebaseStatus').textContent = 'Firebase: ✅ 연결됨';
+            debugLog('Firebase 초기화 성공', 'success');
+            
+            // 연결 상태 모니터링
+            const connectedRef = firebase.database().ref('.info/connected');
+            connectedRef.on('value', (snap) => {
+                if (snap.val() === true) {
+                    document.getElementById('firebaseStatus').textContent = 'Firebase: ✅ 실시간 연결됨';
+                    debugLog('Firebase 실시간 연결 확인', 'success');
+                } else {
+                    document.getElementById('firebaseStatus').textContent = 'Firebase: ⚠️ 연결 끊김';
+                    debugLog('Firebase 연결 끊김', 'error');
+                }
+            });
+        } catch (error) {
+            document.getElementById('firebaseStatus').className = 'status error';
+            document.getElementById('firebaseStatus').textContent = 'Firebase: ❌ 초기화 실패';
+            debugLog('Firebase 초기화 실패: ' + error.message, 'error');
+            console.error('Firebase 초기화 에러:', error);
+        }
 
         let selectedEnterTime = '';
         let selectedOutReason = '';
         let selectedOutDuration = '';
         let selectedExitTime = '';
         let currentStudentName = '';
+
+        // Firebase 테스트 함수
+        function testFirebase() {
+            debugLog('Firebase 테스트 시작...', 'info');
+            const testRef = database.ref('test');
+            const testData = { timestamp: Date.now(), message: '테스트 데이터' };
+            
+            testRef.set(testData)
+                .then(() => {
+                    debugLog('✅ Firebase 쓰기 성공!', 'success');
+                    alert('Firebase 연결 성공!\n데이터 쓰기가 정상적으로 작동합니다.');
+                })
+                .catch((error) => {
+                    debugLog('❌ Firebase 쓰기 실패: ' + error.message, 'error');
+                    alert('Firebase 연결 실패!\n에러: ' + error.message + '\n\nF12를 눌러 콘솔을 확인해주세요.');
+                });
+        }
 
         // 시간 포맷팅 헬퍼 함수
         function formatTime(date) {
@@ -364,7 +445,7 @@
 
         // 이름 자동완성 목록 업데이트
         function updateNameList() {
-            database.ref('studentNames').once('value', (snapshot) => {
+            database.ref('studentNames').on('value', (snapshot) => {
                 const names = snapshot.val() || [];
                 const datalist = document.getElementById('nameList');
                 datalist.innerHTML = '';
@@ -374,6 +455,9 @@
                     option.value = name;
                     datalist.appendChild(option);
                 });
+                debugLog(`이름 목록 업데이트: ${names.length}명`, 'success');
+            }, (error) => {
+                debugLog('이름 목록 로드 실패: ' + error.message, 'error');
             });
         }
 
@@ -383,8 +467,10 @@
                 const names = snapshot.val() || [];
                 if (!names.includes(name)) {
                     names.push(name);
-                    names.sort(); // 가나다순 정렬
-                    database.ref('studentNames').set(names);
+                    names.sort();
+                    database.ref('studentNames').set(names)
+                        .then(() => debugLog(`새 이름 저장: ${name}`, 'success'))
+                        .catch((error) => debugLog('이름 저장 실패: ' + error.message, 'error'));
                 }
             });
         }
@@ -399,13 +485,11 @@
                 return;
             }
 
-            // 이름 저장
             saveNewName(name);
 
             const now = new Date();
             const timeInfo = formatTime(now);
 
-            // 기존 정보 가져오기
             database.ref('memberStatus/' + name).once('value', (snapshot) => {
                 const existingData = snapshot.val() || {};
                 
@@ -418,23 +502,30 @@
                     nextArrival: existingData.nextArrival || ''
                 };
 
-                // Firebase에 상태 저장
-                database.ref('memberStatus/' + name).set(newData);
-
-                // 로그 추가
-                database.ref('accessLogs').push({
-                    name: name,
-                    status: status,
-                    time: timeInfo.full,
-                    timestamp: now.getTime(),
-                    studyEndTime: '',
-                    outReason: '',
-                    outDuration: '',
-                    nextArrival: ''
-                });
-
-                nameInput.value = '';
-                alert(`${name} 학생 ${timeInfo.period} ${timeInfo.hour}시 ${timeInfo.minutes}분에 복귀하였습니다.`);
+                database.ref('memberStatus/' + name).set(newData)
+                    .then(() => {
+                        debugLog(`${name} 학생 ${status} 처리 완료`, 'success');
+                        
+                        // 로그 추가
+                        return database.ref('accessLogs').push({
+                            name: name,
+                            status: status,
+                            time: timeInfo.full,
+                            timestamp: now.getTime(),
+                            studyEndTime: '',
+                            outReason: '',
+                            outDuration: '',
+                            nextArrival: ''
+                        });
+                    })
+                    .then(() => {
+                        nameInput.value = '';
+                        alert(`${name} 학생 ${timeInfo.period} ${timeInfo.hour}시 ${timeInfo.minutes}분에 복귀하였습니다.`);
+                    })
+                    .catch((error) => {
+                        debugLog('복귀 처리 실패: ' + error.message, 'error');
+                        alert('데이터 저장 실패: ' + error.message);
+                    });
             });
         }
 
@@ -458,21 +549,18 @@
             document.getElementById('enterModal').classList.add('show');
         }
 
-        // 입실 시간 선택
         function selectEnterTime(btn, time) {
             document.querySelectorAll('#enterModal .time-btn').forEach(b => b.classList.remove('selected'));
             btn.classList.add('selected');
             selectedEnterTime = time;
         }
 
-        // 입실 확정
         function confirmEnter() {
             if (!selectedEnterTime) {
                 alert('공부 종료 시각을 선택해주세요.');
                 return;
             }
 
-            // 이름 저장
             saveNewName(currentStudentName);
 
             const now = new Date();
@@ -487,28 +575,32 @@
                 nextArrival: ''
             };
 
-            // Firebase에 상태 저장
-            database.ref('memberStatus/' + currentStudentName).set(newData);
-
-            // 로그 추가
-            database.ref('accessLogs').push({
-                name: currentStudentName,
-                status: '입실',
-                time: timeInfo.full,
-                timestamp: now.getTime(),
-                studyEndTime: selectedEnterTime,
-                outReason: '',
-                outDuration: '',
-                nextArrival: ''
-            });
-
-            document.getElementById('studentName').value = '';
-            alert(`${currentStudentName} 학생 ${timeInfo.period} ${timeInfo.hour}시 ${timeInfo.minutes}분에 입실하였습니다.\n${selectedEnterTime}에 하원할 예정입니다.`);
-
-            closeModal();
+            database.ref('memberStatus/' + currentStudentName).set(newData)
+                .then(() => {
+                    debugLog(`${currentStudentName} 학생 입실 처리 완료`, 'success');
+                    
+                    return database.ref('accessLogs').push({
+                        name: currentStudentName,
+                        status: '입실',
+                        time: timeInfo.full,
+                        timestamp: now.getTime(),
+                        studyEndTime: selectedEnterTime,
+                        outReason: '',
+                        outDuration: '',
+                        nextArrival: ''
+                    });
+                })
+                .then(() => {
+                    document.getElementById('studentName').value = '';
+                    alert(`${currentStudentName} 학생 ${timeInfo.period} ${timeInfo.hour}시 ${timeInfo.minutes}분에 입실하였습니다.\n${selectedEnterTime}에 하원할 예정입니다.`);
+                    closeModal();
+                })
+                .catch((error) => {
+                    debugLog('입실 처리 실패: ' + error.message, 'error');
+                    alert('데이터 저장 실패: ' + error.message);
+                });
         }
 
-        // 외출 모달 열기
         function showOutModal() {
             const nameInput = document.getElementById('studentName');
             const name = nameInput.value.trim();
@@ -529,7 +621,6 @@
             document.getElementById('outModal').classList.add('show');
         }
 
-        // 외출 사유 선택
         function selectOutReason(btn, reason) {
             document.querySelectorAll('#outModal .time-btn').forEach(b => {
                 if (['점심', '저녁', '학원', '병원', '집'].includes(b.textContent)) {
@@ -540,7 +631,6 @@
             selectedOutReason = reason;
         }
 
-        // 외출 복귀 시간 선택
         function selectOutDuration(btn, duration) {
             document.querySelectorAll('#outModal .time-btn').forEach(b => {
                 if (['30분', '1시간', '1시간 30분', '2시간'].includes(b.textContent)) {
@@ -551,7 +641,6 @@
             selectedOutDuration = duration;
         }
 
-        // 외출 확정
         function confirmOut() {
             if (!selectedOutReason) {
                 alert('외출 사유를 선택해주세요.');
@@ -562,13 +651,11 @@
                 return;
             }
 
-            // 이름 저장
             saveNewName(currentStudentName);
 
             const now = new Date();
             const timeInfo = formatTime(now);
 
-            // 복귀 시간 계산
             const durationMap = {'30분': 30, '1시간': 60, '1시간 30분': 90, '2시간': 120};
             const addMinutes = durationMap[selectedOutDuration];
             const returnTime = new Date(now.getTime() + addMinutes * 60000);
@@ -583,28 +670,32 @@
                 nextArrival: ''
             };
 
-            // Firebase에 상태 저장
-            database.ref('memberStatus/' + currentStudentName).set(newData);
-
-            // 로그 추가
-            database.ref('accessLogs').push({
-                name: currentStudentName,
-                status: '외출',
-                time: timeInfo.full,
-                timestamp: now.getTime(),
-                studyEndTime: '',
-                outReason: selectedOutReason,
-                outDuration: selectedOutDuration,
-                nextArrival: ''
-            });
-
-            document.getElementById('studentName').value = '';
-            alert(`${currentStudentName} 학생 ${timeInfo.period} ${timeInfo.hour}시 ${timeInfo.minutes}분에 ${selectedOutReason} 가서 외출하여\n${returnInfo.period} ${returnInfo.hour}시 ${returnInfo.minutes}분에 복귀 예정입니다.`);
-
-            closeModal();
+            database.ref('memberStatus/' + currentStudentName).set(newData)
+                .then(() => {
+                    debugLog(`${currentStudentName} 학생 외출 처리 완료`, 'success');
+                    
+                    return database.ref('accessLogs').push({
+                        name: currentStudentName,
+                        status: '외출',
+                        time: timeInfo.full,
+                        timestamp: now.getTime(),
+                        studyEndTime: '',
+                        outReason: selectedOutReason,
+                        outDuration: selectedOutDuration,
+                        nextArrival: ''
+                    });
+                })
+                .then(() => {
+                    document.getElementById('studentName').value = '';
+                    alert(`${currentStudentName} 학생 ${timeInfo.period} ${timeInfo.hour}시 ${timeInfo.minutes}분에 ${selectedOutReason} 가서 외출하여\n${returnInfo.period} ${returnInfo.hour}시 ${returnInfo.minutes}분에 복귀 예정입니다.`);
+                    closeModal();
+                })
+                .catch((error) => {
+                    debugLog('외출 처리 실패: ' + error.message, 'error');
+                    alert('데이터 저장 실패: ' + error.message);
+                });
         }
 
-        // 퇴실 모달 열기
         function showExitModal() {
             const nameInput = document.getElementById('studentName');
             const name = nameInput.value.trim();
@@ -624,21 +715,18 @@
             document.getElementById('exitModal').classList.add('show');
         }
 
-        // 퇴실 시간 선택
         function selectExitTime(btn, time) {
             document.querySelectorAll('#exitModal .time-btn').forEach(b => b.classList.remove('selected'));
             btn.classList.add('selected');
             selectedExitTime = time;
         }
 
-        // 퇴실 확정
         function confirmExit() {
             if (!selectedExitTime) {
                 alert('다음날 등원 시각을 선택해주세요.');
                 return;
             }
 
-            // 이름 저장
             saveNewName(currentStudentName);
 
             const now = new Date();
@@ -653,28 +741,32 @@
                 nextArrival: selectedExitTime
             };
 
-            // Firebase에 상태 저장
-            database.ref('memberStatus/' + currentStudentName).set(newData);
-
-            // 로그 추가
-            database.ref('accessLogs').push({
-                name: currentStudentName,
-                status: '퇴실',
-                time: timeInfo.full,
-                timestamp: now.getTime(),
-                studyEndTime: '',
-                outReason: '',
-                outDuration: '',
-                nextArrival: selectedExitTime
-            });
-
-            document.getElementById('studentName').value = '';
-            alert(`${currentStudentName} 학생 ${timeInfo.period} ${timeInfo.hour}시 ${timeInfo.minutes}분에 하원하였습니다.\n내일 ${selectedExitTime}에 입실할 예정입니다.`);
-
-            closeModal();
+            database.ref('memberStatus/' + currentStudentName).set(newData)
+                .then(() => {
+                    debugLog(`${currentStudentName} 학생 퇴실 처리 완료`, 'success');
+                    
+                    return database.ref('accessLogs').push({
+                        name: currentStudentName,
+                        status: '퇴실',
+                        time: timeInfo.full,
+                        timestamp: now.getTime(),
+                        studyEndTime: '',
+                        outReason: '',
+                        outDuration: '',
+                        nextArrival: selectedExitTime
+                    });
+                })
+                .then(() => {
+                    document.getElementById('studentName').value = '';
+                    alert(`${currentStudentName} 학생 ${timeInfo.period} ${timeInfo.hour}시 ${timeInfo.minutes}분에 하원하였습니다.\n내일 ${selectedExitTime}에 입실할 예정입니다.`);
+                    closeModal();
+                })
+                .catch((error) => {
+                    debugLog('퇴실 처리 실패: ' + error.message, 'error');
+                    alert('데이터 저장 실패: ' + error.message);
+                });
         }
 
-        // 모달 닫기
         function closeModal() {
             document.getElementById('enterModal').classList.remove('show');
             document.getElementById('outModal').classList.remove('show');
@@ -683,13 +775,17 @@
 
         // PC 화면 갱신
         function updatePCScreen() {
-            // 현황 테이블 업데이트
+            // 현황 테이블 실시간 업데이트
             database.ref('memberStatus').on('value', (snapshot) => {
+                updateCounter++;
+                document.getElementById('updateCount').textContent = `업데이트: ${updateCounter}회`;
+                
                 const memberStatus = snapshot.val() || {};
                 const tableBody = document.getElementById('statusTableBody');
                 tableBody.innerHTML = '';
                 
                 const statusKeys = Object.keys(memberStatus);
+                debugLog(`현황 업데이트: ${statusKeys.length}명`, 'success');
                 
                 if (statusKeys.length === 0) {
                     tableBody.innerHTML = `
@@ -722,15 +818,19 @@
                         tableBody.appendChild(row);
                     });
                 }
+            }, (error) => {
+                debugLog('현황 로드 실패: ' + error.message, 'error');
             });
 
-            // 로그 리스트 업데이트 (최신 20개만)
+            // 로그 리스트 실시간 업데이트
             database.ref('accessLogs').orderByChild('timestamp').limitToLast(20).on('value', (snapshot) => {
                 const accessLogs = [];
                 snapshot.forEach((childSnapshot) => {
                     accessLogs.push(childSnapshot.val());
                 });
-                accessLogs.reverse(); // 최신순 정렬
+                accessLogs.reverse();
+
+                debugLog(`로그 업데이트: ${accessLogs.length}건`, 'success');
 
                 const logList = document.getElementById('logList');
                 logList.innerHTML = '';
@@ -742,7 +842,6 @@
                         const logItem = document.createElement('div');
                         logItem.className = `log-item ${log.status}`;
                         
-                        // 시간을 오전/오후 형식으로 변환
                         const timeParts = log.time.split(':');
                         const hours = parseInt(timeParts[0]);
                         const minutes = timeParts[1];
@@ -776,10 +875,11 @@
                         logList.appendChild(logItem);
                     });
                 }
+            }, (error) => {
+                debugLog('로그 로드 실패: ' + error.message, 'error');
             });
         }
 
-        // 모드 전환
         function switchMode(mode) {
             document.querySelectorAll('.mode-btn').forEach(btn => btn.classList.remove('active'));
             document.querySelectorAll('.screen').forEach(scr => scr.classList.remove('active'));
@@ -795,20 +895,26 @@
             }
         }
 
-        // 로그 전체 삭제
         function clearLogs() {
             if (!confirm('모든 로그 기록을 삭제하시겠습니까?\n\n⚠️ 이 작업은 되돌릴 수 없습니다.\n(현재 상태 정보는 유지됩니다)')) {
                 return;
             }
             
-            database.ref('accessLogs').remove().then(() => {
-                alert('✅ 로그가 모두 삭제되었습니다.');
-            });
+            database.ref('accessLogs').remove()
+                .then(() => {
+                    debugLog('로그 삭제 완료', 'success');
+                    alert('✅ 로그가 모두 삭제되었습니다.');
+                })
+                .catch((error) => {
+                    debugLog('로그 삭제 실패: ' + error.message, 'error');
+                    alert('로그 삭제 실패: ' + error.message);
+                });
         }
 
         // 초기 로드
         updateNameList();
         updatePCScreen();
+        debugLog('시스템 초기화 완료', 'success');
     </script>
 </body>
 </html>
