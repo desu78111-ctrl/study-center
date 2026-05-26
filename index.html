@@ -164,6 +164,12 @@
         
         .time-text { color: #94a3b8; font-size: 0.8rem; float: right; }
         .next-arrival { color: #3b82f6; font-size: 0.85rem; margin-left: 10px; }
+        
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: #94a3b8;
+        }
     </style>
 </head>
 <body>
@@ -414,6 +420,7 @@
             nameInput.value = '';
             alert(`${name} 학생 ${timeInfo.period} ${timeInfo.hour}시 ${timeInfo.minutes}분에 복귀하였습니다.`);
 
+            // ✅ 즉시 PC 화면 갱신
             updatePCScreen();
         }
 
@@ -484,6 +491,7 @@
             alert(`${currentStudentName} 학생 ${timeInfo.period} ${timeInfo.hour}시 ${timeInfo.minutes}분에 입실하였습니다.\n${selectedEnterTime}에 하원할 예정입니다.`);
 
             closeModal();
+            // ✅ 즉시 PC 화면 갱신
             updatePCScreen();
         }
 
@@ -580,6 +588,7 @@
             alert(`${currentStudentName} 학생 ${timeInfo.period} ${timeInfo.hour}시 ${timeInfo.minutes}분에 ${selectedOutReason} 가서 외출하여\n${returnInfo.period} ${returnInfo.hour}시 ${returnInfo.minutes}분에 복귀 예정입니다.`);
 
             closeModal();
+            // ✅ 즉시 PC 화면 갱신
             updatePCScreen();
         }
 
@@ -650,6 +659,7 @@
             alert(`${currentStudentName} 학생 ${timeInfo.period} ${timeInfo.hour}시 ${timeInfo.minutes}분에 하원하였습니다.\n내일 ${selectedExitTime}에 입실할 예정입니다.`);
 
             closeModal();
+            // ✅ 즉시 PC 화면 갱신
             updatePCScreen();
         }
 
@@ -669,72 +679,88 @@
             const tableBody = document.getElementById('statusTableBody');
             tableBody.innerHTML = '';
             
-            Object.keys(memberStatus).forEach(name => {
-                const data = memberStatus[name];
-                const row = document.createElement('tr');
-                
-                let extraInfo = '';
-                if (data.studyEndTime) {
-                    extraInfo = '<span class="next-arrival">공부 종료: ' + data.studyEndTime + '</span>';
-                } else if (data.outReason && data.outDuration) {
-                    extraInfo = '<span class="next-arrival">' + data.outReason + ' (' + data.outDuration + ' 후 복귀)</span>';
-                } else if (data.nextArrival) {
-                    extraInfo = '<span class="next-arrival">' + data.nextArrival + '</span>';
-                }
-                
-                row.innerHTML = `
-                    <td><strong>${name}</strong></td>
-                    <td><span class="badge badge-${data.status}">${data.status}</span></td>
-                    <td>${data.time}</td>
-                    <td>${extraInfo || '-'}</td>
+            const statusKeys = Object.keys(memberStatus);
+            
+            if (statusKeys.length === 0) {
+                tableBody.innerHTML = `
+                    <tr>
+                        <td colspan="4" class="empty-state">
+                            아직 등록된 학생이 없습니다.
+                        </td>
+                    </tr>
                 `;
-                tableBody.appendChild(row);
-            });
+            } else {
+                statusKeys.forEach(name => {
+                    const data = memberStatus[name];
+                    const row = document.createElement('tr');
+                    
+                    let extraInfo = '';
+                    if (data.studyEndTime) {
+                        extraInfo = '<span class="next-arrival">공부 종료: ' + data.studyEndTime + '</span>';
+                    } else if (data.outReason && data.outDuration) {
+                        extraInfo = '<span class="next-arrival">' + data.outReason + ' (' + data.outDuration + ' 후 복귀)</span>';
+                    } else if (data.nextArrival) {
+                        extraInfo = '<span class="next-arrival">' + data.nextArrival + '</span>';
+                    }
+                    
+                    row.innerHTML = `
+                        <td><strong>${name}</strong></td>
+                        <td><span class="badge badge-${data.status}">${data.status}</span></td>
+                        <td>${data.time}</td>
+                        <td>${extraInfo || '-'}</td>
+                    `;
+                    tableBody.appendChild(row);
+                });
+            }
 
             // 로그 리스트
             const logList = document.getElementById('logList');
             logList.innerHTML = '';
 
-            accessLogs.forEach(log => {
-                const logItem = document.createElement('div');
-                logItem.className = `log-item ${log.status}`;
-                
-                // 시간을 오전/오후 형식으로 변환
-                const timeParts = log.time.split(':');
-                const hours = parseInt(timeParts[0]);
-                const minutes = timeParts[1];
-                const period = hours < 12 ? '오전' : '오후';
-                const displayHour = hours === 0 ? 12 : (hours <= 12 ? hours : hours - 12);
-                
-                let logText = '';
-                
-                if (log.status === '입실') {
-                    logText = `<strong>${log.name}</strong> 학생 ${period} ${displayHour}시 ${minutes}분에 <span style="font-weight:bold; color:var(--color-${log.status})">입실</span>하였습니다.`;
-                    if (log.studyEndTime) {
-                        logText += `<br><span class="next-arrival">${log.studyEndTime}에 하원할 예정입니다.</span>`;
+            if (accessLogs.length === 0) {
+                logList.innerHTML = '<div class="empty-state">아직 기록이 없습니다.</div>';
+            } else {
+                accessLogs.forEach(log => {
+                    const logItem = document.createElement('div');
+                    logItem.className = `log-item ${log.status}`;
+                    
+                    // 시간을 오전/오후 형식으로 변환
+                    const timeParts = log.time.split(':');
+                    const hours = parseInt(timeParts[0]);
+                    const minutes = timeParts[1];
+                    const period = hours < 12 ? '오전' : '오후';
+                    const displayHour = hours === 0 ? 12 : (hours <= 12 ? hours : hours - 12);
+                    
+                    let logText = '';
+                    
+                    if (log.status === '입실') {
+                        logText = `<strong>${log.name}</strong> 학생 ${period} ${displayHour}시 ${minutes}분에 <span style="font-weight:bold; color:var(--color-${log.status})">입실</span>하였습니다.`;
+                        if (log.studyEndTime) {
+                            logText += `<br><span class="next-arrival">${log.studyEndTime}에 하원할 예정입니다.</span>`;
+                        }
+                    } else if (log.status === '외출') {
+                        logText = `<strong>${log.name}</strong> 학생 ${period} ${displayHour}시 ${minutes}분에 ${log.outReason} 가서 <span style="font-weight:bold; color:var(--color-${log.status})">외출</span>하였습니다.`;
+                        if (log.outDuration) {
+                            logText += `<br><span class="next-arrival">${log.outDuration} 후 복귀 예정입니다.</span>`;
+                        }
+                    } else if (log.status === '복귀') {
+                        logText = `<strong>${log.name}</strong> 학생 ${period} ${displayHour}시 ${minutes}분에 <span style="font-weight:bold; color:var(--color-${log.status})">복귀</span>하였습니다.`;
+                    } else if (log.status === '퇴실') {
+                        logText = `<strong>${log.name}</strong> 학생 ${period} ${displayHour}시 ${minutes}분에 <span style="font-weight:bold; color:var(--color-${log.status})">하원</span>하였습니다.`;
+                        if (log.nextArrival) {
+                            logText += `<br><span class="next-arrival">내일 ${log.nextArrival}에 입실할 예정입니다.</span>`;
+                        }
                     }
-                } else if (log.status === '외출') {
-                    logText = `<strong>${log.name}</strong> 학생 ${period} ${displayHour}시 ${minutes}분에 ${log.outReason} 가서 <span style="font-weight:bold; color:var(--color-${log.status})">외출</span>하였습니다.`;
-                    if (log.outDuration) {
-                        logText += `<br><span class="next-arrival">${log.outDuration} 후 복귀 예정입니다.</span>`;
-                    }
-                } else if (log.status === '복귀') {
-                    logText = `<strong>${log.name}</strong> 학생 ${period} ${displayHour}시 ${minutes}분에 <span style="font-weight:bold; color:var(--color-${log.status})">복귀</span>하였습니다.`;
-                } else if (log.status === '퇴실') {
-                    logText = `<strong>${log.name}</strong> 학생 ${period} ${displayHour}시 ${minutes}분에 <span style="font-weight:bold; color:var(--color-${log.status})">하원</span>하였습니다.`;
-                    if (log.nextArrival) {
-                        logText += `<br><span class="next-arrival">내일 ${log.nextArrival}에 입실할 예정입니다.</span>`;
-                    }
-                }
-                
-                logText += `<span class="time-text">${log.time}</span>`;
-                
-                logItem.innerHTML = logText;
-                logList.appendChild(logItem);
-            });
+                    
+                    logText += `<span class="time-text">${log.time}</span>`;
+                    
+                    logItem.innerHTML = logText;
+                    logList.appendChild(logItem);
+                });
+            }
         }
 
-        // 실시간 연동
+        // 실시간 연동 (다른 탭/창에서 변경 시)
         window.addEventListener('storage', (e) => {
             if (e.key === 'memberStatus' || e.key === 'accessLogs') {
                 updatePCScreen();
@@ -754,6 +780,7 @@
                 document.getElementById('pcMode').classList.add('active');
                 document.querySelectorAll('.mode-btn')[1].classList.add('active');
                 document.getElementById('pcToolbar').style.display = 'block';
+                // ✅ PC 모드로 전환 시 즉시 갱신
                 updatePCScreen();
             }
         }
@@ -770,7 +797,7 @@
             alert('✅ 로그가 모두 삭제되었습니다.');
         }
 
-        // 초기 로드 시 이름 목록 업데이트
+        // ✅ 초기 로드 시 이름 목록 및 PC 화면 업데이트
         updateNameList();
         updatePCScreen();
     </script>
