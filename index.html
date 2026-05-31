@@ -18,30 +18,18 @@
 
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Pretendard', sans-serif; }
         body { background-color: var(--bg-color); color: #333; padding: 20px; display: flex; flex-direction: column; gap: 20px; }
-        
+
         .connection-status {
-            position: fixed;
-            top: 10px;
-            right: 10px;
-            padding: 10px 15px;
-            background: #10b981;
-            color: white;
-            border-radius: 8px;
-            font-size: 14px;
-            font-weight: bold;
-            z-index: 9999;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+            position: fixed; top: 10px; right: 10px; padding: 10px 15px;
+            background: #94a3b8; color: white; border-radius: 8px; font-size: 14px;
+            font-weight: bold; z-index: 9999; box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+            transition: background 0.3s;
         }
-        .connection-status.disconnected {
-            background: #ef4444;
-        }
-        
-        .mode-selector {
-            display: flex; gap: 10px; background: #e2e8f0; padding: 5px; border-radius: 8px; width: fit-content; margin: 0 auto;
-        }
-        .mode-btn {
-            padding: 8px 16px; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; background: transparent; color: #64748b;
-        }
+        .connection-status.connected { background: #10b981; }
+        .connection-status.disconnected { background: #ef4444; }
+
+        .mode-selector { display: flex; gap: 10px; background: #e2e8f0; padding: 5px; border-radius: 8px; width: fit-content; margin: 0 auto; }
+        .mode-btn { padding: 8px 16px; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; background: transparent; color: #64748b; }
         .mode-btn.active { background: white; color: var(--primary); box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
 
         .screen { display: none; max-width: 1200px; margin: 0 auto; width: 100%; }
@@ -50,120 +38,45 @@
         h2 { margin-bottom: 20px; color: var(--primary); font-size: 1.5rem; border-left: 5px solid var(--primary); padding-left: 10px; }
 
         .tablet-container {
-            max-width: 600px; margin: 40px auto; background: var(--panel-bg); padding: 40px; border-radius: 16px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); text-align: center;
+            max-width: 600px; margin: 40px auto; background: var(--panel-bg); padding: 40px;
+            border-radius: 16px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); text-align: center;
         }
         .tablet-container h1 { font-size: 2rem; color: var(--primary); margin-bottom: 30px; }
         .input-group { margin-bottom: 25px; }
         .input-group input { width: 100%; padding: 15px; font-size: 1.2rem; border: 2px solid #cbd5e1; border-radius: 8px; text-align: center; outline: none; }
         .input-group input:focus { border-color: var(--accent); }
-        
+
         .button-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
-        .btn-status {
-            padding: 20px; font-size: 1.3rem; font-weight: bold; border: none; border-radius: 12px; cursor: pointer; color: white; transition: transform 0.1s;
-        }
+        .btn-status { padding: 20px; font-size: 1.3rem; font-weight: bold; border: none; border-radius: 12px; cursor: pointer; color: white; transition: transform 0.1s; }
         .btn-status:active { transform: scale(0.98); }
         .btn-입실 { background-color: var(--color-입실); }
         .btn-외출 { background-color: var(--color-외출); }
         .btn-복귀 { background-color: var(--color-복귀); }
         .btn-퇴실 { background-color: var(--color-퇴실); }
 
-        .modal {
-            display: none;
-            position: fixed;
-            inset: 0;
-            background: rgba(0,0,0,0.8);
-            z-index: 1000;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-        }
+        .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 1000; align-items: center; justify-content: center; padding: 20px; }
         .modal.show { display: flex; }
-        .modal-content {
-            background: white;
-            border-radius: 16px;
-            padding: 30px;
-            max-width: 500px;
-            width: 100%;
-            max-height: 80vh;
-            overflow-y: auto;
-        }
-        .modal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-        }
-        .modal-header h3 {
-            font-size: 1.5rem;
-            color: var(--primary);
-        }
-        .modal-close {
-            background: none;
-            border: none;
-            font-size: 1.5rem;
-            color: #64748b;
-            cursor: pointer;
-        }
-        .modal-body {
-            text-align: center;
-        }
-        .time-label {
-            font-size: 1.1rem;
-            font-weight: bold;
-            color: var(--primary);
-            margin-bottom: 15px;
-        }
-        .time-grid {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 10px;
-            margin-bottom: 20px;
-        }
-        .time-btn {
-            padding: 15px 10px;
-            border: 2px solid #cbd5e1;
-            border-radius: 8px;
-            background: white;
-            color: #334155;
-            font-size: 1rem;
-            font-weight: bold;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-        .time-btn:hover {
-            border-color: var(--accent);
-            background: #eff6ff;
-        }
-        .time-btn.selected {
-            background: var(--accent);
-            border-color: var(--accent);
-            color: white;
-        }
-        .confirm-btn {
-            width: 100%;
-            padding: 15px;
-            background: var(--color-퇴실);
-            color: white;
-            border: none;
-            border-radius: 8px;
-            font-size: 1.2rem;
-            font-weight: bold;
-            cursor: pointer;
-        }
-        .confirm-btn:hover {
-            opacity: 0.9;
-        }
+        .modal-content { background: white; border-radius: 16px; padding: 30px; max-width: 500px; width: 100%; max-height: 80vh; overflow-y: auto; }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .modal-header h3 { font-size: 1.5rem; color: var(--primary); }
+        .modal-close { background: none; border: none; font-size: 1.5rem; color: #64748b; cursor: pointer; }
+        .modal-body { text-align: center; }
+        .time-label { font-size: 1.1rem; font-weight: bold; color: var(--primary); margin-bottom: 15px; }
+        .time-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 20px; }
+        .time-btn { padding: 15px 10px; border: 2px solid #cbd5e1; border-radius: 8px; background: white; color: #334155; font-size: 1rem; font-weight: bold; cursor: pointer; transition: all 0.2s; }
+        .time-btn:hover { border-color: var(--accent); background: #eff6ff; }
+        .time-btn.selected { background: var(--accent); border-color: var(--accent); color: white; }
+        .confirm-btn { width: 100%; padding: 15px; background: var(--color-퇴실); color: white; border: none; border-radius: 8px; font-size: 1.2rem; font-weight: bold; cursor: pointer; }
+        .confirm-btn:hover { opacity: 0.9; }
 
         .pc-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 20px; }
         .panel { background: var(--panel-bg); padding: 20px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.02); }
-        
+
         .status-table { width: 100%; border-collapse: collapse; text-align: left; }
         .status-table th, .status-table td { padding: 12px; border-bottom: 1px solid #e2e8f0; }
         .status-table th { background-color: #f8fafc; color: #64748b; font-weight: 600; }
-        
-        .badge {
-            padding: 4px 8px; border-radius: 4px; font-size: 0.85rem; font-weight: bold; color: white; display: inline-block;
-        }
+
+        .badge { padding: 4px 8px; border-radius: 4px; font-size: 0.85rem; font-weight: bold; color: white; display: inline-block; }
         .badge-입실 { background-color: var(--color-입실); }
         .badge-외출 { background-color: var(--color-외출); }
         .badge-복귀 { background-color: var(--color-복귀); }
@@ -175,581 +88,450 @@
         .log-item.외출 { border-left-color: var(--color-외출); }
         .log-item.복귀 { border-left-color: var(--color-복귀); }
         .log-item.퇴실 { border-left-color: var(--color-퇴실); }
-        
+
         .time-text { color: #94a3b8; font-size: 0.8rem; float: right; }
         .next-arrival { color: #3b82f6; font-size: 0.85rem; margin-left: 10px; }
-        
-        .empty-state {
-            text-align: center;
-            padding: 40px 20px;
-            color: #94a3b8;
-        }
+        .empty-state { text-align: center; padding: 40px 20px; color: #94a3b8; }
+
+        @keyframes flash { 0% { background: #dbeafe; } 100% { background: #f8fafc; } }
+        .log-item.new { animation: flash 1.5s ease; }
     </style>
 </head>
 <body>
 
-    <div class="connection-status" id="connectionStatus">
-        ⚠️ 같은 WiFi 필요
-    </div>
+<div class="connection-status" id="connectionStatus">⏳ 연결 중...</div>
 
-    <div class="mode-selector">
-        <button class="mode-btn active" onclick="switchMode('tablet')">태블릿 모드 (학생용)</button>
-        <button class="mode-btn" onclick="switchMode('pc')">PC 모드 (관리자용)</button>
-    </div>
+<div class="mode-selector">
+    <button class="mode-btn active" onclick="switchMode('tablet')">태블릿 모드 (학생용)</button>
+    <button class="mode-btn" onclick="switchMode('pc')">PC 모드 (관리자용)</button>
+</div>
 
-    <div id="pcToolbar" style="display: none; padding: 15px 20px; background: var(--panel-bg); border-bottom: 2px solid #e2e8f0; text-align: right; max-width: 1200px; margin: 0 auto; width: 100%;">
-        <button onclick="clearLogs()" style="background: #ef4444; color: white; padding: 10px 20px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 14px;">
-            🗑 로그 전체 삭제
-        </button>
-    </div>
+<div id="pcToolbar" style="display:none; padding:15px 20px; background:var(--panel-bg); border-bottom:2px solid #e2e8f0; text-align:right; max-width:1200px; margin:0 auto; width:100%;">
+    <button onclick="clearLogs()" style="background:#ef4444;color:white;padding:10px 20px;border:none;border-radius:8px;cursor:pointer;font-weight:bold;font-size:14px;">
+        🗑 로그 전체 삭제
+    </button>
+</div>
 
-    <div id="tabletMode" class="screen active">
-        <div class="tablet-container">
-            <h1>BESTIAN STUDY CENTER</h1>
-            <div class="input-group">
-                <input type="text" id="studentName" list="nameList" placeholder="이름을 입력하세요" autocomplete="off">
-                <datalist id="nameList"></datalist>
-            </div>
-            <div class="button-grid">
-                <button class="btn-status btn-입실" onclick="showEnterModal()">입실</button>
-                <button class="btn-status btn-외출" onclick="showOutModal()">외출</button>
-                <button class="btn-status btn-복귀" onclick="processStatus('복귀')">복귀</button>
-                <button class="btn-status btn-퇴실" onclick="showExitModal()">퇴실</button>
-            </div>
+<div id="tabletMode" class="screen active">
+    <div class="tablet-container">
+        <h1>BESTIAN STUDY CENTER</h1>
+        <div class="input-group">
+            <input type="text" id="studentName" list="nameList" placeholder="이름을 입력하세요" autocomplete="off">
+            <datalist id="nameList"></datalist>
+        </div>
+        <div class="button-grid">
+            <button class="btn-status btn-입실" onclick="showEnterModal()">입실</button>
+            <button class="btn-status btn-외출" onclick="showOutModal()">외출</button>
+            <button class="btn-status btn-복귀" onclick="processReturn()">복귀</button>
+            <button class="btn-status btn-퇴실" onclick="showExitModal()">퇴실</button>
         </div>
     </div>
+</div>
 
-    <div id="pcMode" class="screen">
-        <div class="pc-grid">
-            <div class="panel">
-                <h2>현재 이용자 상태 현황</h2>
-                <table class="status-table">
-                    <thead>
-                        <tr>
-                            <th>이름</th>
-                            <th>현재 상태</th>
-                            <th>최종 변경 시간</th>
-                            <th>공부 종료 / 다음 등원</th>
-                        </tr>
-                    </thead>
-                    <tbody id="statusTableBody"></tbody>
-                </table>
-            </div>
-            <div class="panel">
-                <h2>실시간 출입 기록</h2>
-                <div class="log-list" id="logList"></div>
-            </div>
+<div id="pcMode" class="screen">
+    <div class="pc-grid">
+        <div class="panel">
+            <h2>현재 이용자 상태 현황</h2>
+            <table class="status-table">
+                <thead><tr><th>이름</th><th>현재 상태</th><th>최종 변경 시간</th><th>공부 종료 / 다음 등원</th></tr></thead>
+                <tbody id="statusTableBody"></tbody>
+            </table>
+        </div>
+        <div class="panel">
+            <h2>실시간 출입 기록</h2>
+            <div class="log-list" id="logList"></div>
         </div>
     </div>
+</div>
 
-    <!-- 모달들 -->
-    <div class="modal" id="enterModal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3>오늘 공부 종료 시각 선택</h3>
-                <button class="modal-close" onclick="closeModal()">✕</button>
+<!-- 입실 모달 -->
+<div class="modal" id="enterModal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>오늘 공부 종료 시각 선택</h3>
+            <button class="modal-close" onclick="closeModal()">✕</button>
+        </div>
+        <div class="modal-body">
+            <div class="time-label">오후</div>
+            <div class="time-grid">
+                <button class="time-btn" onclick="selectEnterTime(this,'오후 8시')">8시</button>
+                <button class="time-btn" onclick="selectEnterTime(this,'오후 9시')">9시</button>
+                <button class="time-btn" onclick="selectEnterTime(this,'오후 10시')">10시</button>
+                <button class="time-btn" onclick="selectEnterTime(this,'오후 11시')">11시</button>
+                <button class="time-btn" onclick="selectEnterTime(this,'오후 12시')">12시</button>
             </div>
-            <div class="modal-body">
-                <div class="time-label">오후</div>
-                <div class="time-grid">
-                    <button class="time-btn" onclick="selectEnterTime(this, '오후 8시')">8시</button>
-                    <button class="time-btn" onclick="selectEnterTime(this, '오후 9시')">9시</button>
-                    <button class="time-btn" onclick="selectEnterTime(this, '오후 10시')">10시</button>
-                    <button class="time-btn" onclick="selectEnterTime(this, '오후 11시')">11시</button>
-                    <button class="time-btn" onclick="selectEnterTime(this, '오후 12시')">12시</button>
-                </div>
-                <div class="time-label">오전</div>
-                <div class="time-grid">
-                    <button class="time-btn" onclick="selectEnterTime(this, '오전 1시')">1시</button>
-                </div>
-                <button class="confirm-btn" style="background: var(--color-입실);" onclick="confirmEnter()">입실 완료</button>
+            <div class="time-label">오전</div>
+            <div class="time-grid">
+                <button class="time-btn" onclick="selectEnterTime(this,'오전 1시')">1시</button>
             </div>
+            <button class="confirm-btn" style="background:var(--color-입실);" onclick="confirmEnter()">입실 완료</button>
         </div>
     </div>
+</div>
 
-    <div class="modal" id="outModal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3>외출 사유 및 복귀 시간</h3>
-                <button class="modal-close" onclick="closeModal()">✕</button>
+<!-- 외출 모달 -->
+<div class="modal" id="outModal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>외출 사유 및 복귀 시간</h3>
+            <button class="modal-close" onclick="closeModal()">✕</button>
+        </div>
+        <div class="modal-body">
+            <div class="time-label">외출 사유</div>
+            <div class="time-grid">
+                <button class="time-btn" onclick="selectOutReason(this,'점심')">점심</button>
+                <button class="time-btn" onclick="selectOutReason(this,'저녁')">저녁</button>
+                <button class="time-btn" onclick="selectOutReason(this,'학원')">학원</button>
+                <button class="time-btn" onclick="selectOutReason(this,'병원')">병원</button>
+                <button class="time-btn" onclick="selectOutReason(this,'집')">집</button>
             </div>
-            <div class="modal-body">
-                <div class="time-label">외출 사유</div>
-                <div class="time-grid">
-                    <button class="time-btn" onclick="selectOutReason(this, '점심')">점심</button>
-                    <button class="time-btn" onclick="selectOutReason(this, '저녁')">저녁</button>
-                    <button class="time-btn" onclick="selectOutReason(this, '학원')">학원</button>
-                    <button class="time-btn" onclick="selectOutReason(this, '병원')">병원</button>
-                    <button class="time-btn" onclick="selectOutReason(this, '집')">집</button>
-                </div>
-                <div class="time-label" style="margin-top: 20px;">복귀 예정 시간</div>
-                <div class="time-grid">
-                    <button class="time-btn" onclick="selectOutDuration(this, '30분')">30분</button>
-                    <button class="time-btn" onclick="selectOutDuration(this, '1시간')">1시간</button>
-                    <button class="time-btn" onclick="selectOutDuration(this, '1시간 30분')">1시간 30분</button>
-                    <button class="time-btn" onclick="selectOutDuration(this, '2시간')">2시간</button>
-                </div>
-                <button class="confirm-btn" style="background: var(--color-외출);" onclick="confirmOut()">외출 완료</button>
+            <div class="time-label" style="margin-top:20px;">복귀 예정 시간</div>
+            <div class="time-grid">
+                <button class="time-btn" onclick="selectOutDuration(this,'30분')">30분</button>
+                <button class="time-btn" onclick="selectOutDuration(this,'1시간')">1시간</button>
+                <button class="time-btn" onclick="selectOutDuration(this,'1시간 30분')">1시간 30분</button>
+                <button class="time-btn" onclick="selectOutDuration(this,'2시간')">2시간</button>
             </div>
+            <button class="confirm-btn" style="background:var(--color-외출);" onclick="confirmOut()">외출 완료</button>
         </div>
     </div>
+</div>
 
-    <div class="modal" id="exitModal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3>다음날 등원 시각 선택</h3>
-                <button class="modal-close" onclick="closeModal()">✕</button>
+<!-- 퇴실 모달 -->
+<div class="modal" id="exitModal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>다음날 등원 시각 선택</h3>
+            <button class="modal-close" onclick="closeModal()">✕</button>
+        </div>
+        <div class="modal-body">
+            <div class="time-label">오전</div>
+            <div class="time-grid">
+                <button class="time-btn" onclick="selectExitTime(this,'오전 8시')">8시</button>
+                <button class="time-btn" onclick="selectExitTime(this,'오전 9시')">9시</button>
+                <button class="time-btn" onclick="selectExitTime(this,'오전 10시')">10시</button>
+                <button class="time-btn" onclick="selectExitTime(this,'오전 11시')">11시</button>
+                <button class="time-btn" onclick="selectExitTime(this,'오전 12시')">12시</button>
             </div>
-            <div class="modal-body">
-                <div class="time-label">오전</div>
-                <div class="time-grid">
-                    <button class="time-btn" onclick="selectExitTime(this, '오전 8시')">8시</button>
-                    <button class="time-btn" onclick="selectExitTime(this, '오전 9시')">9시</button>
-                    <button class="time-btn" onclick="selectExitTime(this, '오전 10시')">10시</button>
-                    <button class="time-btn" onclick="selectExitTime(this, '오전 11시')">11시</button>
-                    <button class="time-btn" onclick="selectExitTime(this, '오전 12시')">12시</button>
-                </div>
-                <div class="time-label">오후</div>
-                <div class="time-grid">
-                    <button class="time-btn" onclick="selectExitTime(this, '오후 1시')">1시</button>
-                    <button class="time-btn" onclick="selectExitTime(this, '오후 2시')">2시</button>
-                    <button class="time-btn" onclick="selectExitTime(this, '오후 3시')">3시</button>
-                    <button class="time-btn" onclick="selectExitTime(this, '오후 4시')">4시</button>
-                    <button class="time-btn" onclick="selectExitTime(this, '오후 5시')">5시</button>
-                    <button class="time-btn" onclick="selectExitTime(this, '오후 6시')">6시</button>
-                </div>
-                <button class="confirm-btn" onclick="confirmExit()">퇴실 완료</button>
+            <div class="time-label">오후</div>
+            <div class="time-grid">
+                <button class="time-btn" onclick="selectExitTime(this,'오후 1시')">1시</button>
+                <button class="time-btn" onclick="selectExitTime(this,'오후 2시')">2시</button>
+                <button class="time-btn" onclick="selectExitTime(this,'오후 3시')">3시</button>
+                <button class="time-btn" onclick="selectExitTime(this,'오후 4시')">4시</button>
+                <button class="time-btn" onclick="selectExitTime(this,'오후 5시')">5시</button>
+                <button class="time-btn" onclick="selectExitTime(this,'오후 6시')">6시</button>
             </div>
+            <button class="confirm-btn" onclick="confirmExit()">퇴실 완료</button>
         </div>
     </div>
+</div>
 
-    <script>
-        // BroadcastChannel로 같은 WiFi 내 기기 간 통신
-        const channel = new BroadcastChannel('bestian_study_center');
-        
-        let selectedEnterTime = '';
-        let selectedOutReason = '';
-        let selectedOutDuration = '';
-        let selectedExitTime = '';
-        let currentStudentName = '';
+<!-- Firebase SDK (ES Module) -->
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+    import { getDatabase, ref, set, push, onValue, remove } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
 
-        // 로컬 스토리지 초기화
-        if (!localStorage.getItem('memberStatus')) {
-            localStorage.setItem('memberStatus', JSON.stringify({}));
+    // ════════════════════════════════════════════════════════════
+    // ✏️  Firebase 설정 — Firebase 콘솔에서 복사해 아래에 붙여넣으세요
+    // ════════════════════════════════════════════════════════════
+    const firebaseConfig = {
+        apiKey:            "여기에_API_KEY를_입력하세요",
+        authDomain:        "study-center-8a2cf.firebaseapp.com",
+        databaseURL:       "https://study-center-8a2cf-default-rtdb.asia-southeast1.firebasedatabase.app",
+        projectId:         "study-center-8a2cf",
+        storageBucket:     "study-center-8a2cf.appspot.com",
+        messagingSenderId: "여기에_SENDER_ID를_입력하세요",
+        appId:             "여기에_APP_ID를_입력하세요"
+    };
+    // ════════════════════════════════════════════════════════════
+
+    const app = initializeApp(firebaseConfig);
+    const db  = getDatabase(app);
+
+    // ── 상태 변수 ──
+    let selectedEnterTime = '';
+    let selectedOutReason = '';
+    let selectedOutDuration = '';
+    let selectedExitTime = '';
+    let currentStudentName = '';
+    let memberStatusCache = {};
+    let accessLogsCache   = [];
+    let studentNamesCache  = [];
+
+    // ── Firebase 연결 상태 표시 ──
+    onValue(ref(db, '.info/connected'), snap => {
+        const el = document.getElementById('connectionStatus');
+        if (snap.val()) {
+            el.textContent = '✅ 실시간 연결됨';
+            el.className = 'connection-status connected';
+        } else {
+            el.textContent = '❌ 연결 끊김';
+            el.className = 'connection-status disconnected';
         }
-        if (!localStorage.getItem('accessLogs')) {
-            localStorage.setItem('accessLogs', JSON.stringify([]));
-        }
-        if (!localStorage.getItem('studentNames')) {
-            localStorage.setItem('studentNames', JSON.stringify([]));
-        }
+    });
 
-        // 데이터 브로드캐스트
-        function broadcastData() {
-            channel.postMessage({
-                type: 'update',
-                memberStatus: JSON.parse(localStorage.getItem('memberStatus')),
-                accessLogs: JSON.parse(localStorage.getItem('accessLogs')),
-                studentNames: JSON.parse(localStorage.getItem('studentNames'))
-            });
-        }
-
-        // 다른 기기에서 데이터 수신
-        channel.onmessage = (event) => {
-            if (event.data.type === 'update') {
-                localStorage.setItem('memberStatus', JSON.stringify(event.data.memberStatus));
-                localStorage.setItem('accessLogs', JSON.stringify(event.data.accessLogs));
-                localStorage.setItem('studentNames', JSON.stringify(event.data.studentNames));
-                updatePCScreen();
-                updateNameList();
-                document.getElementById('connectionStatus').textContent = '✅ 연결됨';
-                document.getElementById('connectionStatus').className = 'connection-status';
-            }
-        };
-
-        function formatTime(date) {
-            const hours = date.getHours();
-            const minutes = date.getMinutes();
-            const period = hours < 12 ? '오전' : '오후';
-            const displayHour = hours === 0 ? 12 : (hours > 12 ? hours - 12 : hours);
-            const paddedMinutes = String(minutes).padStart(2, '0');
-            
-            return {
-                full: `${String(hours).padStart(2, '0')}:${paddedMinutes}`,
-                period: period,
-                hour: displayHour,
-                minutes: paddedMinutes
-            };
-        }
-
-        function updateNameList() {
-            const names = JSON.parse(localStorage.getItem('studentNames')) || [];
-            const datalist = document.getElementById('nameList');
-            datalist.innerHTML = '';
-            names.forEach(name => {
-                const option = document.createElement('option');
-                option.value = name;
-                datalist.appendChild(option);
-            });
-        }
-
-        function saveNewName(name) {
-            const names = JSON.parse(localStorage.getItem('studentNames')) || [];
-            if (!names.includes(name)) {
-                names.push(name);
-                names.sort();
-                localStorage.setItem('studentNames', JSON.stringify(names));
-                updateNameList();
-            }
-        }
-
-        function processStatus(status) {
-            const nameInput = document.getElementById('studentName');
-            const name = nameInput.value.trim();
-            if (!name) {
-                alert('이름을 입력해주세요.');
-                return;
-            }
-
-            saveNewName(name);
-            const now = new Date();
-            const timeInfo = formatTime(now);
-            const memberStatus = JSON.parse(localStorage.getItem('memberStatus')) || {};
-            
-            memberStatus[name] = { 
-                status: status, 
-                time: timeInfo.full,
-                studyEndTime: memberStatus[name]?.studyEndTime || '',
-                outReason: '',
-                outDuration: '',
-                nextArrival: memberStatus[name]?.nextArrival || ''
-            };
-            localStorage.setItem('memberStatus', JSON.stringify(memberStatus));
-
-            const accessLogs = JSON.parse(localStorage.getItem('accessLogs')) || [];
-            accessLogs.unshift({ 
-                name: name, 
-                status: status, 
-                time: timeInfo.full,
-                studyEndTime: '',
-                outReason: '',
-                outDuration: '',
-                nextArrival: ''
-            });
-            localStorage.setItem('accessLogs', JSON.stringify(accessLogs));
-
-            nameInput.value = '';
-            alert(`${name} 학생 ${timeInfo.period} ${timeInfo.hour}시 ${timeInfo.minutes}분에 복귀하였습니다.`);
-            
-            broadcastData();
-            updatePCScreen();
-        }
-
-        function showEnterModal() {
-            const nameInput = document.getElementById('studentName');
-            const name = nameInput.value.trim();
-            if (!name) {
-                alert('이름을 입력해주세요.');
-                return;
-            }
-            currentStudentName = name;
-            selectedEnterTime = '';
-            document.querySelectorAll('#enterModal .time-btn').forEach(btn => btn.classList.remove('selected'));
-            document.getElementById('enterModal').classList.add('show');
-        }
-
-        function selectEnterTime(btn, time) {
-            document.querySelectorAll('#enterModal .time-btn').forEach(b => b.classList.remove('selected'));
-            btn.classList.add('selected');
-            selectedEnterTime = time;
-        }
-
-        function confirmEnter() {
-            if (!selectedEnterTime) {
-                alert('공부 종료 시각을 선택해주세요.');
-                return;
-            }
-            saveNewName(currentStudentName);
-            const now = new Date();
-            const timeInfo = formatTime(now);
-            const memberStatus = JSON.parse(localStorage.getItem('memberStatus')) || {};
-            
-            memberStatus[currentStudentName] = { 
-                status: '입실', 
-                time: timeInfo.full,
-                studyEndTime: selectedEnterTime,
-                outReason: '',
-                outDuration: '',
-                nextArrival: ''
-            };
-            localStorage.setItem('memberStatus', JSON.stringify(memberStatus));
-
-            const accessLogs = JSON.parse(localStorage.getItem('accessLogs')) || [];
-            accessLogs.unshift({ 
-                name: currentStudentName, 
-                status: '입실', 
-                time: timeInfo.full,
-                studyEndTime: selectedEnterTime,
-                outReason: '',
-                outDuration: '',
-                nextArrival: ''
-            });
-            localStorage.setItem('accessLogs', JSON.stringify(accessLogs));
-
-            document.getElementById('studentName').value = '';
-            alert(`${currentStudentName} 학생 ${timeInfo.period} ${timeInfo.hour}시 ${timeInfo.minutes}분에 입실하였습니다.\n${selectedEnterTime}에 하원할 예정입니다.`);
-            
-            closeModal();
-            broadcastData();
-            updatePCScreen();
-        }
-
-        function showOutModal() {
-            const nameInput = document.getElementById('studentName');
-            const name = nameInput.value.trim();
-            if (!name) {
-                alert('이름을 입력해주세요.');
-                return;
-            }
-            currentStudentName = name;
-            selectedOutReason = '';
-            selectedOutDuration = '';
-            document.querySelectorAll('#outModal .time-btn').forEach(btn => btn.classList.remove('selected'));
-            document.getElementById('outModal').classList.add('show');
-        }
-
-        function selectOutReason(btn, reason) {
-            document.querySelectorAll('#outModal .time-btn').forEach(b => {
-                if (['점심', '저녁', '학원', '병원', '집'].includes(b.textContent)) {
-                    b.classList.remove('selected');
-                }
-            });
-            btn.classList.add('selected');
-            selectedOutReason = reason;
-        }
-
-        function selectOutDuration(btn, duration) {
-            document.querySelectorAll('#outModal .time-btn').forEach(b => {
-                if (['30분', '1시간', '1시간 30분', '2시간'].includes(b.textContent)) {
-                    b.classList.remove('selected');
-                }
-            });
-            btn.classList.add('selected');
-            selectedOutDuration = duration;
-        }
-
-        function confirmOut() {
-            if (!selectedOutReason) {
-                alert('외출 사유를 선택해주세요.');
-                return;
-            }
-            if (!selectedOutDuration) {
-                alert('복귀 시간을 선택해주세요.');
-                return;
-            }
-            saveNewName(currentStudentName);
-            const now = new Date();
-            const timeInfo = formatTime(now);
-            const durationMap = {'30분': 30, '1시간': 60, '1시간 30분': 90, '2시간': 120};
-            const addMinutes = durationMap[selectedOutDuration];
-            const returnTime = new Date(now.getTime() + addMinutes * 60000);
-            const returnInfo = formatTime(returnTime);
-
-            const memberStatus = JSON.parse(localStorage.getItem('memberStatus')) || {};
-            memberStatus[currentStudentName] = { 
-                status: '외출', 
-                time: timeInfo.full,
-                studyEndTime: '',
-                outReason: selectedOutReason,
-                outDuration: selectedOutDuration,
-                nextArrival: ''
-            };
-            localStorage.setItem('memberStatus', JSON.stringify(memberStatus));
-
-            const accessLogs = JSON.parse(localStorage.getItem('accessLogs')) || [];
-            accessLogs.unshift({ 
-                name: currentStudentName, 
-                status: '외출', 
-                time: timeInfo.full,
-                studyEndTime: '',
-                outReason: selectedOutReason,
-                outDuration: selectedOutDuration,
-                nextArrival: ''
-            });
-            localStorage.setItem('accessLogs', JSON.stringify(accessLogs));
-
-            document.getElementById('studentName').value = '';
-            alert(`${currentStudentName} 학생 ${timeInfo.period} ${timeInfo.hour}시 ${timeInfo.minutes}분에 ${selectedOutReason} 가서 외출하여\n${returnInfo.period} ${returnInfo.hour}시 ${returnInfo.minutes}분에 복귀 예정입니다.`);
-            
-            closeModal();
-            broadcastData();
-            updatePCScreen();
-        }
-
-        function showExitModal() {
-            const nameInput = document.getElementById('studentName');
-            const name = nameInput.value.trim();
-            if (!name) {
-                alert('이름을 입력해주세요.');
-                return;
-            }
-            currentStudentName = name;
-            selectedExitTime = '';
-            document.querySelectorAll('#exitModal .time-btn').forEach(btn => btn.classList.remove('selected'));
-            document.getElementById('exitModal').classList.add('show');
-        }
-
-        function selectExitTime(btn, time) {
-            document.querySelectorAll('#exitModal .time-btn').forEach(b => b.classList.remove('selected'));
-            btn.classList.add('selected');
-            selectedExitTime = time;
-        }
-
-        function confirmExit() {
-            if (!selectedExitTime) {
-                alert('다음날 등원 시각을 선택해주세요.');
-                return;
-            }
-            saveNewName(currentStudentName);
-            const now = new Date();
-            const timeInfo = formatTime(now);
-
-            const memberStatus = JSON.parse(localStorage.getItem('memberStatus')) || {};
-            memberStatus[currentStudentName] = { 
-                status: '퇴실', 
-                time: timeInfo.full,
-                studyEndTime: '',
-                outReason: '',
-                outDuration: '',
-                nextArrival: selectedExitTime
-            };
-            localStorage.setItem('memberStatus', JSON.stringify(memberStatus));
-
-            const accessLogs = JSON.parse(localStorage.getItem('accessLogs')) || [];
-            accessLogs.unshift({ 
-                name: currentStudentName, 
-                status: '퇴실', 
-                time: timeInfo.full,
-                studyEndTime: '',
-                outReason: '',
-                outDuration: '',
-                nextArrival: selectedExitTime
-            });
-            localStorage.setItem('accessLogs', JSON.stringify(accessLogs));
-
-            document.getElementById('studentName').value = '';
-            alert(`${currentStudentName} 학생 ${timeInfo.period} ${timeInfo.hour}시 ${timeInfo.minutes}분에 하원하였습니다.\n내일 ${selectedExitTime}에 입실할 예정입니다.`);
-            
-            closeModal();
-            broadcastData();
-            updatePCScreen();
-        }
-
-        function closeModal() {
-            document.getElementById('enterModal').classList.remove('show');
-            document.getElementById('outModal').classList.remove('show');
-            document.getElementById('exitModal').classList.remove('show');
-        }
-
-        function updatePCScreen() {
-            const memberStatus = JSON.parse(localStorage.getItem('memberStatus')) || {};
-            const accessLogs = JSON.parse(localStorage.getItem('accessLogs')) || [];
-
-            const tableBody = document.getElementById('statusTableBody');
-            tableBody.innerHTML = '';
-            const statusKeys = Object.keys(memberStatus);
-            
-            if (statusKeys.length === 0) {
-                tableBody.innerHTML = '<tr><td colspan="4" class="empty-state">아직 등록된 학생이 없습니다.</td></tr>';
-            } else {
-                statusKeys.forEach(name => {
-                    const data = memberStatus[name];
-                    const row = document.createElement('tr');
-                    let extraInfo = '';
-                    if (data.studyEndTime) {
-                        extraInfo = '<span class="next-arrival">공부 종료: ' + data.studyEndTime + '</span>';
-                    } else if (data.outReason && data.outDuration) {
-                        extraInfo = '<span class="next-arrival">' + data.outReason + ' (' + data.outDuration + ' 후 복귀)</span>';
-                    } else if (data.nextArrival) {
-                        extraInfo = '<span class="next-arrival">' + data.nextArrival + '</span>';
-                    }
-                    row.innerHTML = `
-                        <td><strong>${name}</strong></td>
-                        <td><span class="badge badge-${data.status}">${data.status}</span></td>
-                        <td>${data.time}</td>
-                        <td>${extraInfo || '-'}</td>
-                    `;
-                    tableBody.appendChild(row);
-                });
-            }
-
-            const logList = document.getElementById('logList');
-            logList.innerHTML = '';
-            if (accessLogs.length === 0) {
-                logList.innerHTML = '<div class="empty-state">아직 기록이 없습니다.</div>';
-            } else {
-                accessLogs.forEach(log => {
-                    const logItem = document.createElement('div');
-                    logItem.className = `log-item ${log.status}`;
-                    const timeParts = log.time.split(':');
-                    const hours = parseInt(timeParts[0]);
-                    const minutes = timeParts[1];
-                    const period = hours < 12 ? '오전' : '오후';
-                    const displayHour = hours === 0 ? 12 : (hours <= 12 ? hours : hours - 12);
-                    
-                    let logText = '';
-                    if (log.status === '입실') {
-                        logText = `<strong>${log.name}</strong> 학생 ${period} ${displayHour}시 ${minutes}분에 <span style="font-weight:bold; color:var(--color-${log.status})">입실</span>하였습니다.`;
-                        if (log.studyEndTime) {
-                            logText += `<br><span class="next-arrival">${log.studyEndTime}에 하원할 예정입니다.</span>`;
-                        }
-                    } else if (log.status === '외출') {
-                        logText = `<strong>${log.name}</strong> 학생 ${period} ${displayHour}시 ${minutes}분에 ${log.outReason} 가서 <span style="font-weight:bold; color:var(--color-${log.status})">외출</span>하였습니다.`;
-                        if (log.outDuration) {
-                            logText += `<br><span class="next-arrival">${log.outDuration} 후 복귀 예정입니다.</span>`;
-                        }
-                    } else if (log.status === '복귀') {
-                        logText = `<strong>${log.name}</strong> 학생 ${period} ${displayHour}시 ${minutes}분에 <span style="font-weight:bold; color:var(--color-${log.status})">복귀</span>하였습니다.`;
-                    } else if (log.status === '퇴실') {
-                        logText = `<strong>${log.name}</strong> 학생 ${period} ${displayHour}시 ${minutes}분에 <span style="font-weight:bold; color:var(--color-${log.status})">하원</span>하였습니다.`;
-                        if (log.nextArrival) {
-                            logText += `<br><span class="next-arrival">내일 ${log.nextArrival}에 입실할 예정입니다.</span>`;
-                        }
-                    }
-                    logText += `<span class="time-text">${log.time}</span>`;
-                    logItem.innerHTML = logText;
-                    logList.appendChild(logItem);
-                });
-            }
-        }
-
-        function switchMode(mode) {
-            document.querySelectorAll('.mode-btn').forEach(btn => btn.classList.remove('active'));
-            document.querySelectorAll('.screen').forEach(scr => scr.classList.remove('active'));
-            if (mode === 'tablet') {
-                document.getElementById('tabletMode').classList.add('active');
-                document.querySelectorAll('.mode-btn')[0].classList.add('active');
-                document.getElementById('pcToolbar').style.display = 'none';
-            } else {
-                document.getElementById('pcMode').classList.add('active');
-                document.querySelectorAll('.mode-btn')[1].classList.add('active');
-                document.getElementById('pcToolbar').style.display = 'block';
-                updatePCScreen();
-            }
-        }
-
-        function clearLogs() {
-            if (!confirm('모든 로그 기록을 삭제하시겠습니까?\n\n⚠️ 이 작업은 되돌릴 수 없습니다.\n(현재 상태 정보는 유지됩니다)')) {
-                return;
-            }
-            localStorage.setItem('accessLogs', JSON.stringify([]));
-            broadcastData();
-            updatePCScreen();
-            alert('✅ 로그가 모두 삭제되었습니다.');
-        }
-
-        updateNameList();
+    // ── 실시간 리스너: 현재 상태 ──
+    onValue(ref(db, 'memberStatus'), snap => {
+        memberStatusCache = snap.val() || {};
         updatePCScreen();
-    </script>
+    });
+
+    // ── 실시간 리스너: 출입 기록 ──
+    onValue(ref(db, 'accessLogs'), snap => {
+        const raw = snap.val() || {};
+        accessLogsCache = Object.entries(raw)
+            .sort((a, b) => b[0].localeCompare(a[0]))
+            .map(([, v]) => v);
+        updatePCScreen();
+    });
+
+    // ── 실시간 리스너: 학생 이름 목록 ──
+    onValue(ref(db, 'studentNames'), snap => {
+        studentNamesCache = snap.val() || [];
+        updateNameList();
+    });
+
+    // ── 유틸 ──
+    function formatTime(date) {
+        const h = date.getHours(), m = date.getMinutes();
+        return {
+            full:    `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`,
+            period:  h < 12 ? '오전' : '오후',
+            hour:    h === 0 ? 12 : (h > 12 ? h - 12 : h),
+            minutes: String(m).padStart(2,'0')
+        };
+    }
+
+    function safeKey(name) { return name.replace(/[.#$/[\]]/g, '_'); }
+
+    function updateNameList() {
+        const dl = document.getElementById('nameList');
+        dl.innerHTML = '';
+        studentNamesCache.forEach(name => {
+            const opt = document.createElement('option');
+            opt.value = name;
+            dl.appendChild(opt);
+        });
+    }
+
+    async function saveNewName(name) {
+        if (!studentNamesCache.includes(name)) {
+            const updated = [...studentNamesCache, name].sort();
+            await set(ref(db, 'studentNames'), updated);
+        }
+    }
+
+    async function saveMemberStatus(name, data) {
+        await set(ref(db, `memberStatus/${safeKey(name)}`), { name, ...data });
+    }
+
+    async function saveLog(logData) {
+        await push(ref(db, 'accessLogs'), logData);
+    }
+
+    // ── 복귀 ──
+    async function processReturn() {
+        const name = document.getElementById('studentName').value.trim();
+        if (!name) { alert('이름을 입력해주세요.'); return; }
+        await saveNewName(name);
+        const tf = formatTime(new Date());
+        const prev = memberStatusCache[safeKey(name)] || {};
+        await saveMemberStatus(name, {
+            status: '복귀', time: tf.full,
+            studyEndTime: prev.studyEndTime || '',
+            outReason: '', outDuration: '',
+            nextArrival: prev.nextArrival || ''
+        });
+        await saveLog({ name, status: '복귀', time: tf.full, studyEndTime: '', outReason: '', outDuration: '', nextArrival: '' });
+        document.getElementById('studentName').value = '';
+        alert(`${name} 학생 ${tf.period} ${tf.hour}시 ${tf.minutes}분에 복귀하였습니다.`);
+    }
+
+    // ── 입실 ──
+    function showEnterModal() {
+        const name = document.getElementById('studentName').value.trim();
+        if (!name) { alert('이름을 입력해주세요.'); return; }
+        currentStudentName = name; selectedEnterTime = '';
+        document.querySelectorAll('#enterModal .time-btn').forEach(b => b.classList.remove('selected'));
+        document.getElementById('enterModal').classList.add('show');
+    }
+    function selectEnterTime(btn, time) {
+        document.querySelectorAll('#enterModal .time-btn').forEach(b => b.classList.remove('selected'));
+        btn.classList.add('selected');
+        selectedEnterTime = time;
+    }
+    async function confirmEnter() {
+        if (!selectedEnterTime) { alert('공부 종료 시각을 선택해주세요.'); return; }
+        await saveNewName(currentStudentName);
+        const tf = formatTime(new Date());
+        await saveMemberStatus(currentStudentName, {
+            status: '입실', time: tf.full, studyEndTime: selectedEnterTime,
+            outReason: '', outDuration: '', nextArrival: ''
+        });
+        await saveLog({ name: currentStudentName, status: '입실', time: tf.full, studyEndTime: selectedEnterTime, outReason: '', outDuration: '', nextArrival: '' });
+        document.getElementById('studentName').value = '';
+        alert(`${currentStudentName} 학생 ${tf.period} ${tf.hour}시 ${tf.minutes}분에 입실하였습니다.\n${selectedEnterTime}에 하원할 예정입니다.`);
+        closeModal();
+    }
+
+    // ── 외출 ──
+    function showOutModal() {
+        const name = document.getElementById('studentName').value.trim();
+        if (!name) { alert('이름을 입력해주세요.'); return; }
+        currentStudentName = name; selectedOutReason = ''; selectedOutDuration = '';
+        document.querySelectorAll('#outModal .time-btn').forEach(b => b.classList.remove('selected'));
+        document.getElementById('outModal').classList.add('show');
+    }
+    function selectOutReason(btn, reason) {
+        document.querySelectorAll('#outModal .time-btn').forEach(b => {
+            if (['점심','저녁','학원','병원','집'].includes(b.textContent)) b.classList.remove('selected');
+        });
+        btn.classList.add('selected'); selectedOutReason = reason;
+    }
+    function selectOutDuration(btn, duration) {
+        document.querySelectorAll('#outModal .time-btn').forEach(b => {
+            if (['30분','1시간','1시간 30분','2시간'].includes(b.textContent)) b.classList.remove('selected');
+        });
+        btn.classList.add('selected'); selectedOutDuration = duration;
+    }
+    async function confirmOut() {
+        if (!selectedOutReason) { alert('외출 사유를 선택해주세요.'); return; }
+        if (!selectedOutDuration) { alert('복귀 시간을 선택해주세요.'); return; }
+        await saveNewName(currentStudentName);
+        const now = new Date();
+        const tf = formatTime(now);
+        const mins = {'30분':30,'1시간':60,'1시간 30분':90,'2시간':120}[selectedOutDuration];
+        const returnTf = formatTime(new Date(now.getTime() + mins * 60000));
+        await saveMemberStatus(currentStudentName, {
+            status: '외출', time: tf.full, studyEndTime: '',
+            outReason: selectedOutReason, outDuration: selectedOutDuration, nextArrival: ''
+        });
+        await saveLog({ name: currentStudentName, status: '외출', time: tf.full, studyEndTime: '', outReason: selectedOutReason, outDuration: selectedOutDuration, nextArrival: '' });
+        document.getElementById('studentName').value = '';
+        alert(`${currentStudentName} 학생 ${tf.period} ${tf.hour}시 ${tf.minutes}분에 ${selectedOutReason} 가서 외출하여\n${returnTf.period} ${returnTf.hour}시 ${returnTf.minutes}분에 복귀 예정입니다.`);
+        closeModal();
+    }
+
+    // ── 퇴실 ──
+    function showExitModal() {
+        const name = document.getElementById('studentName').value.trim();
+        if (!name) { alert('이름을 입력해주세요.'); return; }
+        currentStudentName = name; selectedExitTime = '';
+        document.querySelectorAll('#exitModal .time-btn').forEach(b => b.classList.remove('selected'));
+        document.getElementById('exitModal').classList.add('show');
+    }
+    function selectExitTime(btn, time) {
+        document.querySelectorAll('#exitModal .time-btn').forEach(b => b.classList.remove('selected'));
+        btn.classList.add('selected'); selectedExitTime = time;
+    }
+    async function confirmExit() {
+        if (!selectedExitTime) { alert('다음날 등원 시각을 선택해주세요.'); return; }
+        await saveNewName(currentStudentName);
+        const tf = formatTime(new Date());
+        await saveMemberStatus(currentStudentName, {
+            status: '퇴실', time: tf.full, studyEndTime: '', outReason: '', outDuration: '', nextArrival: selectedExitTime
+        });
+        await saveLog({ name: currentStudentName, status: '퇴실', time: tf.full, studyEndTime: '', outReason: '', outDuration: '', nextArrival: selectedExitTime });
+        document.getElementById('studentName').value = '';
+        alert(`${currentStudentName} 학생 ${tf.period} ${tf.hour}시 ${tf.minutes}분에 하원하였습니다.\n내일 ${selectedExitTime}에 입실할 예정입니다.`);
+        closeModal();
+    }
+
+    function closeModal() {
+        ['enterModal','outModal','exitModal'].forEach(id => document.getElementById(id).classList.remove('show'));
+    }
+
+    // ── PC 화면 렌더 ──
+    function updatePCScreen() {
+        // 상태 테이블
+        const tbody = document.getElementById('statusTableBody');
+        tbody.innerHTML = '';
+        const keys = Object.keys(memberStatusCache);
+        if (keys.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="4" class="empty-state">아직 등록된 학생이 없습니다.</td></tr>';
+        } else {
+            keys.forEach(key => {
+                const d = memberStatusCache[key];
+                let extra = '';
+                if (d.studyEndTime) extra = `<span class="next-arrival">공부 종료: ${d.studyEndTime}</span>`;
+                else if (d.outReason && d.outDuration) extra = `<span class="next-arrival">${d.outReason} (${d.outDuration} 후 복귀)</span>`;
+                else if (d.nextArrival) extra = `<span class="next-arrival">${d.nextArrival}</span>`;
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td><strong>${d.name || key}</strong></td>
+                    <td><span class="badge badge-${d.status}">${d.status}</span></td>
+                    <td>${d.time}</td>
+                    <td>${extra || '-'}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        // 로그
+        const logList = document.getElementById('logList');
+        logList.innerHTML = '';
+        if (accessLogsCache.length === 0) {
+            logList.innerHTML = '<div class="empty-state">아직 기록이 없습니다.</div>';
+        } else {
+            accessLogsCache.forEach((log, idx) => {
+                const item = document.createElement('div');
+                item.className = `log-item ${log.status}${idx === 0 ? ' new' : ''}`;
+                const h = parseInt(log.time.split(':')[0]);
+                const m = log.time.split(':')[1];
+                const period = h < 12 ? '오전' : '오후';
+                const dh = h === 0 ? 12 : (h <= 12 ? h : h - 12);
+                let txt = '';
+                if (log.status === '입실') {
+                    txt = `<strong>${log.name}</strong> 학생 ${period} ${dh}시 ${m}분에 <span style="font-weight:bold;color:var(--color-입실)">입실</span>하였습니다.`;
+                    if (log.studyEndTime) txt += `<br><span class="next-arrival">${log.studyEndTime}에 하원할 예정입니다.</span>`;
+                } else if (log.status === '외출') {
+                    txt = `<strong>${log.name}</strong> 학생 ${period} ${dh}시 ${m}분에 ${log.outReason} 가서 <span style="font-weight:bold;color:var(--color-외출)">외출</span>하였습니다.`;
+                    if (log.outDuration) txt += `<br><span class="next-arrival">${log.outDuration} 후 복귀 예정입니다.</span>`;
+                } else if (log.status === '복귀') {
+                    txt = `<strong>${log.name}</strong> 학생 ${period} ${dh}시 ${m}분에 <span style="font-weight:bold;color:var(--color-복귀)">복귀</span>하였습니다.`;
+                } else if (log.status === '퇴실') {
+                    txt = `<strong>${log.name}</strong> 학생 ${period} ${dh}시 ${m}분에 <span style="font-weight:bold;color:var(--color-퇴실)">하원</span>하였습니다.`;
+                    if (log.nextArrival) txt += `<br><span class="next-arrival">내일 ${log.nextArrival}에 입실할 예정입니다.</span>`;
+                }
+                txt += `<span class="time-text">${log.time}</span>`;
+                item.innerHTML = txt;
+                logList.appendChild(item);
+            });
+        }
+    }
+
+    // ── 모드 전환 ──
+    function switchMode(mode) {
+        document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+        if (mode === 'tablet') {
+            document.getElementById('tabletMode').classList.add('active');
+            document.querySelectorAll('.mode-btn')[0].classList.add('active');
+            document.getElementById('pcToolbar').style.display = 'none';
+        } else {
+            document.getElementById('pcMode').classList.add('active');
+            document.querySelectorAll('.mode-btn')[1].classList.add('active');
+            document.getElementById('pcToolbar').style.display = 'block';
+        }
+    }
+
+    // ── 로그 삭제 ──
+    async function clearLogs() {
+        if (!confirm('모든 로그 기록을 삭제하시겠습니까?\n\n⚠️ 이 작업은 되돌릴 수 없습니다.\n(현재 상태 정보는 유지됩니다)')) return;
+        await remove(ref(db, 'accessLogs'));
+        alert('✅ 로그가 모두 삭제되었습니다.');
+    }
+
+    // ── 전역 노출 ──
+    Object.assign(window, {
+        switchMode, clearLogs,
+        showEnterModal, selectEnterTime, confirmEnter,
+        showOutModal, selectOutReason, selectOutDuration, confirmOut,
+        processReturn,
+        showExitModal, selectExitTime, confirmExit,
+        closeModal
+    });
+</script>
 </body>
 </html>
