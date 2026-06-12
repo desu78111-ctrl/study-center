@@ -114,6 +114,10 @@ button{font-family:inherit;border:none;cursor:pointer}
 .stu-row .phone{color:var(--ink-soft);font-size:12px}
 .del-btn{background:none;color:#C2BFD9;font-size:16px;padding:4px 8px}
 .del-btn:active{color:var(--coral)}
+.log-del{background:none;color:#C2BFD9;font-size:15px;padding:6px 8px;border-radius:8px;flex-shrink:0}
+.log-del.arm{background:var(--coral);color:#fff;font-size:12px;font-weight:700;padding:7px 10px}
+.clear-btn{background:none;border:1px solid var(--line);border-radius:8px;font-size:12px;font-weight:600;padding:6px 10px;color:var(--ink-soft);margin-left:8px}
+.clear-btn.arm{background:var(--coral);border-color:var(--coral);color:#fff}
 .toast{position:fixed;bottom:28px;left:50%;transform:translateX(-50%);background:var(--ink);color:#fff;font-size:14px;padding:12px 22px;border-radius:30px;opacity:0;transition:opacity .25s;pointer-events:none;z-index:99}
 .toast.show{opacity:1}
 </style>
@@ -211,7 +215,10 @@ button{font-family:inherit;border:none;cursor:pointer}
     <div class="panel">
       <div class="panel-head">
         <h2>오늘 입퇴실 기록</h2>
-        <span class="count" id="logCount"></span>
+        <div style="display:flex;align-items:center">
+          <span class="count" id="logCount"></span>
+          <button class="clear-btn" id="clearAllBtn" onclick="clearTodayLogs()">전체 삭제</button>
+        </div>
       </div>
       <div class="log-list" id="logList"><div class="empty-note">아직 기록이 없습니다</div></div>
     </div>
@@ -311,14 +318,13 @@ function setMode(m){
   mode = m;
   localStorage.setItem("bsMode", m);
   if (m === "kiosk") show("screen-kiosk");
-  else { show("screen-board"); subscribeLogs(); renderStudents(); }
+  else { show("screen-board"); subscribeLogs(); renderStudents(); cleanupOldLogs(); }
 }
 function resetMode(){
   localStorage.removeItem("bsMode");
   mode = "";
   show("screen-select");
 }
-if (mode) setMode(mode); else show("screen-select");
 
 /* ═══════════ 태블릿 키오스크 ═══════════ */
 let numBuf = "";
@@ -480,6 +486,7 @@ function renderLogs(logs){
       '<div class="grow"><div class="name">' + l.name + ' <span style="font-weight:400;color:var(--ink-soft);font-size:12px">#' + l.sid + '</span></div>' +
       '<div class="meta">' + timeLabel(l.ts) + extra + (phone ? " · " + phone : "") + '</div></div>' +
       '<button class="copy-btn" id="cp-' + key + '" onclick="copyMsg(\'' + key + '\')">카톡 복사</button>' +
+      '<button class="log-del" id="ld-' + key + '" onclick="delLog(\'' + key + '\')">✕</button>' +
       '</div>';
   }).join("");
   latestLogs = logs;
@@ -499,6 +506,77 @@ function copyMsg(key){
     // 클립보드 권한이 없을 때 대비
     prompt("아래 내용을 직접 복사하세요:", msg);
   });
+}
+
+/* ═══════════ 기록 삭제 ═══════════ */
+/* 개별 삭제: ✕를 한 번 누르면 "삭제?"로 바뀌고, 4초 안에 다시 누르면 삭제됩니다.
+   (브라우저 환경에 따라 confirm 창이 막히는 경우가 있어 두 번 누르기 방식 사용) */
+let armedDel = null, armedDelTimer = null;
+function delLog(key){
+  const btn = document.getElementById("ld-" + key);
+  if (armedDel !== key) {
+    // 1단계: 삭제 대기 상태로 전환
+    if (armedDel) disarmDel();
+    armedDel = key;
+    if (btn) { btn.textContent = "삭제?"; btn.classList.add("arm"); }
+    armedDelTimer = setTimeout(disarmDel, 4000);
+    return;
+  }
+  // 2단계: 실제 삭제
+  disarmDel();
+  db.ref(ROOT + "/logs/" + todayKey() + "/" + key).remove()
+    .then(() => toast("기록 1건을 삭제했습니다."))
+    .catch(() => toast("삭제에 실패했습니다. 인터넷 연결을 확인해주세요."));
+}
+function disarmDel(){
+  if (armedDel) {
+    const prev = document.getElementById("ld-" + armedDel);
+    if (prev) { prev.textContent = "✕"; prev.classList.remove("arm"); }
+  }
+  armedDel = null;
+  clearTimeout(armedDelTimer);
+}
+
+/* 전체 삭제: 버튼을 한 번 누르면 "정말 삭제? 다시 누르세요"로 바뀌고,
+   5초 안에 다시 누르면 오늘 기록이 전부 지워집니다. */
+let clearArmed = false, clearTimer = null;
+function clearTodayLogs(){
+  const btn = document.getElementById("clearAllBtn");
+  if (!clearArmed) {
+    clearArmed = true;
+    btn.textContent = "정말 삭제? 다시 누르세요";
+    btn.classList.add("arm");
+    clearTimer = setTimeout(() => {
+      clearArmed = false;
+      btn.textContent = "전체 삭제";
+      btn.classList.remove("arm");
+    }, 5000);
+    return;
+  }
+  clearArmed = false;
+  clearTimeout(clearTimer);
+  btn.textContent = "전체 삭제";
+  btn.classList.remove("arm");
+  db.ref(ROOT + "/logs/" + todayKey()).remove()
+    .then(() => toast("오늘 기록을 모두 삭제했습니다."))
+    .catch(() => toast("삭제에 실패했습니다. 인터넷 연결을 확인해주세요."));
+}
+
+/* 오래된 기록 자동 정리: PC 현황판을 열 때마다 7일이 지난 날짜의 기록을
+   데이터베이스에서 자동 삭제해 데이터가 무한정 쌓이지 않게 합니다. */
+const KEEP_DAYS = 7; // 보관 일수 (바꾸고 싶으면 이 숫자만 수정)
+function cleanupOldLogs(){
+  const cutoff = new Date();
+  cutoff.setDate(cutoff.getDate() - KEEP_DAYS);
+  const cutoffKey = cutoff.getFullYear() + "-" + String(cutoff.getMonth()+1).padStart(2,"0") + "-" + String(cutoff.getDate()).padStart(2,"0");
+  db.ref(ROOT + "/logs").once("value").then(s => {
+    const all = s.val() || {};
+    let removed = 0;
+    Object.keys(all).forEach(dayKey => {
+      if (dayKey < cutoffKey) { db.ref(ROOT + "/logs/" + dayKey).remove(); removed++; }
+    });
+    if (removed) console.log(removed + "일치 오래된 기록을 정리했습니다.");
+  }).catch(() => {});
 }
 
 /* 학생 관리 */
@@ -550,6 +628,9 @@ function toast(msg){
 setInterval(() => {
   if (mode === "board" && logsRef && !logsRef.toString().endsWith(todayKey())) subscribeLogs();
 }, 60000);
+
+/* ═══════════ 시작: 저장된 모드로 실행 (반드시 맨 마지막) ═══════════ */
+if (mode) setMode(mode); else show("screen-select");
 </script>
 </body>
 </html>
