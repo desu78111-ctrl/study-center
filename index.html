@@ -106,6 +106,9 @@ button{font-family:inherit;border:none;cursor:pointer}
 .stu-form input{border:1px solid var(--line);border-radius:8px;padding:10px 12px;font-size:14px;font-family:inherit}
 .stu-form input:focus{outline:2px solid var(--purple);border-color:transparent}
 .stu-form button{background:var(--purple);color:#fff;border-radius:8px;padding:11px;font-size:14px;font-weight:700}
+.stu-search{padding:12px 18px;border-bottom:1px solid var(--line)}
+.stu-search input{width:100%;border:1px solid var(--line);border-radius:8px;padding:10px 12px;font-size:14px;font-family:inherit;background:var(--bg)}
+.stu-search input:focus{outline:2px solid var(--purple);border-color:transparent}
 .stu-list{max-height:46vh;overflow-y:auto}
 .stu-row{display:flex;align-items:center;padding:10px 18px;border-bottom:1px solid var(--line);font-size:13px;gap:8px}
 .stu-row:last-child{border-bottom:none}
@@ -222,6 +225,9 @@ button{font-family:inherit;border:none;cursor:pointer}
         <input id="fName" type="text" placeholder="학생 이름">
         <input id="fPhone" type="tel" placeholder="부모님 연락처 (010-0000-0000)">
         <button onclick="addStudent()">학생 등록</button>
+      </div>
+      <div class="stu-search">
+        <input id="stuSearch" type="text" placeholder="🔍 이름 또는 번호로 검색" oninput="renderStudents()">
       </div>
       <div class="stu-list" id="stuList"></div>
     </div>
@@ -504,12 +510,32 @@ function copyMsg(key){
   });
 }
 
-/* 학생 관리 */
+/* 학생 관리: 검색 + 가나다순 정렬 */
 function renderStudents(){
   const list = document.getElementById("stuList");
-  const entries = Object.entries(students).sort((a,b) => Number(a[0]) - Number(b[0]));
-  document.getElementById("stuCount").textContent = entries.length ? entries.length + "명" : "";
-  if (!entries.length) { list.innerHTML = '<div class="empty-note">등록된 학생이 없습니다</div>'; return; }
+  const searchEl = document.getElementById("stuSearch");
+  const query = searchEl ? searchEl.value.trim().toLowerCase() : "";
+
+  let entries = Object.entries(students);
+
+  if (query) {
+    entries = entries.filter(([sid, s]) =>
+      (s.name || "").toLowerCase().includes(query) || sid.includes(query)
+    );
+  }
+
+  // 이름 기준 가나다순(한국어 로케일) 정렬
+  entries.sort((a, b) => (a[1].name || "").localeCompare(b[1].name || "", "ko"));
+
+  document.getElementById("stuCount").textContent = entries.length
+    ? entries.length + "명" + (query ? " (검색됨)" : "")
+    : "";
+
+  if (!entries.length) {
+    list.innerHTML = '<div class="empty-note">' + (query ? "검색 결과가 없습니다" : "등록된 학생이 없습니다") + '</div>';
+    return;
+  }
+
   list.innerHTML = entries.map(([sid, s]) =>
     '<div class="stu-row"><span class="num">#' + sid + '</span>' +
     '<div class="grow">' + s.name + '<div class="phone">' + (s.phone || "") + '</div></div>' +
