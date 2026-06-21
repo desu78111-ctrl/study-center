@@ -155,6 +155,7 @@ button{font-family:inherit;border:none;cursor:pointer}
         <button class="fn" onclick="keyClear()">지움</button><button onclick="key('0')">0</button><button class="go" onclick="lookup()">확인</button>
       </div>
       <div class="kiosk-msg" id="kioskMsg"></div>
+      <div style="margin-top:10px;font-size:13px;color:#9a9a9a;text-align:center">💻 컴퓨터에서는 키보드 숫자·Enter로도 입력할 수 있어요</div>
     </div>
   </div>
 </div>
@@ -354,6 +355,20 @@ function lookup(){
 }
 function backToKiosk(){ numBuf = ""; renderNum(); currentSid = null; show("screen-kiosk"); }
 
+/* 컴퓨터에서 태블릿 모드 사용 시: 물리 키보드로 고유번호 입력 가능
+   (학생이 입력 못 한 경우 관리자가 키보드로 대신 입력) */
+document.addEventListener("keydown", e => {
+  const kioskVisible = document.getElementById("screen-kiosk").style.display !== "none"
+                       && document.getElementById("screen-kiosk").style.display !== "";
+  if (!kioskVisible) return;
+  if (e.key >= "0" && e.key <= "9") { key(e.key); e.preventDefault(); }
+  else if (e.key === "Backspace") {
+    numBuf = numBuf.slice(0, -1); renderNum();
+    document.getElementById("kioskMsg").textContent = ""; e.preventDefault();
+  }
+  else if (e.key === "Enter") { lookup(); e.preventDefault(); }
+});
+
 /* 분(자정 넘으면 다음날 기준)을 한국어 시간 라벨로 변환 */
 function minLabel2(min){
   const m = min % 1440;
@@ -451,13 +466,14 @@ function subscribeLogs(){
   logsRef.on("value", s => renderLogs(s.val() || {}));
 }
 
-const REASON_PHRASE = { "점심": "점심 먹으러", "저녁": "저녁 먹으러", "학원": "학원 가야해서", "기타": "개인 사유로" };
+const REASON_WORD = { "점심": "점심", "저녁": "저녁", "학원": "학원", "기타": "개인" };
 
 function kakaoMessage(name, type, ts, plan, reason, dur, durMin){
   let msg = "[베스티안 스터디센터]\n";
   if (type === "외출") {
-    msg += name + " 학생이 " + (REASON_PHRASE[reason] || "개인 사유로") + " " + dur + " 외출하였습니다.";
-    if (durMin) msg += "\n복귀 예정 시간은 " + timeLabel(ts + durMin * 60000) + "입니다.";
+    const rw = REASON_WORD[reason] || "개인";
+    msg += name + " 학생 " + rw + " 사유로 " + timeLabel(ts) + "에 외출하였습니다.";
+    if (durMin) msg += " 복귀 예정시간은 " + timeLabel(ts + durMin * 60000) + " 입니다.";
   } else if (type === "복귀") {
     msg += name + " 학생이 " + timeLabel(ts) + "에 외출 후 복귀하였습니다.";
   } else {
