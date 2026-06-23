@@ -99,6 +99,8 @@ button{font-family:inherit;border:none;cursor:pointer}
 .copy-btn{background:var(--bg);border:1px solid var(--line);border-radius:8px;font-size:12px;font-weight:600;padding:7px 12px;color:var(--purple-dark)}
 .copy-btn:active{background:#E8E5F7}
 .copy-btn.copied{background:var(--teal);color:#fff;border-color:var(--teal)}
+.del-log{background:none;border:none;color:#C2BFD9;font-size:20px;font-weight:700;line-height:1;padding:4px 8px;cursor:pointer;border-radius:8px;flex-shrink:0}
+.del-log:active{color:#fff;background:var(--coral)}
 .empty-note{padding:34px;text-align:center;font-size:14px;color:var(--ink-soft)}
 
 /* 학생 관리 */
@@ -215,7 +217,10 @@ button{font-family:inherit;border:none;cursor:pointer}
     <div class="panel">
       <div class="panel-head">
         <h2>오늘 입퇴실 기록</h2>
-        <span class="count" id="logCount"></span>
+        <div style="display:flex;align-items:center;gap:10px">
+          <span class="count" id="logCount"></span>
+          <button id="clearLogsBtn" onclick="clearAllLogs()" style="display:none;background:#fbe9e9;color:#c0392b;border:none;border-radius:7px;padding:6px 11px;font-size:12px;font-weight:700;cursor:pointer">전체 삭제</button>
+        </div>
       </div>
       <div class="log-list" id="logList"><div class="empty-note">아직 기록이 없습니다</div></div>
     </div>
@@ -358,9 +363,12 @@ function backToKiosk(){ numBuf = ""; renderNum(); currentSid = null; show("scree
 /* 컴퓨터에서 태블릿 모드 사용 시: 물리 키보드로 고유번호 입력 가능
    (학생이 입력 못 한 경우 관리자가 키보드로 대신 입력) */
 document.addEventListener("keydown", e => {
-  const kioskVisible = document.getElementById("screen-kiosk").style.display !== "none"
-                       && document.getElementById("screen-kiosk").style.display !== "";
-  if (!kioskVisible) return;
+  // 입력란(고유번호/이름/연락처 등)에 포커스가 있으면 절대 간섭하지 않음
+  const tag = (e.target && e.target.tagName || "").toLowerCase();
+  if (tag === "input" || tag === "select" || tag === "textarea") return;
+  // 태블릿 '번호 입력' 화면이 실제로 보일 때만 동작
+  const ks = document.getElementById("screen-kiosk");
+  if (!ks || ks.style.display === "none" || ks.style.display === "") return;
   if (e.key >= "0" && e.key <= "9") { key(e.key); e.preventDefault(); }
   else if (e.key === "Backspace") {
     numBuf = numBuf.slice(0, -1); renderNum();
@@ -492,7 +500,8 @@ function renderLogs(logs){
   const list = document.getElementById("logList");
   const entries = Object.entries(logs).sort((a,b) => b[1].ts - a[1].ts);
   document.getElementById("logCount").textContent = entries.length ? "총 " + entries.length + "건" : "";
-  if (!entries.length) { list.innerHTML = '<div class="empty-note">아직 기록이 없습니다</div>'; return; }
+  document.getElementById("clearLogsBtn").style.display = entries.length ? "block" : "none";
+  if (!entries.length) { list.innerHTML = '<div class="empty-note">아직 기록이 없습니다</div>'; latestLogs = {}; return; }
   list.innerHTML = entries.map(([key, l]) => {
     const phone = (students[l.sid] && students[l.sid].phone) || "";
     let extra = "";
@@ -505,9 +514,26 @@ function renderLogs(logs){
       '<div class="grow"><div class="name">' + l.name + ' <span style="font-weight:400;color:var(--ink-soft);font-size:12px">#' + l.sid + '</span></div>' +
       '<div class="meta">' + timeLabel(l.ts) + extra + (phone ? " · " + phone : "") + '</div></div>' +
       '<button class="copy-btn" id="cp-' + key + '" onclick="copyMsg(\'' + key + '\')">카톡 복사</button>' +
+      '<button class="del-log" onclick="deleteLog(\'' + key + '\',\'' + l.name + '\')" title="이 기록 삭제">×</button>' +
       '</div>';
   }).join("");
   latestLogs = logs;
+}
+
+/* 기록 삭제 */
+function deleteLog(key, name){
+  if (!confirm((name || "이 ") + " 학생의 이 기록을 삭제할까요?")) return;
+  db.ref(ROOT + "/logs/" + todayKey() + "/" + key).remove()
+    .then(() => toast("기록을 삭제했습니다."))
+    .catch(() => toast("삭제에 실패했습니다. 인터넷 연결을 확인해주세요."));
+}
+function clearAllLogs(){
+  const n = Object.keys(latestLogs || {}).length;
+  if (!n) return;
+  if (!confirm("오늘 입퇴실 기록 " + n + "건을 모두 삭제할까요?\n(학생 명단은 지워지지 않습니다)")) return;
+  db.ref(ROOT + "/logs/" + todayKey()).remove()
+    .then(() => toast("오늘 기록을 모두 삭제했습니다."))
+    .catch(() => toast("삭제에 실패했습니다. 인터넷 연결을 확인해주세요."));
 }
 
 let latestLogs = {};
