@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex,nofollow">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0072b5">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<link rel="apple-touch-icon" href="logo.png">
+<title>베스티안 스터디센터 · 전체 실시간 현황</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f5f7f9;--line:#d8dfe5;--ink:#1d2328;--mute:#6b737a;--blue:#0072b5;--blued:#004f80;--yellow:#f2c100;--green:#1f7a4d;--amber:#9a5b00;--red:#b02a37}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font-family:'Noto Sans KR','Apple SD Gothic Neo','Malgun Gothic',sans-serif;font-size:15px;line-height:1.55}
+button,input,select,textarea{font:inherit}
+.top{background:var(--blue);color:#fff;border-bottom:6px solid var(--yellow)}.top .in{max-width:1080px;margin:0 auto;padding:14px 16px;display:flex;align-items:center;justify-content:space-between;gap:12px}
+.top h1{font-size:clamp(18px,4vw,27px);margin:0;font-weight:900;color:#fff;white-space:nowrap}.top h1 small{display:block;font-size:11.5px;letter-spacing:.14em;color:#ffe680;font-weight:700}.top img{height:38px;background:#fff;border-radius:6px;padding:5px 8px}
+main{max-width:1080px;margin:0 auto;padding:18px 16px;display:grid;gap:16px}
+.g2{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.5fr);gap:16px}@media(max-width:820px){.g2{grid-template-columns:minmax(0,1fr)}}
+.panel{background:#fff;border:1px solid var(--line);border-radius:12px;padding:16px 18px;min-width:0}.panel h3{margin:0 0 8px;font-size:16px;font-weight:900;color:var(--blued)}
+.inp,.ta,.sel{width:100%;font-size:16px;padding:10px 11px;border-radius:8px;border:1px solid var(--line);background:#fff;color:var(--ink)}
+.btn{display:inline-block;background:var(--blue);color:#fff;font-weight:900;padding:10px 14px;border-radius:8px;border:0;cursor:pointer;min-height:40px}.btn.g{background:#eef5fa;color:var(--ink)}
+.hint{font-size:13px;color:var(--mute);margin:0}
+.kpi{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}@media(max-width:600px){.kpi{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.kpi div{background:#fff;border:1px solid var(--line);border-radius:10px;padding:10px 12px}.kpi small{display:block;color:var(--mute);font-size:12px}.kpi b{font-size:22px}
+table{width:100%;border-collapse:collapse;font-size:14px}th{background:var(--blued);color:#fff;padding:8px;font-weight:700}td{padding:8px;border-bottom:1px solid var(--line);text-align:center;white-space:nowrap}td:first-child{text-align:left;font-weight:700;color:var(--blued)}
+.in{color:var(--green);font-weight:900}.out{color:var(--amber);font-weight:900}.done{color:var(--mute);font-weight:900}.none{color:var(--red);font-weight:900}
+.upd{font-size:12.5px;color:var(--mute)}
+
+.search{display:flex;gap:8px;flex-wrap:wrap;align-items:center}.search .inp{flex:1;min-width:180px}
+.chips{display:flex;flex-wrap:wrap;gap:6px}.chip{display:inline-flex;align-items:center;gap:6px;padding:5px 10px;border-radius:999px;background:#f1f4f7;border:1px solid var(--line);font-size:13.5px;font-weight:700}
+.chip.in{background:#e3f1ea;border-color:#bfe0cc;color:var(--green)}.chip.out{background:#fff3dd;border-color:#f3d89a;color:var(--amber)}.chip.done{background:#eceff2;color:var(--mute)}.chip.none{background:#fbe3e6;border-color:#f1bcc3;color:var(--red)}
+.chip small{font-weight:500;color:var(--mute)}
+.hit{background:#fff8d6}
+</style>
+</head>
+<body>
+<div class="top"><div class="in"><h1><small>BESTIAN STUDY CENTER</small>전체 실시간 현황</h1><img src="logo.png" alt="BESTIAN"></div></div>
+<main>
+  <div class="kpi" id="kpi"></div>
+  <div class="panel" style="display:grid;gap:10px">
+    <div class="search"><input class="inp" id="q" placeholder="학생 이름 검색 (예: 김)" autocomplete="off"><button class="btn g" type="button" id="refresh">새로고침</button><span class="upd" id="upd"></span></div>
+    <p class="hint" id="msg">출결 프로그램(키오스크)과 바로 연결돼요. 15초마다, 그리고 입실·외출·하원이 바뀔 때 바로 갱신돼요.</p>
+  </div>
+  <div class="g2" style="grid-template-columns:minmax(0,1.4fr) minmax(0,1fr)">
+    <div class="panel" style="display:grid;gap:10px;align-content:start">
+      <h3 style="margin:0" id="tIn">온 학생</h3>
+      <div style="overflow-x:auto"><table id="tbl"></table></div>
+    </div>
+    <div class="panel" style="display:grid;gap:10px;align-content:start">
+      <h3 style="margin:0" id="tNone">아직 안 온 학생</h3>
+      <p class="hint">오늘 입실 기록이 없는 독서실 등록 학생이에요.</p>
+      <div class="chips" id="noneList"></div>
+      <h3 style="margin:10px 0 0" id="tDone">하원한 학생</h3>
+      <div class="chips" id="doneList"></div>
+    </div>
+  </div>
+</main>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<script>
+(function(){
+"use strict";
+var SUPABASE_URL='https://qtpftloyumtffvgurvqv.supabase.co',SUPABASE_KEY='sb_publishable_XGP9n-2fuBQFuJlAA5MJ8w_R8JYIi9O';
+var MOCK=/[?&]mock=1/.test(location.search),db=null;try{if(!MOCK&&window.supabase)db=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY)}catch(e){}
+var $=function(s){return document.querySelector(s)},$$=function(s){return Array.prototype.slice.call(document.querySelectorAll(s))},pad=function(n){return n<10?'0'+n:''+n};
+var esc=function(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})};
+function fmtD(d){return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate())}
+function bizToday(){var d=new Date();if(d.getHours()<1||(d.getHours()===1&&d.getMinutes()<10))d.setDate(d.getDate()-1);return fmtD(d)}
+function tMin(t){if(!t)return null;var m=String(t).match(/^(\d{1,2}):(\d{2})/);return m?(+m[1])*60+(+m[2]):null}
+function nowMin(){var d=new Date();var m=d.getHours()*60+d.getMinutes();if(bizToday()!==fmtD(d))m+=1440;return m}
+function outs(r){var o=[];[['out_1_start','out_1_end'],['out_2_start','out_2_end']].forEach(function(p){if(r[p[0]])o.push({s:tMin(r[p[0]]),e:r[p[1]]?tMin(r[p[1]]):null})});(Array.isArray(r.extra_outs)?r.extra_outs:[]).forEach(function(x){if(x&&x.start)o.push({s:tMin(x.start),e:x.end?tMin(x.end):null})});if(r.pending_out_start)o.push({s:tMin(r.pending_out_start),e:null});return o}
+function statusOf(r){if(!r||!r.check_in_time)return 'none';if(r.check_out_time)return 'done';return outs(r).some(function(o){return o.e==null})?'out':'in'}
+function minutesOf(r){if(!r||!r.check_in_time)return 0;var ci=tMin(r.check_in_time),end=r.check_out_time?tMin(r.check_out_time):nowMin();var m=end-ci;outs(r).forEach(function(o){if(o.s==null)return;var e=o.e==null?nowMin():o.e;m-=Math.max(0,Math.min(e,end)-o.s)});m-=Number(r.extra_out_minutes)||0;return Math.max(0,m)}
+function fmtM(m){m=Math.max(0,Math.round(m));return m>=60?Math.floor(m/60)+'시간 '+pad(m%60)+'분':m+'분'}
+
+var GATE_H='d8553e3ac2d808918a2ff3be6f092d23550436d4f051d0fccb41dc675a3bd83a';
+function gateOk(){if(location.protocol==='file:')return Promise.resolve(true);
+  var k=(location.search.match(/[?&]k=([^&#]+)/)||[])[1]||'';if(!k){try{k=localStorage.getItem('bestian_staff_k')||''}catch(e){}}
+  if(!k||!(window.crypto&&crypto.subtle&&window.TextEncoder))return Promise.resolve(false);
+  return crypto.subtle.digest('SHA-256',new TextEncoder().encode(k)).then(function(b){var hex=Array.prototype.map.call(new Uint8Array(b),function(x){return ('0'+x.toString(16)).slice(-2)}).join('');
+    if(hex!==GATE_H)return false;try{localStorage.setItem('bestian_staff_k',k)}catch(e){}return true}).catch(function(){return false})}
+function lockPage(where){document.querySelector('main').innerHTML='<div class="panel" style="text-align:center;padding:36px 18px"><h3 style="font-size:20px">직원용 화면이에요</h3><p class="hint" style="font-size:14.5px">'+where+'의 <b>스터디센터 라이브</b> 탭에 있는 버튼으로 열어 주세요.<br>한 번 열면 이 기기에서는 다음부터 바로 열려요.</p></div>'}
+var USERS=[],ATT=[],SEATS=[],chan=null,Q='';
+$('#q').addEventListener('input',function(){Q=this.value.trim();render()});
+$('#refresh').onclick=load;
+function mockData(){var names=['김베스','이티안','박하안','정광명','최소하','한지원','오서준','윤다은','장민재','서예린'];USERS=names.map(function(n,i){return {id:'u'+i,name:n,school:'광명고',grade:'고2'}});
+  ATT=[{student_id:'u0',check_in_time:'09:05:00'},{student_id:'u1',check_in_time:'09:30:00',pending_out_start:'12:30:00',pending_out_reason:'점심',pending_out_expected_end:'13:20:00'},{student_id:'u2',check_in_time:'08:50:00',check_out_time:'16:10:00'},{student_id:'u3',check_in_time:'10:00:00'}];
+  SEATS=[{seat_no:16,student_id:'u0'},{seat_no:21,student_id:'u1'},{seat_no:3,student_id:'u2'},{seat_no:52,student_id:'u3'}]}
+async function load(){
+  try{
+    if(MOCK)mockData();
+    else{if(!db)throw new Error('no db');
+      var u=await db.from('users').select('id,name,school,grade,status,deleted_at,reading_room_withdrawn_at').eq('reading_room_yn',true);if(u.error)throw u.error;
+      USERS=(u.data||[]).filter(function(x){return x.name&&x.status!=='inactive'&&!x.deleted_at&&!x.reading_room_withdrawn_at});
+      var a=await db.from('reading_room_attendance').select('*').eq('attend_date',bizToday());if(a.error)throw a.error;ATT=a.data||[];
+      var s=await db.from('reading_room_seats').select('seat_no,student_id');SEATS=s.error?[]:(s.data||[])}
+    $('#msg').textContent='출결 프로그램(키오스크)과 연결됨 · 15초마다, 그리고 입실·외출·하원이 바뀔 때 바로 갱신돼요.';
+  }catch(e){$('#msg').textContent='출결 서버에 연결하지 못했어요. 잠시 후 다시 시도해요.';return}
+  render();var d=new Date();$('#upd').textContent='갱신 '+pad(d.getHours())+':'+pad(d.getMinutes())+':'+pad(d.getSeconds());
+  if(db&&!chan){try{chan=db.channel('bo-live').on('postgres_changes',{event:'*',schema:'public',table:'reading_room_attendance'},function(){load()}).on('postgres_changes',{event:'*',schema:'public',table:'reading_room_seats'},function(){load()}).subscribe()}catch(e){}}}
+function render(){
+  var byId={};ATT.forEach(function(r){byId[r.student_id]=r});var seatBy={};SEATS.forEach(function(s){if(s.student_id)seatBy[s.student_id]=s.seat_no});
+  var rows=USERS.map(function(u){var r=byId[u.id];return {u:u,n:u.name,seat:seatBy[u.id],st:statusOf(r),r:r,min:r?minutesOf(r):0}});
+  var c={in:0,out:0,done:0,none:0};rows.forEach(function(x){c[x.st]++});
+  $('#kpi').innerHTML='<div><small>등록 학생</small><b>'+rows.length+'명</b></div><div><small>지금 공부 중 (재실)</small><b class="in">'+c.in+'명</b></div><div><small>외출</small><b class="out">'+c.out+'명</b></div><div><small>미입실 / 하원</small><b><span class="none">'+c.none+'</span> / <span class="done">'+c.done+'</span>명</b></div>';
+  var hit=function(x){return !Q||x.n.indexOf(Q)>-1};
+  var ord={in:0,out:1,done:2,none:3};
+  var here=rows.filter(function(x){return (x.st==='in'||x.st==='out')&&hit(x)}).sort(function(a,b){return ord[a.st]-ord[b.st]||(a.seat||999)-(b.seat||999)});
+  var lab={in:'<span class="in">재실</span>',out:'<span class="out">외출</span>',done:'<span class="done">하원</span>',none:'<span class="none">미입실</span>'};
+  $('#tIn').textContent='온 학생 '+(c.in+c.out)+'명 (재실 '+c.in+' · 외출 '+c.out+')';
+  $('#tbl').innerHTML=here.length?'<thead><tr><th>학생</th><th>자리</th><th>상태</th><th>입실</th><th>오늘 순공</th><th>비고</th></tr></thead><tbody>'+here.map(function(x){var r=x.r||{};var note=x.st==='out'?(r.pending_out_reason||r.out_1_reason||r.out_2_reason||'')+(r.pending_out_expected_end?' · '+String(r.pending_out_expected_end).slice(0,5)+' 복귀 예정':''):'';
+    return '<tr'+(Q?' class="hit"':'')+'><td>'+esc(x.n)+' <small style="color:var(--mute);font-weight:500">'+esc(x.u.grade||'')+'</small></td><td>'+(x.seat?x.seat+'번':'-')+'</td><td>'+lab[x.st]+'</td><td>'+(r.check_in_time?String(r.check_in_time).slice(0,5):'-')+'</td><td>'+fmtM(x.min)+'</td><td style="white-space:normal;color:var(--mute)">'+esc(note)+'</td></tr>'}).join('')+'</tbody>':'<tr><td style="color:var(--mute);font-weight:500">'+(Q?'"'+esc(Q)+'" 학생은 지금 센터에 없어요.':'아직 입실한 학생이 없어요.')+'</td></tr>';
+  var chip=function(x,cls){return '<span class="chip '+cls+'">'+esc(x.n)+(cls==='done'&&x.r&&x.r.check_out_time?' <small>'+String(x.r.check_out_time).slice(0,5)+'</small>':'')+'</span>'};
+  var none=rows.filter(function(x){return x.st==='none'&&hit(x)}).sort(function(a,b){return a.n.localeCompare(b.n,'ko')});
+  var done=rows.filter(function(x){return x.st==='done'&&hit(x)}).sort(function(a,b){return a.n.localeCompare(b.n,'ko')});
+  $('#tNone').textContent='아직 안 온 학생 '+c.none+'명';$('#tDone').textContent='하원한 학생 '+c.done+'명';
+  $('#noneList').innerHTML=none.length?none.map(function(x){return chip(x,'none')}).join(''):'<span class="hint">'+(Q?'해당 없음':'모두 입실했어요!')+'</span>';
+  $('#doneList').innerHTML=done.length?done.map(function(x){return chip(x,'done')}).join(''):'<span class="hint">아직 없음</span>';}
+gateOk().then(function(ok){if(!ok){lockPage('운영 계획');return}load();setInterval(load,15000)});
+})();
+</script>
+</body>
+</html>

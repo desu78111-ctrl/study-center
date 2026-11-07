@@ -1,0 +1,717 @@
+<!doctype html><html lang="ko"><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>현대 탐험대</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Jua&family=Noto+Sans+KR:wght@400;500;700&display=swap">
+<style>
+/* Layout concept: a comic-book reader (panel grid, speech bubbles) that hands off to a graded exam sheet. */
+:root{
+  --bg:#e9eef7; --fg:#1b1b2f; --muted:#5a6078; --card:#ffffff; --line:#c9d1e3;
+  --acc:#e5484d; --acc-ink:#ffffff; --hl:#ffd23f; --blue:#2f6fed; --ok:#17835a; --ok-bg:#e3f6ec; --no:#c9303f; --no-bg:#fde8ea;
+  --comic:#1b1b2f; --dots:rgba(47,111,237,.10);
+  --f-display:'Jua','Noto Sans KR',sans-serif; --f-body:'Noto Sans KR',system-ui,sans-serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#12141f; --fg:#eef0f8; --muted:#a6adc8; --card:#1d2032; --line:#33384f;
+  --acc:#ff6b70; --acc-ink:#1b1b2f; --hl:#ffd23f; --blue:#7aa2ff; --ok:#4ad19a; --ok-bg:#12332a; --no:#ff7a86; --no-bg:#3a1a20;
+  --dots:rgba(122,162,255,.10); color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#12141f; --fg:#eef0f8; --muted:#a6adc8; --card:#1d2032; --line:#33384f;
+  --acc:#ff6b70; --acc-ink:#1b1b2f; --hl:#ffd23f; --blue:#7aa2ff; --ok:#4ad19a; --ok-bg:#12332a; --no:#ff7a86; --no-bg:#3a1a20;
+  --dots:rgba(122,162,255,.10); color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);background-image:radial-gradient(var(--dots) 1.5px,transparent 1.6px);background-size:14px 14px;color:var(--fg);font-family:var(--f-body);line-height:1.6;
+  padding-block:0 48px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.wrap{max-width:1000px;margin:0 auto}
+header.top{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px;padding-block:18px 14px}
+h1{font-family:var(--f-display);font-weight:400;font-size:clamp(26px,5vw,38px);margin:0;letter-spacing:.01em;line-height:1.15}
+h1 small{display:block;font-family:var(--f-body);font-size:13px;color:var(--muted);letter-spacing:0;margin-top:4px}
+.tabs{display:flex;gap:8px}
+.tabs button{font:inherit;font-family:var(--f-display);font-size:17px;padding:8px 18px;border:3px solid var(--comic);border-radius:10px;background:var(--card);color:var(--fg);cursor:pointer;box-shadow:3px 3px 0 var(--comic)}
+.tabs button[aria-selected="true"]{background:var(--hl);color:var(--comic)}
+button:focus-visible,input:focus-visible+label{outline:3px solid var(--blue);outline-offset:2px}
+
+/* ---------- comic reader ---------- */
+.slide{background:var(--card);border:3px solid var(--comic);border-radius:14px;box-shadow:6px 6px 0 var(--comic);padding:clamp(14px,3vw,26px)}
+.shead{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin-bottom:14px}
+.chip{font-family:var(--f-display);background:var(--acc);color:var(--acc-ink);padding:2px 12px;border-radius:99px;font-size:15px;border:2px solid var(--comic)}
+.shead h2{font-family:var(--f-display);font-weight:400;font-size:clamp(22px,4vw,30px);margin:0;text-wrap:balance}
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+@media(max-width:640px){.grid{grid-template-columns:minmax(0,1fr)}}
+.panel{position:relative;border:3px solid var(--comic);border-radius:6px;overflow:hidden;background:#fff;box-shadow:4px 4px 0 var(--comic);display:flex;flex-direction:column}
+.panel svg{display:block;width:100%;height:auto;aspect-ratio:320/200}
+.cap{background:var(--hl);color:var(--comic);font-family:var(--f-display);font-size:16px;padding:5px 10px;border-top:3px solid var(--comic)}
+.bub{position:absolute;top:8px;max-width:68%;background:#fff;color:#1b1b2f;border:2.5px solid #1b1b2f;border-radius:16px;padding:6px 11px;font-family:var(--f-display);font-size:clamp(14px,2.2vw,16px);line-height:1.35;z-index:2}
+.bub.l{left:8px}.bub.r{right:8px}
+.bub::after{content:"";position:absolute;bottom:-11px;width:14px;height:14px;background:#fff;border-right:2.5px solid #1b1b2f;border-bottom:2.5px solid #1b1b2f;transform:rotate(45deg)}
+.bub.l::after{left:22px}.bub.r::after{right:22px}
+.bub.shout{background:#fff3b0;border-width:3px;border-radius:6px}
+.bub b{color:#d62839;font-weight:400}
+.radar{margin-top:18px;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.3fr);gap:14px}
+@media(max-width:700px){.radar{grid-template-columns:minmax(0,1fr)}}
+.box{border:2.5px solid var(--comic);border-radius:10px;padding:12px 14px;background:var(--bg)}
+.box h3{font-family:var(--f-display);font-weight:400;font-size:18px;margin:0 0 6px}
+.box ul{margin:0;padding-left:18px}.box li{margin:2px 0;font-size:14px}
+.big{font-family:var(--f-display);font-size:40px;line-height:1;color:var(--acc)}
+.big small{font-size:16px;color:var(--muted);font-family:var(--f-body)}
+.trap{display:flex;flex-wrap:wrap;gap:6px;margin-top:4px}
+.trap span{font-size:13px;border:2px dashed var(--no);color:var(--no);border-radius:6px;padding:0 8px;text-decoration:line-through;text-decoration-thickness:1.5px}
+.src{font-size:12.5px;color:var(--muted);margin-top:6px}
+.nav{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:16px}
+.nav button,.btn{font-family:var(--f-display);font-size:17px;padding:8px 20px;border:3px solid var(--comic);border-radius:10px;background:var(--card);color:var(--fg);cursor:pointer;box-shadow:3px 3px 0 var(--comic)}
+.nav button:disabled{opacity:.4;cursor:default}
+.btn.main{background:var(--acc);color:var(--acc-ink)}
+.dots{display:flex;gap:6px;flex-wrap:wrap;justify-content:center}
+.dots i{width:12px;height:12px;border-radius:50%;border:2px solid var(--comic);background:var(--card);display:block}
+.dots i.on{background:var(--acc)}
+.timeline{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-top:16px}
+@media(max-width:700px){.timeline{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.tl{border:3px solid var(--comic);border-radius:10px;padding:10px;background:var(--bg);text-align:center}
+.tl b{font-family:var(--f-display);font-weight:400;font-size:20px;display:block}
+.tl .n{font-family:var(--f-display);font-size:34px;color:var(--acc);line-height:1}
+.tl small{color:var(--muted);display:block;font-size:12.5px}
+.tl .bar{height:10px;border:2px solid var(--comic);border-radius:99px;margin-top:6px;overflow:hidden;background:var(--card)}
+.tl .bar i{display:block;height:100%;background:var(--blue)}
+.dict{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+@media(max-width:800px){.dict{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:520px){.dict{grid-template-columns:minmax(0,1fr)}}
+.dict .box h3{display:flex;justify-content:space-between;gap:8px}
+.dict .box h3 small{font-family:var(--f-body);font-size:12px;color:var(--muted)}
+table.cmp{width:100%;border-collapse:collapse;font-size:14px;margin-top:6px}
+table.cmp th,table.cmp td{border:2px solid var(--comic);padding:6px 8px;text-align:left;vertical-align:top}
+table.cmp th{background:var(--hl);color:var(--comic);font-family:var(--f-display);font-weight:400}
+.tw{overflow-x:auto}
+
+/* ---------- exam ---------- */
+.bar-sticky{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--card);border:3px solid var(--comic);border-radius:12px;box-shadow:4px 4px 0 var(--comic);padding:8px 14px;display:flex;flex-wrap:wrap;align-items:center;gap:12px;margin-bottom:16px}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--bg)}
+.prog{flex:1 1 160px;height:14px;border:2px solid var(--comic);border-radius:99px;overflow:hidden;background:var(--bg)}
+.prog i{display:block;height:100%;width:0;background:var(--acc);transition:width .25s}
+.bar-sticky b{font-family:var(--f-display);font-weight:400;font-size:18px;font-variant-numeric:tabular-nums}
+.intro{margin-bottom:16px}
+.intro p{margin:4px 0;font-size:14.5px}
+.lv{font-family:var(--f-display);font-weight:400;font-size:clamp(20px,3.5vw,26px);margin:26px 0 10px;display:flex;flex-wrap:wrap;align-items:baseline;gap:10px}
+.lv small{font-family:var(--f-body);font-size:13px;color:var(--muted)}
+.q{background:var(--card);border:3px solid var(--comic);border-radius:12px;padding:14px 16px;margin-bottom:14px;box-shadow:4px 4px 0 var(--comic)}
+.q.ok{border-color:var(--ok)}.q.ng{border-color:var(--no)}
+.qh{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-bottom:6px}
+.qn{font-family:var(--f-display);font-size:20px;background:var(--hl);color:var(--comic);border:2px solid var(--comic);border-radius:8px;padding:0 10px}
+.tag{font-size:12px;border:1.5px solid var(--line);border-radius:99px;padding:0 9px;color:var(--muted)}
+.mark{margin-left:auto;font-family:var(--f-display);font-size:18px}
+.q.ok .mark{color:var(--ok)}.q.ng .mark{color:var(--no)}
+.qt{white-space:pre-line;margin:4px 0 10px;font-weight:500}
+.pass{white-space:pre-line;background:var(--bg);border-left:5px solid var(--blue);padding:8px 12px;margin:0 0 10px;font-size:14.5px;border-radius:0 8px 8px 0}
+.opts{display:grid;gap:6px}
+.opts input{position:absolute;opacity:0;pointer-events:none}
+.opts label{display:flex;gap:10px;align-items:flex-start;border:2px solid var(--line);border-radius:9px;padding:8px 12px;cursor:pointer;background:var(--card)}
+.opts label:hover{border-color:var(--blue)}
+.opts .no{flex:none;width:24px;height:24px;border-radius:50%;border:2px solid var(--comic);display:grid;place-items:center;font-size:13px;font-weight:700;background:var(--bg)}
+.opts input:checked+label{border-color:var(--blue);background:color-mix(in srgb,var(--blue) 14%,var(--card))}
+.opts input:checked+label .no{background:var(--blue);color:#fff}
+.q.lock .opts label{cursor:default}
+.opts label.right{border-color:var(--ok);background:var(--ok-bg)}
+.opts label.wrong{border-color:var(--no);background:var(--no-bg)}
+.exp{margin-top:10px;border-top:2px dashed var(--line);padding-top:8px;font-size:14.5px}
+.exp b{font-family:var(--f-display);font-weight:400}
+.exp .from{font-size:12.5px;color:var(--muted);margin-top:4px}
+.result{background:var(--card);border:3px solid var(--comic);border-radius:14px;box-shadow:6px 6px 0 var(--comic);padding:18px;margin-bottom:20px}
+.result h2{font-family:var(--f-display);font-weight:400;margin:0 0 8px;font-size:26px}
+.score{display:flex;flex-wrap:wrap;gap:18px;align-items:center}
+.ring{width:140px;height:140px;border-radius:50%;display:grid;place-items:center;border:3px solid var(--comic)}
+.ring div{width:104px;height:104px;border-radius:50%;background:var(--card);display:grid;place-items:center;text-align:center;border:3px solid var(--comic);font-family:var(--f-display);font-size:28px;line-height:1.05;white-space:nowrap}
+.ring small{display:block;font-size:13px;font-family:var(--f-body);color:var(--muted)}
+.rows{flex:1 1 260px;display:grid;gap:7px}
+.row{display:grid;grid-template-columns:86px 1fr 52px;gap:8px;align-items:center;font-size:14px}
+.row .t{height:12px;border:2px solid var(--comic);border-radius:99px;background:var(--bg);overflow:hidden}
+.row .t i{display:block;height:100%;background:var(--ok)}
+.row span:last-child{text-align:right;font-variant-numeric:tabular-nums}
+.msg{margin:12px 0 0;font-size:15px}
+.acts{display:flex;flex-wrap:wrap;gap:10px;margin-top:14px}
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--comic);color:#fff;padding:10px 18px;border-radius:99px;font-family:var(--f-display);z-index:20;max-width:90vw;text-align:center}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+.timeline.t5{grid-template-columns:repeat(5,minmax(0,1fr))}
+@media(max-width:700px){.timeline.t5{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.nav button{white-space:nowrap;flex:none}.dots{gap:5px}.dots i{width:10px;height:10px}
+</style>
+
+<!-- ============ SVG symbol library (shared by every panel) ============ -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+<defs>
+<g id="o" stroke="#1b1b2f" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"></g>
+<symbol id="kid" viewBox="0 0 100 100"><g stroke="#1b1b2f" stroke-width="3" stroke-linejoin="round" stroke-linecap="round">
+<rect x="36" y="82" width="10" height="14" fill="#1b1b2f"/><rect x="54" y="82" width="10" height="14" fill="#1b1b2f"/>
+<path d="M30 54 L19 72 M70 54 L81 72" fill="none"/>
+<rect x="30" y="50" width="40" height="34" rx="10" fill="#3b82f6"/><path d="M42 50 Q50 58 58 50" fill="none"/>
+<circle cx="50" cy="32" r="19" fill="#ffd9b3"/>
+<path d="M31 31 Q32 11 51 11 Q69 12 69 31 Q60 21 50 22 Q40 21 31 31Z" fill="#2a2a3a"/>
+<circle cx="43" cy="35" r="2.4" fill="#1b1b2f" stroke="none"/><circle cx="57" cy="35" r="2.4" fill="#1b1b2f" stroke="none"/>
+<path d="M45 43 Q50 47 55 43" fill="none"/></g></symbol>
+<symbol id="tchr" viewBox="0 0 100 100"><g stroke="#1b1b2f" stroke-width="3" stroke-linejoin="round" stroke-linecap="round">
+<rect x="36" y="82" width="10" height="14" fill="#1b1b2f"/><rect x="54" y="82" width="10" height="14" fill="#1b1b2f"/>
+<path d="M28 56 L16 66 M72 56 L84 70" fill="none"/>
+<rect x="28" y="50" width="44" height="35" rx="8" fill="#2f9e6b"/><path d="M50 50 L50 85 M44 50 L50 60 L56 50" fill="none"/>
+<circle cx="50" cy="32" r="19" fill="#ffd9b3"/>
+<path d="M31 28 Q33 9 50 9 Q68 9 69 28 Q62 18 50 19 Q38 18 31 28Z" fill="#c4c8d4"/>
+<circle cx="42" cy="34" r="6.5" fill="#fff" fill-opacity=".5"/><circle cx="58" cy="34" r="6.5" fill="#fff" fill-opacity=".5"/><path d="M48.5 34 H51.5" fill="none"/>
+<circle cx="42" cy="34" r="1.8" fill="#1b1b2f" stroke="none"/><circle cx="58" cy="34" r="1.8" fill="#1b1b2f" stroke="none"/>
+<path d="M44 44 Q50 49 56 44" fill="none"/></g></symbol>
+<symbol id="dangun" viewBox="0 0 100 100"><g stroke="#1b1b2f" stroke-width="3" stroke-linejoin="round" stroke-linecap="round">
+<path d="M26 92 L32 50 H68 L74 92Z" fill="#f4f1e8"/><path d="M50 50 V92" fill="none"/>
+<path d="M28 30 Q28 8 50 8 Q72 8 72 30 L72 52 Q60 40 50 40 Q40 40 28 52Z" fill="#2a2a3a"/>
+<circle cx="50" cy="32" r="17" fill="#ffd9b3"/>
+<path d="M33 18 L38 4 L45 15 L50 2 L55 15 L62 4 L67 18Z" fill="#ffc933"/>
+<circle cx="44" cy="34" r="2.2" fill="#1b1b2f" stroke="none"/><circle cx="56" cy="34" r="2.2" fill="#1b1b2f" stroke="none"/>
+<path d="M45 42 Q50 46 55 42" fill="none"/></g></symbol>
+<symbol id="handaxe" viewBox="0 0 100 100"><g stroke="#1b1b2f" stroke-width="3" stroke-linejoin="round" stroke-linecap="round">
+<path d="M50 6 C74 30 80 62 62 88 C54 97 46 97 38 88 C20 62 26 30 50 6Z" fill="#9aa0a6"/>
+<path d="M50 14 L44 50 L52 84 M44 50 L30 62 M44 50 L62 56" fill="none" stroke-width="2"/></g></symbol>
+<symbol id="axe" viewBox="0 0 100 100"><g stroke="#1b1b2f" stroke-width="3" stroke-linejoin="round" stroke-linecap="round">
+<path d="M30 92 L66 18" stroke="#8a6a45" stroke-width="9" fill="none"/><path d="M30 92 L66 18" stroke-width="3" fill="none" opacity=".0"/>
+<path d="M54 14 L86 24 L80 52 L50 40Z" fill="#c7ccd6"/><path d="M60 22 L78 28" fill="none" stroke-width="2"/></g></symbol>
+<symbol id="cave" viewBox="0 0 100 100"><g stroke="#1b1b2f" stroke-width="3" stroke-linejoin="round">
+<path d="M3 97 L3 56 Q6 8 50 6 Q94 8 97 56 L97 97Z" fill="#7b6a5c"/>
+<path d="M24 97 L24 64 Q28 32 50 30 Q72 32 76 64 L76 97Z" fill="#1d1a24"/></g></symbol>
+<symbol id="tent" viewBox="0 0 100 100"><g stroke="#1b1b2f" stroke-width="3" stroke-linejoin="round" stroke-linecap="round">
+<path d="M6 94 L50 10 L94 94Z" fill="#c8a165"/><path d="M50 10 L38 94 M50 10 L62 94 M20 66 H80" fill="none" stroke-width="2"/>
+<path d="M41 94 L50 56 L59 94Z" fill="#3a2a1a"/></g></symbol>
+<symbol id="hut" viewBox="0 0 100 100"><g stroke="#1b1b2f" stroke-width="3" stroke-linejoin="round" stroke-linecap="round">
+<rect x="10" y="68" width="80" height="26" fill="#7a5a3a"/>
+<path d="M4 72 L50 16 L96 72Z" fill="#dcb85e"/><path d="M22 56 L34 72 M38 40 L52 72 M62 40 L72 72 M78 56 L84 72" fill="none" stroke-width="2"/>
+<path d="M42 94 V80 Q50 70 58 80 V94Z" fill="#2a1d12"/></g></symbol>
+<symbol id="pot" viewBox="0 0 100 100"><g stroke="#1b1b2f" stroke-width="3" stroke-linejoin="round" stroke-linecap="round">
+<path d="M26 20 H74 L62 80 L50 95 L38 80Z" fill="#c9774f"/><ellipse cx="50" cy="20" rx="24" ry="7" fill="#e6a27b"/>
+<path d="M32 36 L40 46 M42 36 L50 46 M52 36 L60 46 M62 36 L68 44 M36 52 L44 62 M46 52 L54 62 M56 52 L62 60" fill="none" stroke-width="2.5"/></g></symbol>
+<symbol id="pot2" viewBox="0 0 100 100"><g stroke="#1b1b2f" stroke-width="3" stroke-linejoin="round">
+<path d="M28 24 H72 L68 62 Q66 90 50 92 Q34 90 32 62Z" fill="#b98a5d"/><ellipse cx="50" cy="24" rx="22" ry="6" fill="#d8b48a"/></g></symbol>
+<symbol id="dolmen" viewBox="0 0 100 100"><g stroke="#1b1b2f" stroke-width="3" stroke-linejoin="round">
+<rect x="12" y="46" width="15" height="48" fill="#8d9096"/><rect x="73" y="46" width="15" height="48" fill="#8d9096"/>
+<path d="M2 50 L20 22 L84 16 L98 48Z" fill="#aab0b8"/><path d="M30 30 L50 28 M62 26 L76 32" fill="none" stroke-width="2"/></g></symbol>
+<symbol id="sword" viewBox="0 0 100 100"><g stroke="#1b1b2f" stroke-width="3" stroke-linejoin="round" stroke-linecap="round">
+<path d="M50 3 C62 20 70 34 60 50 L57 78 L43 78 L40 50 C30 34 38 20 50 3Z" fill="#d7a43a"/><path d="M50 10 V74" fill="none" stroke-width="2"/>
+<rect x="45" y="78" width="10" height="17" fill="#6b4a2b"/><path d="M38 78 H62" fill="none"/></g></symbol>
+<symbol id="halfmoon" viewBox="0 0 100 100"><g stroke="#1b1b2f" stroke-width="3" stroke-linejoin="round">
+<path d="M4 72 A46 46 0 0 1 96 72 Z" fill="#b8bcc4"/><circle cx="34" cy="62" r="5" fill="#eef2f8"/><circle cx="66" cy="62" r="5" fill="#eef2f8"/>
+<path d="M4 72 H96" fill="none"/></g></symbol>
+<symbol id="whorl" viewBox="0 0 100 100"><g stroke="#1b1b2f" stroke-width="3" stroke-linejoin="round" stroke-linecap="round">
+<rect x="47" y="4" width="6" height="64" fill="#8a6a45"/><ellipse cx="50" cy="72" rx="30" ry="14" fill="#c9774f"/><ellipse cx="50" cy="72" rx="5" ry="2.5" fill="#1b1b2f"/>
+<path d="M50 6 Q80 20 70 40 Q60 50 78 60" fill="none" stroke="#f4f1e8" stroke-width="3"/></g></symbol>
+<symbol id="grind" viewBox="0 0 100 100"><g stroke="#1b1b2f" stroke-width="3" stroke-linejoin="round">
+<path d="M6 66 Q50 50 94 66 L94 80 Q50 96 6 80Z" fill="#9aa0a6"/><ellipse cx="50" cy="52" rx="26" ry="11" fill="#bcc1c9"/>
+<circle cx="30" cy="68" r="2" fill="#f2d16b" stroke="none"/><circle cx="46" cy="72" r="2" fill="#f2d16b" stroke="none"/><circle cx="64" cy="68" r="2" fill="#f2d16b" stroke="none"/></g></symbol>
+<symbol id="deer" viewBox="0 0 100 100"><g stroke="#1b1b2f" stroke-width="3" stroke-linejoin="round" stroke-linecap="round">
+<rect x="26" y="66" width="7" height="26" fill="#a96a35"/><rect x="40" y="68" width="7" height="24" fill="#a96a35"/><rect x="62" y="66" width="7" height="26" fill="#a96a35"/><rect x="74" y="68" width="7" height="24" fill="#a96a35"/>
+<ellipse cx="52" cy="58" rx="32" ry="17" fill="#c07c3f"/><path d="M76 52 L88 34 L98 38 L94 50 L82 56Z" fill="#c07c3f"/>
+<path d="M88 34 L84 14 L78 20 M84 14 L92 8 M88 34 L96 16" fill="none"/><circle cx="92" cy="40" r="1.8" fill="#1b1b2f" stroke="none"/></g></symbol>
+<symbol id="fire" viewBox="0 0 100 100"><g stroke="#1b1b2f" stroke-width="3" stroke-linejoin="round" stroke-linecap="round">
+<path d="M50 6 C68 30 82 46 74 70 C70 86 60 92 50 92 C40 92 30 86 26 70 C20 46 38 36 50 6Z" fill="#ff7a1a"/>
+<path d="M50 40 C60 54 64 62 60 74 C58 82 54 84 50 84 C46 84 42 82 40 74 C38 62 44 54 50 40Z" fill="#ffd23f" stroke-width="2"/>
+<path d="M16 94 L84 82 M16 82 L84 94" stroke="#6b4a2b" stroke-width="6" fill="none"/></g></symbol>
+<symbol id="crop" viewBox="0 0 100 100"><g stroke="#1b1b2f" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round">
+<path d="M30 96 Q28 60 24 30 M50 96 Q50 58 50 22 M70 96 Q72 60 76 30" fill="none" stroke="#5a8a3a" stroke-width="4"/>
+<ellipse cx="24" cy="22" rx="6" ry="14" fill="#e9c24a"/><ellipse cx="50" cy="14" rx="6" ry="14" fill="#e9c24a"/><ellipse cx="76" cy="22" rx="6" ry="14" fill="#e9c24a"/></g></symbol>
+<symbol id="tree" viewBox="0 0 100 100"><g stroke="#1b1b2f" stroke-width="3" stroke-linejoin="round">
+<rect x="44" y="56" width="12" height="38" fill="#7a5a3a"/><circle cx="50" cy="38" r="30" fill="#4f9d56"/><circle cx="36" cy="46" r="14" fill="#5fb066"/></g></symbol>
+<symbol id="ironhoe" viewBox="0 0 100 100"><g stroke="#1b1b2f" stroke-width="3" stroke-linejoin="round" stroke-linecap="round">
+<path d="M22 94 L64 14" stroke="#8a6a45" stroke-width="9" fill="none"/>
+<path d="M54 10 L90 22 L84 48 L58 38Z" fill="#6c7380"/><path d="M62 18 L82 26" fill="none" stroke="#c7ccd6" stroke-width="2"/></g></symbol>
+<symbol id="coin" viewBox="0 0 100 100"><g stroke="#1b1b2f" stroke-width="3" stroke-linejoin="round">
+<path d="M28 6 Q48 0 56 10 L62 66 L50 96 L40 70Z" fill="#c9923a"/><circle cx="52" cy="22" r="5" fill="#eef2f8"/><path d="M42 40 H54 M44 52 H55" fill="none" stroke-width="2.5"/></g></symbol>
+<symbol id="sword2" viewBox="0 0 100 100"><g stroke="#1b1b2f" stroke-width="3" stroke-linejoin="round" stroke-linecap="round">
+<path d="M50 4 L61 30 L58 76 L42 76 L39 30Z" fill="#d7a43a"/><path d="M50 10 V72" fill="none" stroke-width="2"/><rect x="45" y="76" width="10" height="18" fill="#6b4a2b"/><path d="M36 76 H64" fill="none"/></g></symbol>
+<symbol id="drum" viewBox="0 0 100 100"><g stroke="#1b1b2f" stroke-width="3" stroke-linejoin="round" stroke-linecap="round">
+<path d="M18 36 V76 Q50 92 82 76 V36" fill="#b33a3a"/><ellipse cx="50" cy="36" rx="32" ry="12" fill="#f0d9a8"/>
+<path d="M18 52 Q50 68 82 52" fill="none" stroke-width="2"/><path d="M62 10 L48 30 M78 14 L56 32" stroke="#6b4a2b" stroke-width="5"/></g></symbol>
+<symbol id="sotae" viewBox="0 0 100 100"><g stroke="#1b1b2f" stroke-width="3" stroke-linejoin="round" stroke-linecap="round">
+<path d="M50 96 V30" stroke="#6b4a2b" stroke-width="7" fill="none"/><path d="M36 22 Q50 10 64 22 Q60 34 50 30 Q40 34 36 22Z" fill="#ffffff"/><path d="M62 20 L74 18" fill="none"/>
+<path d="M30 40 H70 M32 52 H68" fill="none" stroke="#c0392b" stroke-width="3"/></g></symbol>
+<symbol id="fence" viewBox="0 0 100 100"><g stroke="#1b1b2f" stroke-width="3" stroke-linejoin="round">
+<rect x="6" y="40" width="12" height="52" fill="#a07848"/><rect x="26" y="34" width="12" height="58" fill="#a07848"/><rect x="46" y="40" width="12" height="52" fill="#a07848"/><rect x="66" y="34" width="12" height="58" fill="#a07848"/><rect x="84" y="40" width="12" height="52" fill="#a07848"/>
+<path d="M4 56 H98 M4 74 H98" fill="none"/></g></symbol>
+<symbol id="scroll" viewBox="0 0 100 100"><g stroke="#1b1b2f" stroke-width="3" stroke-linejoin="round" stroke-linecap="round">
+<rect x="14" y="14" width="72" height="72" rx="6" fill="#f4e7bf"/><path d="M26 32 H74 M26 46 H74 M26 60 H62" fill="none"/>
+<rect x="8" y="8" width="84" height="10" rx="5" fill="#a07848"/><rect x="8" y="82" width="84" height="10" rx="5" fill="#a07848"/></g></symbol>
+<symbol id="mirror" viewBox="0 0 100 100"><g stroke="#1b1b2f" stroke-width="3" stroke-linejoin="round">
+<circle cx="50" cy="50" r="40" fill="#c9923a"/><circle cx="50" cy="50" r="28" fill="none"/><circle cx="50" cy="50" r="14" fill="none"/><circle cx="50" cy="22" r="4" fill="#1b1b2f"/></g></symbol>
+<symbol id="pin" viewBox="0 0 100 100"><g stroke="#1b1b2f" stroke-width="3" stroke-linejoin="round">
+<path d="M50 96 C28 66 22 54 22 38 A28 28 0 0 1 78 38 C78 54 72 66 50 96Z" fill="#e5484d"/><circle cx="50" cy="38" r="10" fill="#fff"/></g></symbol>
+<symbol id="star" viewBox="0 0 100 100"><path d="M50 4 L61 36 L95 38 L68 58 L78 92 L50 72 L22 92 L32 58 L5 38 L39 36Z" fill="#ffd23f" stroke="#1b1b2f" stroke-width="3" stroke-linejoin="round"/></symbol>
+</defs>
+<symbol id="king" viewBox="0 0 100 100"><g stroke="#1b1b2f" stroke-width="3" stroke-linejoin="round" stroke-linecap="round">
+<path d="M24 94 L30 50 H70 L76 94Z" fill="#c0392b"/><path d="M50 50 V94 M40 50 L50 64 L60 50" fill="none"/>
+<path d="M30 30 Q30 10 50 10 Q70 10 70 30 L70 50 Q60 42 50 42 Q40 42 30 50Z" fill="#2a2a3a"/>
+<circle cx="50" cy="32" r="17" fill="#ffd9b3"/>
+<path d="M32 20 L36 4 L44 14 L50 2 L56 14 L64 4 L68 20Z" fill="#ffc933"/>
+<circle cx="44" cy="35" r="2.2" fill="#1b1b2f" stroke="none"/><circle cx="56" cy="35" r="2.2" fill="#1b1b2f" stroke="none"/>
+<path d="M44 43 Q50 49 56 43" fill="none"/></g></symbol>
+<symbol id="warrior" viewBox="0 0 100 100"><g stroke="#1b1b2f" stroke-width="3" stroke-linejoin="round" stroke-linecap="round">
+<path d="M82 6 V96" stroke="#6b4a2b" stroke-width="5" fill="none"/><path d="M82 4 L76 18 H88Z" fill="#c9d0d8"/>
+<rect x="36" y="82" width="10" height="14" fill="#1b1b2f"/><rect x="54" y="82" width="10" height="14" fill="#1b1b2f"/>
+<path d="M30 56 L18 70 M70 56 L82 52" fill="none"/>
+<rect x="28" y="50" width="44" height="34" rx="8" fill="#5b6f8a"/><path d="M34 62 H66 M34 72 H66" fill="none" stroke-width="2"/>
+<circle cx="50" cy="32" r="18" fill="#ffd9b3"/>
+<path d="M30 30 Q30 8 50 8 Q70 8 70 30 L66 28 Q50 20 34 28Z" fill="#8a8f99"/><path d="M50 4 V12" fill="none"/>
+<circle cx="43" cy="35" r="2.2" fill="#1b1b2f" stroke="none"/><circle cx="57" cy="35" r="2.2" fill="#1b1b2f" stroke="none"/>
+<path d="M44 43 Q50 47 56 43" fill="none"/></g></symbol>
+<symbol id="horse" viewBox="0 0 100 100"><g stroke="#1b1b2f" stroke-width="3" stroke-linejoin="round" stroke-linecap="round">
+<rect x="20" y="64" width="7" height="30" fill="#8a5a33"/><rect x="34" y="66" width="7" height="28" fill="#8a5a33"/><rect x="60" y="66" width="7" height="28" fill="#8a5a33"/><rect x="74" y="64" width="7" height="30" fill="#8a5a33"/>
+<ellipse cx="48" cy="56" rx="32" ry="17" fill="#a96a3b"/><path d="M70 48 L80 22 L96 28 L94 44 L82 56Z" fill="#a96a3b"/>
+<path d="M72 46 L78 22 M16 52 Q6 60 10 76" fill="none" stroke="#2a2a3a" stroke-width="5"/><circle cx="88" cy="32" r="2" fill="#1b1b2f" stroke="none"/></g></symbol>
+<symbol id="stele" viewBox="0 0 100 100"><g stroke="#1b1b2f" stroke-width="3" stroke-linejoin="round" stroke-linecap="round">
+<path d="M22 96 V28 Q22 6 50 6 Q78 6 78 28 V96Z" fill="#aab0b8"/><path d="M34 30 H66 M34 42 H66 M34 54 H66 M34 66 H62 M34 78 H58" fill="none" stroke-width="2.5"/>
+<rect x="12" y="92" width="76" height="6" fill="#7b8088"/></g></symbol>
+<symbol id="pyramid" viewBox="0 0 100 100"><g stroke="#1b1b2f" stroke-width="3" stroke-linejoin="round">
+<rect x="6" y="76" width="88" height="20" fill="#aab0b8"/><rect x="16" y="58" width="68" height="18" fill="#b8bec6"/><rect x="26" y="40" width="48" height="18" fill="#c5cbd2"/><rect x="36" y="22" width="28" height="18" fill="#d3d8de"/>
+<path d="M6 86 H94 M16 67 H84 M26 49 H74 M36 31 H64" fill="none" stroke-width="1.5"/></g></symbol>
+<symbol id="sack" viewBox="0 0 100 100"><g stroke="#1b1b2f" stroke-width="3" stroke-linejoin="round" stroke-linecap="round">
+<path d="M30 30 Q14 60 22 90 Q50 98 78 90 Q86 60 70 30Z" fill="#d9bb84"/><path d="M34 30 Q50 40 66 30 L62 20 Q50 26 38 20Z" fill="#c4a56e"/>
+<path d="M44 12 Q50 2 56 12 M50 12 V22" fill="none" stroke="#e9c24a" stroke-width="4"/><path d="M40 60 H60" fill="none" stroke-width="2"/></g></symbol>
+<symbol id="book" viewBox="0 0 100 100"><g stroke="#1b1b2f" stroke-width="3" stroke-linejoin="round" stroke-linecap="round">
+<path d="M8 28 Q30 18 50 30 Q70 18 92 28 V84 Q70 74 50 86 Q30 74 8 84Z" fill="#f4e7bf"/><path d="M50 30 V86" fill="none"/>
+<path d="M18 42 Q32 38 42 44 M18 54 Q32 50 42 56 M18 66 Q32 62 42 68 M58 44 Q68 38 82 42 M58 56 Q68 50 82 54 M58 68 Q68 62 82 66" fill="none" stroke-width="2"/></g></symbol>
+<symbol id="castle" viewBox="0 0 100 100"><g stroke="#1b1b2f" stroke-width="3" stroke-linejoin="round">
+<rect x="6" y="46" width="88" height="48" fill="#b9a98d"/><rect x="6" y="30" width="22" height="64" fill="#c8b999"/><rect x="72" y="30" width="22" height="64" fill="#c8b999"/>
+<path d="M6 30 H10 V24 H16 V30 H20 V24 H26 V30 H28 M72 30 H76 V24 H82 V30 H86 V24 H92 V30 H94" fill="none"/>
+<path d="M38 94 V68 Q50 54 62 68 V94Z" fill="#2a1d12"/></g></symbol>
+<symbol id="censer" viewBox="0 0 100 100"><g stroke="#1b1b2f" stroke-width="3" stroke-linejoin="round" stroke-linecap="round">
+<path d="M40 24 L46 10 L50 20 L54 8 L58 24" fill="#d7a43a"/><circle cx="50" cy="8" r="4" fill="#e5484d"/>
+<path d="M22 56 Q22 28 50 24 Q78 28 78 56Z" fill="#d7a43a"/><path d="M32 52 Q38 36 46 52 M50 52 Q58 34 66 52" fill="none" stroke-width="2"/>
+<path d="M18 56 H82 Q82 78 50 80 Q18 78 18 56Z" fill="#c9922e"/><path d="M50 80 V90 M30 94 Q50 82 70 94" fill="none"/></g></symbol>
+<symbol id="brick" viewBox="0 0 100 100"><g stroke="#1b1b2f" stroke-width="3" stroke-linejoin="round" stroke-linecap="round">
+<rect x="8" y="22" width="84" height="60" rx="4" fill="#b8805a"/><path d="M14 68 L32 40 L46 60 L60 36 L86 68Z" fill="#8f9a6e"/><circle cx="74" cy="34" r="6" fill="#f2d16b"/>
+<path d="M16 74 Q50 82 84 74" fill="none" stroke-width="2"/></g></symbol>
+<symbol id="hyunmu" viewBox="0 0 100 100"><g stroke="#1b1b2f" stroke-width="3" stroke-linejoin="round" stroke-linecap="round">
+<ellipse cx="46" cy="64" rx="32" ry="20" fill="#3d7a52"/><path d="M26 56 L38 50 M46 46 L58 52 M30 70 H60" fill="none" stroke-width="2"/>
+<circle cx="82" cy="62" r="9" fill="#4a9565"/><path d="M12 70 Q4 84 20 86 M30 82 L26 94 M62 82 L66 94" fill="none"/>
+<path d="M40 44 Q20 20 40 12 Q60 4 56 26 Q52 40 64 50" fill="none" stroke="#2a8f5c" stroke-width="7"/><path d="M40 44 Q20 20 40 12 Q60 4 56 26 Q52 40 64 50" fill="none" stroke-width="2"/></g></symbol>
+<symbol id="crown" viewBox="0 0 100 100"><g stroke="#1b1b2f" stroke-width="3" stroke-linejoin="round" stroke-linecap="round">
+<path d="M18 86 V56 H82 V86Z" fill="#e9b93a"/><path d="M22 56 V30 H32 V56 M42 56 V18 H52 V56 M62 56 V30 H72 V56" fill="#e9b93a"/>
+<path d="M50 6 V18 M27 20 V30 M67 20 V30" fill="none"/><circle cx="32" cy="72" r="4" fill="#3b82f6"/><circle cx="50" cy="72" r="4" fill="#e5484d"/><circle cx="68" cy="72" r="4" fill="#3b82f6"/></g></symbol>
+<symbol id="pagoda" viewBox="0 0 100 100"><g stroke="#1b1b2f" stroke-width="3" stroke-linejoin="round" stroke-linecap="round">
+<path d="M50 2 V10" fill="none"/>
+<path d="M30 20 L50 10 L70 20Z" fill="#9b5b3a"/><rect x="38" y="20" width="24" height="8" fill="#d9b88a"/>
+<path d="M26 36 L50 26 L74 36Z" fill="#9b5b3a"/><rect x="36" y="36" width="28" height="9" fill="#d9b88a"/>
+<path d="M22 54 L50 43 L78 54Z" fill="#9b5b3a"/><rect x="34" y="54" width="32" height="10" fill="#d9b88a"/>
+<path d="M18 72 L50 61 L82 72Z" fill="#9b5b3a"/><rect x="30" y="72" width="40" height="12" fill="#d9b88a"/>
+<rect x="10" y="84" width="80" height="12" fill="#a8adb5"/></g></symbol>
+<symbol id="stupa5" viewBox="0 0 100 100"><g stroke="#1b1b2f" stroke-width="3" stroke-linejoin="round" stroke-linecap="round">
+<path d="M50 4 V12" fill="none"/>
+<path d="M34 22 Q50 12 66 22 L62 26 H38Z" fill="#c5cbd2"/><rect x="40" y="26" width="20" height="8" fill="#b0b6bd"/>
+<path d="M30 40 Q50 30 70 40 L66 44 H34Z" fill="#c5cbd2"/><rect x="38" y="44" width="24" height="9" fill="#b0b6bd"/>
+<path d="M26 58 Q50 48 74 58 L70 62 H30Z" fill="#c5cbd2"/><rect x="36" y="62" width="28" height="10" fill="#b0b6bd"/>
+<path d="M22 76 Q50 66 78 76 L74 80 H26Z" fill="#c5cbd2"/><rect x="10" y="80" width="80" height="14" fill="#a0a6ad"/></g></symbol>
+<symbol id="cheom" viewBox="0 0 100 100"><g stroke="#1b1b2f" stroke-width="3" stroke-linejoin="round">
+<path d="M42 10 H58 L60 30 Q74 50 78 94 H22 Q26 50 40 30Z" fill="#b9bfc7"/><rect x="36" y="4" width="28" height="8" fill="#9aa0a8"/>
+<rect x="44" y="46" width="12" height="14" fill="#1d1a24"/><path d="M30 76 H70 M34 64 H66 M40 36 H60" fill="none" stroke-width="2"/></g></symbol>
+<symbol id="tomb" viewBox="0 0 100 100"><g stroke="#1b1b2f" stroke-width="3" stroke-linejoin="round">
+<path d="M6 96 V54 Q6 8 50 8 Q94 8 94 54 V96Z" fill="#b87a55"/><path d="M26 96 V60 Q26 30 50 30 Q74 30 74 60 V96Z" fill="#2a1d12"/>
+<path d="M14 40 H32 M68 40 H86 M10 56 H24 M76 56 H90 M12 74 H24 M76 74 H88" fill="none" stroke-width="2"/></g></symbol>
+<symbol id="flag" viewBox="0 0 100 100"><g stroke="#1b1b2f" stroke-width="3" stroke-linejoin="round" stroke-linecap="round">
+<path d="M26 96 V6" stroke="#6b4a2b" stroke-width="6" fill="none"/><path d="M28 10 H84 L72 28 L84 46 H28Z" fill="#e5484d"/></g></symbol>
+<symbol id="iron" viewBox="0 0 100 100"><g stroke="#1b1b2f" stroke-width="3" stroke-linejoin="round">
+<path d="M14 44 H86 L82 56 H18Z" fill="#6c7380"/><path d="M14 66 H86 L82 78 H18Z" fill="#7d8492"/><path d="M26 44 V56 M50 44 V56 M74 44 V56 M26 66 V78 M50 66 V78 M74 66 V78" fill="none" stroke-width="1.5"/></g></symbol>
+
+<symbol id="egg" viewBox="0 0 100 100"><g stroke="#1b1b2f" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"><path d="M50 8 Q82 8 82 58 Q82 92 50 92 Q18 92 18 58 Q18 8 50 8Z" fill="#fff4d6"/><circle cx="40" cy="42" r="4" fill="#e9c24a" stroke="none"/><circle cx="60" cy="60" r="5" fill="#e9c24a" stroke="none"/><circle cx="44" cy="72" r="3" fill="#e9c24a" stroke="none"/><path d="M34 22 Q40 14 50 14" fill="none" stroke="#fff" stroke-width="4"/></g></symbol>
+<symbol id="celadon" viewBox="0 0 100 100"><g stroke="#1b1b2f" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"><path d="M40 6 H60 V20 Q80 30 80 56 Q80 80 66 94 H34 Q20 80 20 56 Q20 30 40 20Z" fill="#9fd3c0"/><path d="M34 40 Q50 32 66 40" fill="none" stroke-width="2"/><circle cx="40" cy="62" r="5" fill="#fff"/><circle cx="58" cy="52" r="4" fill="#fff"/><path d="M36 76 Q50 84 64 76" fill="none" stroke-width="2"/></g></symbol>
+<symbol id="ship" viewBox="0 0 100 100"><g stroke="#1b1b2f" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"><path d="M8 68 H92 L78 90 H22Z" fill="#a07848"/><path d="M50 10 V68" fill="none" stroke="#6b4a2b" stroke-width="4"/><path d="M53 14 L86 58 H53Z" fill="#f4f1e8"/><path d="M47 24 L20 58 H47Z" fill="#e9e2cc"/></g></symbol>
+<symbol id="woodblock" viewBox="0 0 100 100"><g stroke="#1b1b2f" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"><rect x="6" y="38" width="12" height="30" fill="#8a6a45"/><rect x="82" y="38" width="12" height="30" fill="#8a6a45"/><rect x="14" y="26" width="72" height="54" rx="4" fill="#c9a26b"/><path d="M24 40 H76 M24 50 H76 M24 60 H76 M24 70 H60" fill="none" stroke-width="2.5"/></g></symbol>
+<symbol id="monk" viewBox="0 0 100 100"><g stroke="#1b1b2f" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"><rect x="36" y="82" width="10" height="14" fill="#1b1b2f"/><rect x="54" y="82" width="10" height="14" fill="#1b1b2f"/><path d="M30 56 L20 70 M70 56 L80 70" fill="none"/><rect x="28" y="50" width="44" height="35" rx="8" fill="#c97b2e"/><path d="M36 62 Q50 82 64 62" fill="none" stroke="#f4f1e8" stroke-width="3"/><circle cx="50" cy="32" r="19" fill="#ffd9b3"/><circle cx="43" cy="35" r="2.2" fill="#1b1b2f" stroke="none"/><circle cx="57" cy="35" r="2.2" fill="#1b1b2f" stroke="none"/><path d="M45 43 Q50 47 55 43" fill="none"/></g></symbol>
+</svg>
+
+
+<div class="wrap"><p style="margin:12px 0 0"><a href="index.html#history" style="font-family:'Jua',sans-serif;font-size:16px;color:var(--fg);text-decoration:none;border:3px solid #1b1b2f;border-radius:10px;background:var(--card);padding:5px 14px;box-shadow:3px 3px 0 #1b1b2f;display:inline-block">← 겨울방학 운영 · 한국사</a></p>
+<header class="top">
+  <h1>현대 탐험대<small>광복부터 오늘까지, 만화 수업 + 채점 시험</small></h1>
+  <div class="tabs" role="tablist">
+    <button role="tab" id="tab-story" aria-selected="true">만화 수업</button>
+    <button role="tab" id="tab-quiz" aria-selected="false">시험 보기</button>
+  </div>
+</header>
+
+<section id="view-story" aria-live="polite"></section>
+<section id="view-quiz" hidden></section>
+</div>
+<div id="toast" class="toast" hidden></div>
+
+
+<script>
+/* ===================== comic builder ===================== */
+var BG={day:['#bfe6ff','#8fcf6e'],cave:['#5b4b63','#6b5646'],dusk:['#ffd3a1','#c9a26b'],night:['#2c2f63','#3d5a40'],lab:['#e6e0ff','#cfc6f2'],map:['#d6ebff','#b7d7a0'],gold:['#fff1b8','#e8c66a'],river:['#cdeeff','#7fc4e6']};
+function use(it){var id=it[0],x=it[1],y=it[2],w=it[3],f=it[4];
+  var t=f?' transform="translate('+(2*x+w)+',0) scale(-1,1)"':'';
+  return '<use href="#'+id+'" x="'+x+'" y="'+y+'" width="'+w+'" height="'+w+'"'+t+'/>';}
+function scene(bg,items,opt){opt=opt||{};var c=BG[bg]||BG.day,s='<svg viewBox="0 0 320 200" role="img" aria-label="'+(opt.alt||'만화 장면')+'" xmlns="http://www.w3.org/2000/svg">';
+  s+='<rect width="320" height="200" fill="'+c[0]+'"/>';
+  if(bg==='day'||bg==='river'||bg==='map'){s+='<circle cx="276" cy="34" r="17" fill="#ffd23f" stroke="#1b1b2f" stroke-width="3"/><ellipse cx="70" cy="34" rx="30" ry="9" fill="#fff" opacity=".9"/><ellipse cx="92" cy="28" rx="20" ry="8" fill="#fff" opacity=".9"/>';}
+  if(bg==='dusk'){s+='<circle cx="270" cy="60" r="26" fill="#ff8f5a" stroke="#1b1b2f" stroke-width="3"/>';}
+  if(bg==='night'){s+='<circle cx="270" cy="34" r="14" fill="#f4f1e8"/><circle cx="40" cy="30" r="2" fill="#fff"/><circle cx="120" cy="20" r="2" fill="#fff"/><circle cx="190" cy="40" r="2" fill="#fff"/>';}
+  if(bg==='gold'){for(var i=0;i<14;i++){var a=i*Math.PI*2/14;s+='<path d="M160 100 L'+(160+Math.cos(a)*260)+' '+(100+Math.sin(a)*260)+' L'+(160+Math.cos(a+.2)*260)+' '+(100+Math.sin(a+.2)*260)+'Z" fill="#fff9d6" opacity=".7"/>';}}
+  if(bg==='lab'){s+='<path d="M0 60 H320 M0 110 H320" stroke="#cfc6f2" stroke-width="2"/>';}
+  if(bg==='river'){s+='<rect y="150" width="320" height="50" fill="#7fc4e6"/><path d="M0 168 q20 -8 40 0 t40 0 t40 0 t40 0 t40 0 t40 0 t40 0 t40 0" stroke="#fff" stroke-width="2.5" fill="none"/>';}
+  else{s+='<rect y="150" width="320" height="50" fill="'+c[1]+'"/>';}
+  s+='<path d="M0 150 H320" stroke="#1b1b2f" stroke-width="3"/>';
+  items.forEach(function(it){s+=use(it);});
+  return s+'</svg>';}
+function panel(sc,cap){var b=sc.bub?'<div class="bub '+(sc.bub[1]||'l')+(sc.bub[2]?' shout':'')+'">'+sc.bub[0]+'</div>':'';
+  return '<figure class="panel" style="margin:0">'+b+sc.svg+'<figcaption class="cap">'+cap+'</figcaption></figure>';}
+function P(bg,items,bub,cap,alt){return panel({svg:scene(bg,items,{alt:alt||cap}),bub:bub},cap);}
+var KID=function(x,y,s,f){return ['kid',x,y,s||90,f]},TC=function(x,y,s,f){return ['tchr',x,y,s||90,f]};
+
+function radar(o){
+  return '<div class="radar"><div class="box"><h3>출제 포인트</h3><ul>'+o.pts.map(function(t){return '<li>'+t+'</li>';}).join('')+'</ul></div>'+
+  '<div class="box"><h3>'+(o.h||'이 시기가 아닌데 선지로 등장하는 말')+'</h3><div class="trap">'+o.traps.map(function(t){return '<span>'+t+'</span>';}).join('')+'</div><p class="src" style="margin-top:8px">'+o.note+'</p></div></div>';}
+function cnt(){var a=Array.prototype.slice.call(arguments);return Q.filter(function(q){return a.indexOf(q.tag)>-1}).length;}
+
+var SLIDES=[
+/* 0 cover */
+{chip:'시작',title:'현대 탐험대, 출발!',html:function(){
+  return '<div class="grid" style="grid-template-columns:minmax(0,1fr)">'+
+  P('gold',[['star',12,10,36],['star',270,18,34],['flag',210,56,84],KID(50,76,100),TC(120,76,100),['book',8,96,52]],
+    ['얘들아, 광복부터 오늘까지 대한민국의 길을 한 번에 정복하자!','r',1],'오늘의 목표: 1945년 광복 이후를 한 흐름으로','표지: 다온과 역사쌤')+'</div>'+
+  '<div class="box" style="margin-top:16px"><h3>이렇게 공부해요</h3><ul>'+
+  '<li><b>만화 수업</b> '+SLIDES.length+'장짜리 슬라이드를 넘기며 시기별 핵심을 잡아요. 슬라이드마다 출제 포인트와 함정이 붙어 있어요.</li>'+
+  '<li><b>시험 보기</b> '+Q.length+'문제를 쉬운 문제부터 풀어요. 마지막 문제를 풀면 바로 채점돼요.</li></ul></div>'+
+  '<p class="src">※ 현대 편은 교과서 핵심 개념과 자주 나오는 문제 유형을 바탕으로 새로 쓴 문제예요.</p>';}},
+
+/* 1 big picture */
+{chip:'큰 그림',title:'광복 이후는 “정부 수립 → 전쟁 → 성장과 민주화”',html:function(){
+  var G=[['광복·건국',cnt('광복·건국'),'신탁 통치 · 5·10 총선거 · 농지 개혁'],['6·25 전쟁',cnt('6·25 전쟁'),'인천 상륙 · 휴전'],['정치·민주화',cnt('민주화'),'4·19 · 유신 · 5·18 · 6월 항쟁'],['경제 성장',cnt('경제'),'5개년 계획 · 외환 위기'],['남북 관계',cnt('남북 관계'),'7·4 · 6·15']];
+  var mx=Math.max.apply(null,G.map(function(g){return g[1]}));
+  return '<div class="grid">'+
+  P('day',[KID(40,72,100),TC(120,72,100)],['현대사는 사건이 너무 많아요. 어떻게 정리해요?','l'],'① 다온의 질문')+
+  P('day',[KID(60,72,100,1),TC(150,72,100,1)],['큰 흐름부터! 연도와 사건을 짝지어 외우면 돼.','r'],'② 역사쌤의 대답')+'</div>'+
+  '<div class="box" style="margin-top:14px"><h3>시대의 흐름</h3><p style="margin:0;font-size:15px"><b>광복·분단</b>(1945) → <b>정부 수립</b>(1948) → <b>6·25 전쟁</b>(1950~53) → <b>4·19</b>(1960) → <b>5·16</b>(1961)·<b>경제 개발</b> → <b>유신</b>(1972) → <b>5·18</b>(1980) → <b>6월 민주 항쟁</b>(1987) → <b>외환 위기</b>(1997)·<b>남북 정상 회담</b>(2000)</p></div>'+
+  '<p style="margin:14px 0 4px;font-weight:700">이 시험지의 영역별 문항 수</p><div class="timeline t5">'+
+  G.map(function(r){
+    return '<div class="tl"><b>'+r[0]+'</b><span class="n">'+r[1]+'</span><small>'+r[2]+'</small><div class="bar"><i style="width:'+Math.round(r[1]/mx*100)+'%"></i></div></div>';}).join('')+'</div>'+
+  '<div class="box" style="margin-top:14px"><h3>알아 두면 좋은 것</h3><ul><li>정답 근거는 거의 <b>“연도 + 사건 + 결과”</b>예요. 사건 이름과 연도를 짝으로 외워 두세요.</li>'+
+  '<li>비슷한 이름이 많아요. <b>개헌 이름</b>(발췌·사사오입·3선·유신)과 <b>남북 합의 이름</b>을 구별하는 게 핵심이에요.</li>'+
+  '<li>오답 선지는 <b>일제 강점기</b>의 말이나 같은 현대사 안의 다른 시기 사건으로 채워져요.</li></ul></div>';}},
+
+/* 2 광복과 정부 수립 */
+{chip:'광복·건국',title:'광복에서 대한민국 정부 수립까지',html:function(){
+  return '<div class="grid">'+
+  P('day',[['flag',20,50,70],KID(110,76,86),TC(190,76,86,1)],['1945년 8월 15일 광복! <b>여운형</b>이 <b>건국 준비 위원회</b>를 만들었어요.','r',1],'① 광복과 건국 준비')+
+  P('lab',[['scroll',20,50,90],['flag',130,50,70],['flag',210,50,70]],['<b>모스크바 3국 외상 회의</b>(1945.12): 최대 5년간 <b>신탁 통치</b>!','r',1],'② 신탁 통치 논란')+
+  P('map',[['tchr',20,76,90],KID(130,76,86),['pin',230,44,50]],['<b>여운형·김규식</b>이 <b>좌우 합작 위원회</b>(1946)로 통일 정부를 세우려 했어요.','l'],'③ 좌우 합작 운동')+
+  P('gold',[['book',20,52,90],['flag',130,50,70],['star',230,40,40]],['<b>5·10 총선거</b>(1948) → 제헌 국회 → 8월 15일 <b>대한민국 정부 수립</b>!','r',1],'④ 단독 선거와 정부 수립')+'</div>'+
+  radar({pts:['신탁 통치: 모스크바 3국 외상 회의(1945.12) → 찬탁·반탁 갈등 → 미·소 공동 위원회 결렬','좌우 합작 위원회(1946, 여운형·김규식) · 김구·김규식 남북 협상(1948.4)','5·10 총선거(1948) → 제헌 헌법(7.17) → 정부 수립(8.15)','농지 개혁법(1949, 유상 매입·유상 분배) · 반민족 행위 특별 조사 위원회(반민특위, 1948)'],traps:['토지 조사 사업','6·10 만세 운동','신간회','회사령','헌병 경찰 제도','국민 대표 회의'],note:'토지 조사 사업·회사령·헌병 경찰 제도는 일제 강점기의 일이에요. 광복 이후 첫 토지 제도 변화는 농지 개혁이에요.'});}},
+
+/* 3 6·25 */
+{chip:'6·25 전쟁',title:'분단을 굳힌 6·25 전쟁',html:function(){
+  return '<div class="grid">'+
+  P('night',[['warrior',20,66,86],['flag',130,50,70],['castle',210,50,100]],['1950년 6월 25일 북한의 남침! 서울이 사흘 만에 함락됐어요.','r'],'① 북한의 남침(1950.6.25)')+
+  P('river',[['ship',20,56,100],['warrior',150,66,86],['flag',240,50,60]],['유엔군이 참전하고 <b>인천 상륙 작전</b>(1950.9)으로 서울을 되찾았어요!','l',1],'② 유엔군 참전과 인천 상륙 작전')+
+  P('dusk',[['warrior',20,66,86],['warrior',110,66,86,1],['pin',210,40,50]],['압록강까지 갔지만 <b>중국군</b>이 개입! 1951년 <b>1·4 후퇴</b>…','r'],'③ 중국군 개입과 전선 교착')+
+  P('gold',[['scroll',20,50,90],['flag',130,50,70],['flag',210,50,70]],['1953년 7월 <b>휴전 협정</b>! 그해 <b>한·미 상호 방위 조약</b>도 맺었어요.','r',1],'④ 휴전 협정(1953)')+'</div>'+
+  radar({pts:['1950.6.25 남침 → 유엔 안전 보장 이사회 결의로 유엔군 파견','인천 상륙 작전(1950.9.15) → 서울 수복 → 압록강 진격 → 중국군 개입(1950.10) → 1·4 후퇴(1951)','휴전 협정(1953.7.27) → 한·미 상호 방위 조약(1953.10)','피해: 이산가족 · 전쟁고아 · 산업 시설 파괴 · 분단 고착화'],traps:['6·10 만세 운동','5·18 민주화 운동','4·19 혁명','10월 유신','금융 실명제','IMF 구제 금융'],note:'휴전 협정은 전쟁이 끝난 것이 아니라 전투를 잠시 멈춘 것이에요. 그래서 지금도 “휴전 상태”라고 해요.'});}},
+
+/* 4 이승만 정부와 4·19 */
+{chip:'4·19 혁명',title:'개헌 논란에서 4·19 혁명까지',html:function(){
+  return '<div class="grid">'+
+  P('lab',[['book',20,52,90],KID(120,76,86),['flag',210,50,70]],['<b>발췌 개헌</b>(1952): 부산에서 대통령 직선제로 바꿨어요.','r'],'① 발췌 개헌(1952)')+
+  P('dusk',[['scroll',20,50,90],TC(130,76,86),['star',230,40,40]],['<b>사사오입 개헌</b>(1954): 초대 대통령의 중임 제한을 없앴어요.','l',1],'② 사사오입 개헌(1954)')+
+  P('night',[['sack',20,66,80],['flag',120,50,70],KID(210,76,86,1)],['<b>3·15 부정 선거</b>(1960)! 마산에서 시위가 시작됐어요.','r',1],'③ 3·15 부정 선거')+
+  P('gold',[['flag',20,50,70],KID(110,76,86),KID(190,76,86,1),['star',260,30,36]],['<b>4·19 혁명</b>(1960)! 대통령이 <b>하야</b>하고 내각 책임제의 <b>장면 내각</b>이 출범했어요.','l',1],'④ 4·19 혁명(1960)')+'</div>'+
+  radar({pts:['발췌 개헌(1952, 직선제) · 사사오입 개헌(1954, 중임 제한 철폐)','진보당 사건(1958) · 국가 보안법 개정(1958)','3·15 부정 선거 → 4·19 혁명(1960) → 대통령 하야 → 허정 과도 정부 → 내각 책임제 개헌 → 장면 내각'],traps:['5·16 군사 정변','10월 유신','6월 민주 항쟁','부마 민주 항쟁','3선 개헌','12·12 사태'],note:'4·19(1960)와 5·16(1961)은 1년 차이예요. 4·19는 시민 혁명, 5·16은 군사 정변이라는 점을 구별하세요.'});}},
+
+/* 5 박정희 정부 */
+{chip:'5·16·유신',title:'5·16에서 10월 유신, 그리고 10·26까지',html:function(){
+  return '<div class="grid">'+
+  P('night',[['warrior',20,66,86],['warrior',110,66,86,1],['castle',210,50,100]],['<b>5·16 군사 정변</b>(1961): 군인들이 정권을 잡았어요.','r'],'① 5·16 군사 정변(1961)')+
+  P('map',[['scroll',20,50,90],['ship',120,56,90],['flag',230,50,60]],['<b>한·일 협정</b>(1965)! 반대 시위가 컸어요. <b>베트남 파병</b>도 이어졌어요.','l',1],'② 한·일 협정과 베트남 파병')+
+  P('lab',[['book',20,52,90],['scroll',120,50,80],TC(210,76,86,1)],['<b>3선 개헌</b>(1969) → <b>10월 유신</b>(1972): 대통령 간선제, 긴급 조치!','r',1],'③ 3선 개헌과 10월 유신')+
+  P('dusk',[['flag',20,50,70],KID(110,76,86),KID(190,76,86,1)],['<b>부마 민주 항쟁</b>(1979) 뒤 <b>10·26 사태</b>로 유신 체제가 끝났어요.','l'],'④ 부마 민주 항쟁과 10·26')+'</div>'+
+  radar({pts:['5·16(1961) → 국가 재건 최고 회의 → 1963 대통령 선거','한·일 협정(1965) · 베트남 파병(1964~) · 3선 개헌(1969)','10월 유신(1972): 통일 주체 국민 회의의 대통령 간선 · 긴급 조치권 · 중임 제한 철폐','부마 민주 항쟁(1979.10) → 10·26 사태(1979)'],traps:['4·19 혁명','발췌 개헌','6월 민주 항쟁','금융 실명제','5·18 민주화 운동','외환 위기'],note:'3선 개헌(1969)은 “세 번까지 대통령을 할 수 있게”, 유신(1972)은 “간선제와 긴급 조치”로 구별해요.'});}},
+
+/* 6 경제 */
+{chip:'경제 성장',title:'원조 경제에서 외환 위기까지',html:function(){
+  return '<div class="grid">'+
+  P('gold',[['crop',20,50,90],['coin',120,50,80],TC(210,76,86,1)],['<b>경제 개발 5개년 계획</b>(1962~): 경공업 중심의 수출 주도형 성장!','r',1],'① 경제 개발 5개년 계획')+
+  P('map',[['pin',30,40,50],['fence',100,64,90],['pin',250,40,50]],['<b>경부 고속도로</b>(1970) 개통! <b>새마을 운동</b>도 시작됐어요.','r'],'② 경부 고속도로와 새마을 운동')+
+  P('lab',[['iron',20,60,90],['ship',130,56,100],['coin',240,50,60]],['1970년대엔 <b>중화학 공업</b>! 1977년 수출 100억 달러를 넘었어요.','l',1],'③ 중화학 공업과 수출 100억 달러')+
+  P('dusk',[['sack',20,60,80],['coin',120,50,80],KID(220,80,80,1)],['1997년 <b>외환 위기</b>! IMF 구제 금융… <b>금 모으기 운동</b>도 있었어요.','r',1],'④ 외환 위기(1997)')+'</div>'+
+  radar({pts:['1950년대: 미국 원조 · 삼백 산업(제분·제당·면방직)','1960년대: 경제 개발 5개년 계획 · 경공업 · 수출 주도 · 경부 고속도로·새마을 운동(1970)','1970년대: 중화학 공업 · 수출 100억 달러(1977) · 석유 파동','1980년대 후반 3저 호황 → 1996 OECD 가입 → 1997 외환 위기·IMF → 2001 차입금 조기 상환'],traps:['회사령','토지 조사 사업','물산 장려 운동','산미 증식 계획','방곡령','국채 보상 운동'],note:'회사령·산미 증식 계획 같은 말은 일제 강점기의 경제 정책이에요. 경제 개발 5개년 계획은 1962년에 시작해요.'});}},
+
+/* 7 5·18과 6월 민주 항쟁 */
+{chip:'5·18·6월 항쟁',title:'5·18 민주화 운동과 6월 민주 항쟁',html:function(){
+  return '<div class="grid">'+
+  P('night',[['warrior',20,66,86],['warrior',110,66,86,1],['castle',210,50,100]],['10·26 뒤 <b>12·12 사태</b>(1979)로 신군부가 권력을 잡았어요.','r'],'① 12·12 사태와 서울의 봄')+
+  P('dusk',[['flag',20,50,70],KID(110,76,86),KID(190,76,86,1),['warrior',250,66,60,1]],['<b>5·18 민주화 운동</b>(1980): 광주 시민들이 계엄 확대에 맞섰어요.','l',1],'② 5·18 민주화 운동(1980)')+
+  P('lab',[['scroll',20,50,90],KID(120,76,86),['flag',210,50,70]],['<b>박종철 고문 치사</b>와 <b>4·13 호헌 조치</b>가 시민을 분노하게 했어요(1987).','r'],'③ 박종철 사건과 호헌 조치')+
+  P('gold',[['flag',20,50,70],KID(100,76,86),TC(170,76,86,1),KID(240,80,70)],['<b>6월 민주 항쟁</b>(1987)! <b>6·29 선언</b>으로 대통령 직선제 개헌이 이뤄졌어요.','r',1],'④ 6월 민주 항쟁과 직선제 개헌')+'</div>'+
+  radar({pts:['12·12 사태(1979) → 서울의 봄(1980) → 비상계엄 전국 확대 → 5·18 민주화 운동','5·18 민주화 운동 기록물: 유네스코 세계 기록 유산 등재(2011)','1987: 박종철 고문 치사 → 4·13 호헌 조치 → 6월 민주 항쟁 → 6·29 선언','5년 단임 대통령 직선제 개헌(1987)'],traps:['4·19 혁명','10월 유신','5·16 군사 정변','부마 민주 항쟁','3선 개헌','사사오입 개헌'],note:'민주화 운동 4개를 순서로 외워요: 4·19(1960) → 부마(1979) → 5·18(1980) → 6월 항쟁(1987).'});}},
+
+/* 8 민주주의 정착 */
+{chip:'민주주의 정착',title:'제도로 자리 잡은 민주주의',html:function(){
+  return '<div class="grid">'+
+  P('day',[['star',20,30,40],TC(110,76,86),['flag',200,50,70]],['<b>김영삼 정부</b>(1993): 문민정부! <b>금융 실명제</b>를 실시했어요.','r',1],'① 문민정부와 금융 실명제')+
+  P('map',[['pin',30,40,50],['pin',130,56,50],['pin',230,40,50],KID(250,80,66,1)],['<b>지방 자치제</b>가 1995년 단체장 선거로 전면 실시되었어요.','l'],'② 지방 자치제의 전면 실시')+
+  P('gold',[['book',20,52,90],['flag',130,50,70],['star',230,40,40]],['1997년 선거로 처음 <b>여야 정권 교체</b>가 이뤄졌어요(1998 취임).','r',1],'③ 평화적 정권 교체')+
+  P('lab',[['scroll',20,50,90],KID(120,76,86),TC(190,76,86,1)],['<b>5년 단임제</b>로 대통령이 바뀌며 민주주의가 제도로 자리 잡았어요.','r'],'④ 5년 단임 직선제')+'</div>'+
+  radar({pts:['김영삼 정부(1993): 문민정부 · 금융 실명제 · 지방 자치제 전면 실시(1995)','김대중 정부(1998): 최초의 여야 정권 교체 · 외환 위기 극복 노력','1987 헌법 체제: 대통령 5년 단임 직선제','지방 자치: 1991 지방 의회 선거 → 1995 단체장 선거'],traps:['사사오입 개헌','유신 헌법','12·12 사태','국가 재건 최고 회의','긴급 조치','6·3 시위'],note:'금융 실명제(1993)와 외환 위기(1997)의 순서를 헷갈리지 마세요.'});}},
+
+/* 9 남북 관계 */
+{chip:'남북 관계',title:'대화와 협력의 걸음',html:function(){
+  return '<div class="grid">'+
+  P('map',[['flag',20,50,70],['scroll',120,50,80],['flag',230,50,70]],['<b>7·4 남북 공동 성명</b>(1972): 자주·평화·민족 대단결 3대 원칙!','r',1],'① 7·4 남북 공동 성명(1972)')+
+  P('lab',[['scroll',20,50,90],TC(120,76,86),TC(190,76,86,1)],['1991년 <b>남북 동시 유엔 가입</b>, <b>남북 기본 합의서</b>도 채택!','l'],'② 남북 기본 합의서(1991)')+
+  P('gold',[['flag',20,50,70],KID(110,76,86),KID(190,76,86,1),['flag',250,50,60]],['2000년 첫 정상 회담, <b>6·15 남북 공동 선언</b>! 이산가족 상봉도 이어졌어요.','r',1],'③ 6·15 남북 공동 선언(2000)')+
+  P('river',[['ship',20,56,100],['pin',150,40,50],['coin',230,50,70]],['<b>금강산 관광</b>(1998~), <b>개성 공단</b>(2004~)으로 경제 교류도 했어요.','r'],'④ 남북 경제 협력')+'</div>'+
+  radar({pts:['7·4 남북 공동 성명(1972): 자주·평화·민족 대단결','남북 기본 합의서 · 한반도 비핵화 공동 선언 · 남북 동시 유엔 가입(모두 1991)','6·15 남북 공동 선언(2000, 첫 남북 정상 회담) · 10·4 선언(2007)','금강산 관광(1998) · 개성 공단(2004) · 이산가족 상봉'],traps:['남북 협상(1948)','좌우 합작 위원회','한·일 협정','6·25 전쟁','휴전 협정','베트남 파병'],note:'1948년 김구·김규식의 남북 협상과 2000년 6·15 정상 회담은 전혀 다른 사건이에요.'});}},
+
+/* 10 함정 사전 */
+{chip:'함정 사전',title:'이름이 비슷해서 헷갈리는 말',html:function(){
+  var D=[['일제 강점기 (오답용)',['토지 조사 사업','회사령','물산 장려 운동','6·10 만세 운동','신간회','헌병 경찰 제도']],
+   ['광복~6·25',['모스크바 3국 외상 회의','좌우 합작 위원회','5·10 총선거','반민특위','농지 개혁법','인천 상륙 작전']],
+   ['정치·민주화',['발췌 개헌 · 사사오입 개헌','3선 개헌 · 10월 유신','4·19 · 5·16','부마 항쟁 · 5·18','6월 민주 항쟁 · 6·29 선언']],
+   ['경제·남북',['경제 개발 5개년 계획','새마을 운동 · 경부 고속도로','금융 실명제','외환 위기(IMF)','7·4 · 남북 기본 합의서 · 6·15']]];
+  return '<p style="margin:0 0 12px">현대사는 이름이 비슷한 사건이 많아요. 같은 범주끼리 모아서 차이를 확인해 보세요.</p><div class="dict">'+
+  D.map(function(d){return '<div class="box"><h3>'+d[0]+'<small>'+d[1].length+'개</small></h3><ul>'+d[1].map(function(x){return '<li>'+x+'</li>';}).join('')+'</ul></div>';}).join('')+'</div>'+
+  '<div class="box" style="margin-top:12px"><h3>꼭 구별할 쌍</h3><ul>'+
+  '<li><b>발췌 개헌(1952, 직선제) ↔ 사사오입 개헌(1954, 중임 제한 철폐)</b></li>'+
+  '<li><b>4·19 혁명(1960, 하야) ↔ 5·16 군사 정변(1961)</b></li>'+
+  '<li><b>3선 개헌(1969) ↔ 10월 유신(1972)</b></li>'+
+  '<li><b>부마 항쟁(1979) ↔ 5·18(1980) ↔ 6월 항쟁(1987)</b></li>'+
+  '<li><b>7·4 공동 성명(1972) ↔ 남북 기본 합의서(1991) ↔ 6·15 공동 선언(2000)</b></li>'+
+  '<li><b>모스크바 3국 외상 회의(신탁 통치) ↔ 5·10 총선거(정부 수립)</b></li>'+
+  '<li><b>금융 실명제(1993) ↔ 외환 위기(1997)</b></li>'+
+  '<li><b>남북 협상(1948) ↔ 남북 정상 회담(2000)</b></li></ul></div>';}},
+
+/* 11 summary */
+{chip:'정리',title:'한 장으로 끝내는 현대사',html:function(){
+  var R=[['광복~정부 수립','신탁 통치 · 좌우 합작 · 5·10 총선거(1948)','제헌 헌법 · 농지 개혁 · 반민특위','미 군정 → 이승만 정부'],
+   ['6·25 전쟁','남침 · 인천 상륙 · 중국군 개입 · 휴전(1953)','한·미 상호 방위 조약','이승만 정부'],
+   ['4·19까지','발췌·사사오입 개헌 · 3·15 · 4·19(1960)','내각 책임제 개헌','허정 · 장면'],
+   ['5·16~10·26','5·16 · 한·일 협정 · 유신 · 부마(1979)','경제 개발 5개년 계획 · 경부 고속도로','박정희 정부'],
+   ['1980년 이후','12·12 · 5·18 · 6월 민주 항쟁(1987) · 외환 위기','5년 단임 직선제 · 지방 자치 · 금융 실명제','신군부 · 문민정부 …']];
+  return '<div class="tw"><table class="cmp"><tr><th>시기</th><th>핵심 사건</th><th>제도·성과</th><th>정부</th></tr>'+R.map(function(r){return '<tr>'+r.map(function(c,i){return '<td>'+(i?'':'<b>')+c+(i?'':'</b>')+'</td>';}).join('')+'</tr>';}).join('')+'</table></div>'+
+  '<div class="box" style="margin-top:14px"><h3>연표 한눈에</h3><ul><li>1945 광복 → 1948 정부 수립 → 1950 6·25 전쟁 → 1953 휴전 → 1960 4·19 → 1961 5·16 → 1965 한·일 협정</li>'+
+  '<li>1972 유신·7·4 성명 → 1979 부마·10·26 → 1980 5·18 → 1987 6월 항쟁 → 1991 남북 기본 합의서 → 1997 외환 위기 → 2000 6·15 선언</li></ul></div>'+
+  '<div class="grid" style="margin-top:16px;grid-template-columns:minmax(0,1fr)">'+
+  P('gold',[['star',14,14,34],['star',272,20,32],KID(70,76,100),TC(140,76,100),['flag',230,56,76]],['이제 <b>시험</b>으로 실력을 확인해 볼까?','r',1],'수업 끝! 이어서 시험','마무리')+'</div>'+
+  '<div class="acts"><button class="btn main" id="go-quiz">시험 보러 가기</button></div>';}}
+];
+
+
+/* ===================== story controller ===================== */
+var cur=0,story=document.getElementById('view-story');
+function renderStory(){var s=SLIDES[cur];
+  var dots=SLIDES.map(function(_,i){return '<i class="'+(i===cur?'on':'')+'"></i>';}).join('');
+  story.innerHTML='<article class="slide"><div class="shead"><span class="chip">'+s.chip+'</span><h2>'+s.title+'</h2></div>'+s.html()+'</article>'+
+  '<div class="nav"><button id="prev"'+(cur===0?' disabled':'')+'>이전</button><div class="dots" aria-label="'+(cur+1)+' / '+SLIDES.length+'">'+dots+'</div><button id="next"'+(cur===SLIDES.length-1?' disabled':'')+'>다음</button></div>';
+  document.getElementById('prev').onclick=function(){go(cur-1)};
+  document.getElementById('next').onclick=function(){go(cur+1)};
+  var gq=document.getElementById('go-quiz'); if(gq) gq.onclick=function(){show('quiz')};
+}
+function go(n){if(n<0||n>=SLIDES.length)return;cur=n;renderStory();window.scrollTo({top:0})}
+document.addEventListener('keydown',function(e){if(story.hidden)return;if(e.key==='ArrowRight')go(cur+1);if(e.key==='ArrowLeft')go(cur-1);});
+
+
+var LV=[{n:'기본',s:'★',d:'인물·사건을 바로 묻는 문제'},{n:'표준',s:'★★',d:'지문을 읽고 사건과 시기를 찾는 문제'},{n:'심화',s:'★★★',d:'보기 조합 · 연표 · 순서 · 표 해석 문제'}];
+var Q=[
+{"lv": 0, "tag": "광복·건국", "src": "건국 준비 위원회", "q": "광복 직후 여운형을 중심으로 조직되어 치안과 행정을 맡은 단체는?", "o": ["조선 건국 준비 위원회", "한인 애국단", "독립 협회", "신간회", "대한 광복회"], "a": 0, "e": "조선 건국 준비 위원회(건준)는 광복 직후인 1945년 8월 여운형 등이 조직해 전국에 지부를 두고 치안과 행정을 맡았어요. 한인 애국단·신간회·독립 협회·대한 광복회는 광복 이전의 단체예요."},
+{"lv": 0, "tag": "광복·건국", "src": "모스크바 3국 외상 회의", "q": "1945년 12월 모스크바 3국 외상 회의에서 결정된 내용으로 옳은 것은?", "o": ["즉시 총선거 실시", "남한 단독 정부 수립", "한국 문제의 유엔 이관", "대한민국 임시 정부 승인", "최대 5년간의 신탁 통치 실시"], "a": 4, "e": "모스크바 3국 외상 회의에서는 임시 민주 정부 수립, 미·소 공동 위원회 설치, 최대 5년간의 신탁 통치가 결정되었어요. 국내에서는 찬탁과 반탁으로 의견이 갈렸어요."},
+{"lv": 0, "tag": "광복·건국", "src": "제헌 헌법", "q": "5·10 총선거로 구성된 제헌 국회가 1948년 7월 17일에 공포한 것은?", "o": ["6·29 선언", "유신 헌법", "제헌 헌법", "국가 재건 최고 회의법", "농지 개혁법"], "a": 2, "e": "제헌 국회는 1948년 7월 17일 제헌 헌법을 공포했어요. 농지 개혁법은 이듬해(1949년) 제정되었고, 유신 헌법은 1972년, 6·29 선언은 1987년의 일이에요."},
+{"lv": 0, "tag": "광복·건국", "src": "대한민국 정부 수립", "q": "1948년 대한민국 정부 수립 당시 초대 대통령으로 선출된 인물은?", "o": ["윤보선", "김규식", "이승만", "여운형", "김구"], "a": 2, "e": "제헌 국회에서 이승만이 초대 대통령으로 선출되었고, 1948년 8월 15일 대한민국 정부가 수립되었어요. 김구·김규식은 남북 협상에 참여했고, 여운형은 건국 준비 위원회를 이끌었어요."},
+{"lv": 0, "tag": "6·25 전쟁", "src": "인천 상륙 작전", "q": "6·25 전쟁 중 1950년 9월 서울 수복의 계기가 된 작전은?", "o": ["흥남 철수 작전", "낙동강 방어선 전투", "1·4 후퇴", "인천 상륙 작전", "판문점 회담"], "a": 3, "e": "유엔군은 1950년 9월 15일 인천 상륙 작전을 성공시켜 전세를 뒤집고 서울을 되찾았어요. 1·4 후퇴는 중국군 개입 뒤인 1951년 1월의 일이에요."},
+{"lv": 0, "tag": "남북 관계", "src": "6·15 남북 공동 선언", "q": "2000년 평양에서 열린 첫 남북 정상 회담 결과 발표된 선언은?", "o": ["한반도 비핵화 공동 선언", "7·4 남북 공동 성명", "남북 기본 합의서", "6·15 남북 공동 선언", "10·4 선언"], "a": 3, "e": "2000년 6월 남북 정상이 평양에서 만나 6·15 남북 공동 선언을 발표했어요. 7·4 성명은 1972년, 남북 기본 합의서와 비핵화 공동 선언은 1991년, 10·4 선언은 2007년이에요."},
+{"lv": 0, "tag": "민주화", "src": "4·19 혁명", "q": "4·19 혁명의 직접적인 도화선이 된 사건은?", "o": ["10월 유신", "부마 민주 항쟁", "5·16 군사 정변", "12·12 사태", "3·15 부정 선거"], "a": 4, "e": "1960년 3·15 부정 선거에 항의하는 시위가 마산에서 시작되어 전국으로 퍼지며 4·19 혁명이 일어났고, 이승만 대통령이 하야했어요."},
+{"lv": 0, "tag": "경제", "src": "경제 개발 5개년 계획", "q": "1962년부터 박정희 정부가 추진한 경제 정책은?", "o": ["경제 개발 5개년 계획", "농지 개혁", "산미 증식 계획", "금융 실명제", "토지 조사 사업"], "a": 0, "e": "경제 개발 5개년 계획은 1962년부터 추진되어 경공업 중심의 수출 주도형 성장을 이끌었어요. 토지 조사 사업과 산미 증식 계획은 일제 강점기, 농지 개혁은 1950년, 금융 실명제는 1993년의 일이에요."},
+{"lv": 0, "tag": "민주화", "src": "10월 유신", "q": "1972년 박정희 정부가 선포한, 대통령 간선제와 긴급 조치권을 담은 체제는?", "o": ["금융 실명제", "사사오입 개헌", "10월 유신", "발췌 개헌", "6·29 선언"], "a": 2, "e": "10월 유신(1972)으로 통일 주체 국민 회의가 대통령을 간선으로 뽑고, 대통령은 긴급 조치권을 가졌어요. 발췌 개헌과 사사오입 개헌은 이승만 정부 때의 개헌이에요."},
+{"lv": 0, "tag": "민주화", "src": "5·18 민주화 운동", "q": "1980년 광주에서 신군부의 비상계엄 전국 확대에 맞서 일어난 민주화 운동은?", "o": ["4·19 혁명", "5·18 민주화 운동", "6월 민주 항쟁", "부마 민주 항쟁", "3·1 운동"], "a": 1, "e": "5·18 민주화 운동은 1980년 5월 광주에서 시민과 학생들이 신군부에 맞선 운동이에요. 3·1 운동은 1919년, 4·19 혁명은 1960년, 부마 항쟁은 1979년, 6월 민주 항쟁은 1987년이에요."},
+{"lv": 0, "tag": "민주화", "src": "6월 민주 항쟁", "q": "1987년 6월 민주 항쟁의 결과로 이루어진 헌법 개정 내용은?", "o": ["대통령 5년 단임 직선제", "국회 해산권 부여", "대통령 중임 제한 철폐", "대통령 간선제", "내각 책임제"], "a": 0, "e": "6월 민주 항쟁 뒤 6·29 선언이 발표되고, 대통령 5년 단임 직선제를 담은 헌법 개정이 이루어졌어요. 이 헌법 체제가 오늘날까지 이어지고 있어요."},
+{"lv": 0, "tag": "경제", "src": "외환 위기", "q": "1997년 외환 위기로 우리나라가 구제 금융을 지원받은 국제 기구는?", "o": ["국제 통화 기금(IMF)", "세계 무역 기구(WTO)", "경제 협력 개발 기구(OECD)", "국제 연합(UN)", "아시아 개발 은행"], "a": 0, "e": "1997년 말 외환 위기로 우리나라는 국제 통화 기금(IMF)에 구제 금융을 요청했어요. 국민들은 금 모으기 운동 등으로 위기 극복에 힘을 보탰고, 2001년 차입금을 조기에 갚았어요."},
+{"lv": 1, "tag": "광복·건국", "src": "신탁 통치 논란", "p": "◦ 1945년 12월 미국, 영국, 소련 외무 장관이 모여 한국 문제를 논의하였다.\n◦ 임시 민주 정부 수립을 위해 미·소 공동 위원회를 설치하고, 최대 5년간의 신탁 통치를 하기로 하였다.", "q": "이 결정 이후 국내에서 나타난 모습으로 옳은 것은?", "o": ["신탁 통치를 둘러싸고 찬탁과 반탁으로 의견이 갈렸다.", "헌병 경찰이 즉결 처분권을 행사하였다.", "농지 개혁법이 제정되어 유상 분배가 시작되었다.", "국민 대표 회의가 열려 임시 정부 개편을 논의하였다.", "5·10 총선거가 실시되어 제헌 국회가 구성되었다."], "a": 0, "e": "모스크바 3국 외상 회의의 결정이 알려지자 국내에서는 신탁 통치 찬성(찬탁)과 반대(반탁)로 갈려 갈등이 커졌어요. 국민 대표 회의는 1923년, 헌병 경찰은 일제 강점기, 농지 개혁법(1949)과 5·10 총선거(1948)는 그 뒤의 일이에요."},
+{"lv": 1, "tag": "광복·건국", "src": "좌우 합작 위원회", "p": "◦ 1946년 중도 우파의 김규식과 중도 좌파의 여운형이 중심이 되었다.\n◦ 미·소 공동 위원회의 재개를 촉구하며 좌익과 우익이 함께 통일 정부를 세우려 하였다.", "q": "이 단체의 활동으로 옳은 것은?", "o": ["남북 기본 합의서를 채택하였다.", "좌우 합작 7원칙을 발표하였다.", "신탁 통치 반대 운동을 주도하였다.", "5·10 총선거를 실시하였다.", "국가 재건 최고 회의를 구성하였다."], "a": 1, "e": "좌우 합작 위원회는 1946년 10월 좌우 합작 7원칙을 발표하며 통일 정부 수립을 위해 노력했어요. 5·10 총선거는 1948년, 국가 재건 최고 회의는 1961년, 남북 기본 합의서는 1991년의 일이에요."},
+{"lv": 1, "tag": "광복·건국", "src": "남북 협상(1948)", "p": "1948년 4월 김구와 김규식은 남한만의 단독 선거에 반대하며 평양을 방문하여 북한 지도자들과 회담하였다.", "q": "이 회담을 가리키는 것은?", "o": ["6·15 남북 정상 회담", "남북 협상", "미·소 공동 위원회", "좌우 합작 회의", "7·4 남북 공동 성명"], "a": 1, "e": "김구와 김규식은 통일 정부 수립을 위해 1948년 4월 평양에서 남북 협상에 참여했지만, 5·10 총선거와 정부 수립을 막지는 못했어요. 6·15 정상 회담은 2000년의 일이에요."},
+{"lv": 1, "tag": "광복·건국", "src": "농지 개혁", "p": "◦ 1949년 제정되어 1950년에 실시되었다.\n◦ 정부가 지주의 농지를 유상으로 사들여 농민에게 유상으로 나누어 주었다.", "q": "이 법의 시행으로 나타난 결과로 옳은 것은?", "o": ["국가가 모든 토지를 공유하게 되었다.", "소작 제도가 줄어들고 자영농이 늘어났다.", "일본인 소유 농지만 대상이었다.", "지주가 토지를 무상으로 몰수당하였다.", "농민은 토지를 무상으로 분배받았다."], "a": 1, "e": "농지 개혁법은 유상 매입·유상 분배 방식으로 농지를 나누어 소작농이 줄고 자영농이 늘어났어요. 무상 몰수·무상 분배가 아니라는 점에 주의하세요."},
+{"lv": 1, "tag": "광복·건국", "src": "반민특위", "p": "◦ 1948년 제헌 국회가 반민족 행위 처벌법을 제정하였다.\n◦ 이에 따라 특별 조사 위원회가 설치되어 조사를 시작하였다.", "q": "이 기구에 대한 설명으로 옳은 것은?", "o": ["경제 개발 계획을 수립하였다.", "일제 강점기 친일 행위자를 조사하고 처벌하고자 하였다.", "신탁 통치를 반대하기 위해 만들어졌다.", "남북 대화를 위해 설치되었다.", "6·25 전쟁 중 피란민을 구호하였다."], "a": 1, "e": "반민족 행위 특별 조사 위원회(반민특위)는 일제 강점기 친일 행위자를 조사하고 처벌하기 위해 만들어졌어요. 하지만 여러 이유로 활동이 제대로 마무리되지 못했어요."},
+{"lv": 1, "tag": "6·25 전쟁", "src": "6·25 전쟁 사이 사건", "p": "(가) 1950년 6월 25일 북한군이 38도선을 넘어 남침하였다.\n(나) 1953년 7월 27일 휴전 협정이 조인되었다.", "q": "(가)와 (나) 사이에 있었던 일로 옳은 것은?", "o": ["4·19 혁명이 일어났다.", "제헌 헌법이 공포되었다.", "5·16 군사 정변이 일어났다.", "유엔군이 인천 상륙 작전을 전개하였다.", "5·10 총선거가 실시되었다."], "a": 3, "e": "1950년 9월 인천 상륙 작전은 (가)와 (나) 사이에 있었어요. 5·10 총선거와 제헌 헌법은 1948년, 4·19 혁명은 1960년, 5·16은 1961년의 일이에요."},
+{"lv": 1, "tag": "6·25 전쟁", "src": "6·25 전쟁의 영향", "p": "◦ 국군과 유엔군이 압록강 부근까지 진격하였다.\n◦ 중국군이 개입하자 전세가 바뀌어 1951년 1·4 후퇴가 일어났다.", "q": "이 전쟁이 남긴 영향으로 옳은 것은?", "o": ["신탁 통치가 실시되었다.", "농지 개혁이 처음 추진되었다.", "이산가족과 전쟁고아가 생기고 분단이 고착화되었다.", "대한민국 정부가 수립되었다.", "독립 협회가 결성되었다."], "a": 2, "e": "6·25 전쟁으로 많은 사람이 목숨을 잃고 이산가족·전쟁고아가 생겼으며 산업 시설이 파괴되고 분단이 굳어졌어요. 정부 수립(1948)과 농지 개혁 추진은 전쟁 전의 일이에요."},
+{"lv": 1, "tag": "민주화", "src": "발췌 개헌", "p": "◦ 1952년 부산 임시 수도에서 통과되었다.\n◦ 대통령 직선제를 내용으로 정부와 야당의 개헌안을 절충하였다.", "q": "이 개헌에 해당하는 것은?", "o": ["3선 개헌", "사사오입 개헌", "발췌 개헌", "유신 헌법 개정", "제9차 개헌"], "a": 2, "e": "발췌 개헌(1952)은 부산 정치 파동 속에서 대통령 직선제를 도입한 개헌이에요. 사사오입 개헌은 1954년에 초대 대통령의 중임 제한을 없앤 개헌이에요."},
+{"lv": 1, "tag": "민주화", "src": "4·19 혁명의 결과", "p": "◦ 3·15 부정 선거에 항의하는 시위가 마산에서 시작되었다.\n◦ 시위는 전국으로 확산되어 대학 교수단도 시국 선언을 하였다.", "q": "이 사건의 결과로 옳은 것은?", "o": ["대통령이 하야하고 내각 책임제 개헌이 이루어졌다.", "박정희가 대통령에 당선되었다.", "유신 헌법이 선포되었다.", "금융 실명제가 실시되었다.", "대통령 직선제가 도입되었다."], "a": 0, "e": "4·19 혁명(1960)으로 이승만 대통령이 하야했고, 허정 과도 정부 아래에서 내각 책임제 개헌이 이루어져 장면 내각이 출범했어요."},
+{"lv": 1, "tag": "민주화", "src": "5·16 이후의 정부", "p": "◦ 1961년 군인들이 정변을 일으켜 국가 재건 최고 회의를 설치하였다.\n◦ 이후 경제 개발 5개년 계획을 추진하였다.", "q": "이 시기 정부의 정책으로 옳은 것은?", "o": ["6·15 남북 공동 선언을 발표하였다.", "지방 자치제를 전면 실시하였다.", "금융 실명제를 실시하였다.", "신탁 통치를 찬성하였다.", "한·일 협정을 체결하고 베트남에 군대를 파견하였다."], "a": 4, "e": "박정희 정부는 한·일 협정(1965)을 체결하고 베트남에 군대를 파견(1964~)했어요. 금융 실명제(1993)와 지방 자치제 전면 실시(1995)는 문민정부 때, 6·15 선언은 2000년의 일이에요."},
+{"lv": 1, "tag": "민주화", "src": "유신 체제", "p": "◦ 대통령 선거를 통일 주체 국민 회의에서 간선으로 하였다.\n◦ 대통령에게 긴급 조치권을 주고 중임 제한을 없앴다.", "q": "이 체제가 유지되던 시기(1972~1979)에 있었던 일로 옳은 것은?", "o": ["발췌 개헌이 이루어졌다.", "부마 민주 항쟁이 일어나고 10·26 사태로 체제가 막을 내렸다.", "농지 개혁이 실시되었다.", "4·19 혁명으로 대통령이 하야하였다.", "5·18 민주화 운동이 일어났다."], "a": 1, "e": "유신 체제는 1979년 부마 민주 항쟁과 10·26 사태로 막을 내렸어요. 4·19(1960)와 발췌 개헌(1952)은 이전, 5·18(1980)은 유신 체제 종료 이후의 일이에요."},
+{"lv": 1, "tag": "민주화", "src": "6월 민주 항쟁", "p": "◦ 서울대생 박종철이 경찰의 고문으로 사망하였다.\n◦ 정부가 직선제 개헌 논의를 중단하는 4·13 호헌 조치를 발표하였다.\n◦ 시민과 학생들이 전국에서 거리로 나섰다.", "q": "이 항쟁의 결과 발표된 것은?", "o": ["6·29 민주화 선언", "7·4 남북 공동 성명", "비상계엄 전국 확대", "5·16 군사 정변 공약", "금융 실명제 실시 발표"], "a": 0, "e": "6월 민주 항쟁(1987)의 결과 대통령 직선제 개헌 수용을 담은 6·29 민주화 선언이 발표되었어요. 7·4 성명은 1972년, 금융 실명제는 1993년이에요."},
+{"lv": 1, "tag": "경제", "src": "1970년대 경제", "p": "1970년대 박정희 정부 시기 경제에 대한 설명이다.", "q": "1970년대 경제 정책으로 옳은 것은?", "o": ["3저 호황으로 무역 흑자를 기록하였다.", "삼백 산업 중심으로 미국의 원조에 의존하였다.", "외환 위기로 IMF 구제 금융을 받았다.", "금융 실명제를 시행하였다.", "중화학 공업을 육성하고 새마을 운동을 전개하였다."], "a": 4, "e": "1970년대에는 중화학 공업 육성과 새마을 운동이 이루어졌고 1977년 수출 100억 달러를 넘었어요. 삼백 산업·원조 경제는 1950년대, 3저 호황은 1980년대 중후반, 외환 위기는 1997년이에요."},
+{"lv": 1, "tag": "경제", "src": "외환 위기", "p": "◦ 1997년 말 외환 보유고가 줄어 국제 통화 기금의 구제 금융을 받았다.\n◦ 국민들은 금 모으기 운동에 참여하였다.", "q": "이 시기의 모습으로 옳은 것은?", "o": ["경제 개발 5개년 계획이 처음 시작되었다.", "새마을 운동이 시작되었다.", "기업의 구조 조정과 대량 실업이 사회 문제가 되었다.", "경부 고속도로가 개통되었다.", "미국의 원조에 의존하는 삼백 산업이 발달하였다."], "a": 2, "e": "외환 위기 때는 기업의 구조 조정과 대량 실업이 큰 문제가 되었어요. 삼백 산업(1950년대), 경제 개발 5개년 계획(1962), 새마을 운동·경부 고속도로(1970)는 모두 그 이전의 일이에요."},
+{"lv": 1, "tag": "남북 관계", "src": "7·4 남북 공동 성명", "p": "◦ 1972년 남북이 자주, 평화, 민족 대단결의 통일 3대 원칙에 합의하였다.\n◦ 서울과 평양에서 동시에 발표되었다.", "q": "이 합의에 해당하는 것은?", "o": ["한반도 비핵화 공동 선언", "6·15 남북 공동 선언", "남북 기본 합의서", "10·4 선언", "7·4 남북 공동 성명"], "a": 4, "e": "7·4 남북 공동 성명(1972)은 자주·평화·민족 대단결의 통일 3대 원칙을 밝힌 최초의 남북 합의예요."},
+{"lv": 2, "tag": "연표", "src": "연표 속 위치 찾기", "p": "<연표>\n광복(1945) — (가) — 정부 수립(1948) — (나) — 휴전 협정(1953) — (다) — 4·19 혁명(1960) — (라) — 10월 유신(1972) — (마) — 6월 민주 항쟁(1987)", "q": "6·25 전쟁이 일어난 시기(1950)를 연표에서 고른 것은?", "o": ["(가)", "(나)", "(다)", "(라)", "(마)"], "a": 1, "e": "6·25 전쟁(1950)은 정부 수립(1948) 이후, 휴전 협정(1953) 이전이므로 (나)예요."},
+{"lv": 2, "tag": "연표", "src": "민주화 운동 순서", "q": "다음 사건을 일어난 순서대로 바르게 나열한 것은?\n(가) 5·16 군사 정변\n(나) 5·18 민주화 운동\n(다) 4·19 혁명\n(라) 6월 민주 항쟁", "o": ["(가) – (다) – (나) – (라)", "(다) – (가) – (라) – (나)", "(다) – (나) – (가) – (라)", "(가) – (나) – (다) – (라)", "(다) – (가) – (나) – (라)"], "a": 4, "e": "4·19 혁명(1960) → 5·16 군사 정변(1961) → 5·18 민주화 운동(1980) → 6월 민주 항쟁(1987) 순서예요. 다 – 가 – 나 – 라."},
+{"lv": 2, "tag": "경제", "src": "박정희 정부 시기", "q": "박정희 정부 시기의 모습으로 옳은 것만을 <보기>에서 고른 것은?\n\nㄱ. 경부 고속도로가 개통되었다.\nㄴ. 금융 실명제가 시행되었다.\nㄷ. 한·일 협정이 체결되었다.\nㄹ. 지방 자치제가 전면 실시되었다.", "o": ["ㄱ, ㄴ", "ㄴ, ㄷ", "ㄱ, ㄷ", "ㄷ, ㄹ", "ㄴ, ㄹ"], "a": 2, "e": "경부 고속도로 개통(1970, ㄱ)과 한·일 협정 체결(1965, ㄷ)이 박정희 정부 시기의 일이에요. 금융 실명제(1993)와 지방 자치제 전면 실시(1995)는 문민정부 때의 일이에요."},
+{"lv": 2, "tag": "민주화", "src": "정부별 표 해석", "p": "정부 | 주요 사건 | 특징\n(가) | 발췌 개헌, 사사오입 개헌, 3·15 부정 선거 | 4·19 혁명으로 막을 내림\n(나) | 5·16 군사 정변, 한·일 협정, 10월 유신 | 경제 개발 5개년 계획 추진\n(다) | 12·12 사태, 5·18 민주화 운동 진압, 6월 민주 항쟁 | 5년 단임 직선제 개헌으로 이어짐", "q": "(가)~(다)에 대한 설명으로 옳은 것은?", "o": ["(나) 정부 때 금융 실명제가 시행되었다.", "(다) 정부는 4·19 혁명으로 무너졌다.", "(다) 정부 때 10월 유신이 선포되었다.", "(가) 정부 시기에 6·25 전쟁이 일어나 휴전 협정이 체결되었다.", "(가) 정부 때 한·일 협정이 체결되었다."], "a": 3, "e": "(가)는 이승만 정부, (나)는 박정희 정부, (다)는 신군부·전두환 정부 시기예요. 6·25 전쟁과 휴전(1953)은 (가) 시기의 일이에요. 금융 실명제는 1993년, 유신은 (나), 한·일 협정은 (나), 4·19로 무너진 것은 (가)예요."},
+{"lv": 2, "tag": "민주화", "src": "민주주의 발전 옳지 않은 것", "q": "1980년대 이후 민주주의의 발전에 대한 설명으로 옳지 않은 것은?", "o": ["1995년 지방 자치 단체장 선거가 실시되어 지방 자치제가 전면 실시되었다.", "1997년 대통령 선거를 통해 처음으로 여야 정권 교체가 이루어졌다.", "1993년 금융 실명제가 도입되어 경제 정의 실현에 기여하였다.", "유신 헌법에 따라 대통령 직선제가 실시되었다.", "1987년 개헌으로 대통령 5년 단임 직선제가 도입되었다."], "a": 3, "e": "유신 헌법(1972)은 대통령 선거를 통일 주체 국민 회의에서 하는 간선제였어요. 직선제는 1987년 개헌으로 다시 도입되었어요."},
+{"lv": 2, "tag": "남북 관계", "src": "남북 합의 순서", "q": "다음 남북 합의를 일어난 순서대로 바르게 나열한 것은?\n(가) 6·15 남북 공동 선언\n(나) 7·4 남북 공동 성명\n(다) 남북 기본 합의서\n(라) 10·4 선언", "o": ["(가) – (나) – (다) – (라)", "(나) – (가) – (다) – (라)", "(나) – (다) – (라) – (가)", "(나) – (다) – (가) – (라)", "(다) – (나) – (가) – (라)"], "a": 3, "e": "7·4 남북 공동 성명(1972) → 남북 기본 합의서(1991) → 6·15 남북 공동 선언(2000) → 10·4 선언(2007) 순서예요. 나 – 다 – 가 – 라."}
+];
+
+
+/* ===================== exam controller ===================== */
+var quiz=document.getElementById('view-quiz'),st={ans:[],graded:false,locked:{},t0:0,tm:null};
+function resetState(){st.ans=Q.map(function(){return null});st.graded=false;st.locked={};st.t0=Date.now();}
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
+function buildQuiz(){resetState();
+  var h='<div class="bar-sticky" id="bar"><b id="cnt">0 / '+Q.length+'</b><div class="prog"><i id="pg"></i></div><b id="tm">00:00</b></div>'+
+  '<div id="res"></div>'+
+  '<div class="box intro"><h3>시험 안내</h3><p>'+Q.length+'문제 · 쉬운 문제부터 어려운 문제 순서 · 문제마다 보기 5개 중 하나 선택</p><p>마지막 문제까지 모두 고르면 <b>자동으로 채점</b>돼요. 채점 뒤에는 문제마다 해설이 열려요.</p></div>';
+  var n=0;
+  LV.forEach(function(L,li){var items=Q.map(function(q,i){return [q,i]}).filter(function(x){return x[0].lv===li});
+    h+='<h2 class="lv">'+L.s+' '+L.n+'<small>'+items.length+'문항 · '+L.d+'</small></h2>';
+    items.forEach(function(x){var q=x[0],i=x[1];n++;
+      h+='<article class="q" id="q'+i+'"><div class="qh"><span class="qn">'+(i+1)+'</span><span class="tag">'+q.tag+'</span><span class="mark" id="m'+i+'"></span></div>'+
+      (q.p?'<div class="pass">'+esc(q.p)+'</div>':'')+'<div class="qt">'+esc(q.q)+'</div><div class="opts">'+
+      q.o.map(function(o,j){return '<div><input type="radio" name="r'+i+'" id="r'+i+'_'+j+'" value="'+j+'"><label for="r'+i+'_'+j+'"><span class="no">'+(j+1)+'</span><span>'+esc(o)+'</span></label></div>'}).join('')+
+      '</div><div class="exp" id="e'+i+'" hidden></div></article>';});});
+  h+='<div class="acts"><button class="btn" id="force">지금 채점하기</button></div>';
+  quiz.innerHTML=h;
+  quiz.querySelectorAll('input[type=radio]').forEach(function(r){r.addEventListener('change',function(){
+    var i=+r.name.slice(1);st.ans[i]=+r.value;update();
+    if(!st.graded&&st.ans.every(function(a){return a!==null})){grade(true)}});});
+  document.getElementById('force').onclick=function(){grade(false)};
+  clearInterval(st.tm);st.tm=setInterval(tick,1000);update();}
+function tick(){if(st.graded)return;var s=Math.floor((Date.now()-st.t0)/1000);var el=document.getElementById('tm');if(el)el.textContent=('0'+Math.floor(s/60)).slice(-2)+':'+('0'+s%60).slice(-2)}
+function update(){var c=st.ans.filter(function(a){return a!==null}).length;document.getElementById('cnt').textContent=c+' / '+Q.length;document.getElementById('pg').style.width=(c/Q.length*100)+'%'}
+function toast(m){var t=document.getElementById('toast');t.textContent=m;t.hidden=false;clearTimeout(toast.h);toast.h=setTimeout(function(){t.hidden=true},3200)}
+function grade(auto){
+  var un=st.ans.filter(function(a){return a===null}).length;
+  if(!auto&&un>0){toast('아직 '+un+'문제를 풀지 않았어요. 모두 풀면 자동으로 채점돼요.');return}
+  st.graded=true;clearInterval(st.tm);
+  var ok=0,byLv=[0,0,0],totLv=[0,0,0],byTag={},totTag={},wrong=[];
+  Q.forEach(function(q,i){var a=st.ans[i],good=a===q.a;totLv[q.lv]++;totTag[q.tag]=(totTag[q.tag]||0)+1;
+    if(good){ok++;byLv[q.lv]++;byTag[q.tag]=(byTag[q.tag]||0)+1}else wrong.push(i);
+    var card=document.getElementById('q'+i);card.classList.remove('ok','ng');card.classList.add('lock',good?'ok':'ng');
+    document.getElementById('m'+i).textContent=good?'정답':'오답';
+    card.querySelectorAll('input').forEach(function(r){r.disabled=true});
+    q.o.forEach(function(_,j){var lb=card.querySelector('label[for=r'+i+'_'+j+']');lb.classList.remove('right','wrong');if(j===q.a)lb.classList.add('right');else if(j===a)lb.classList.add('wrong')});
+    var e=document.getElementById('e'+i);e.hidden=false;
+    e.innerHTML='<b>정답 '+(q.a+1)+'번</b>'+(good?'':' · 내가 고른 답 '+(a===null?'없음':(a+1)+'번'))+'<br>'+esc(q.e)+'<div class="from">출제 포인트: '+q.src+'</div>';});
+  var pct=Math.round(ok/Q.length*100),deg=Math.round(ok/Q.length*360);
+  var rows=LV.map(function(L,li){return rowH(L.s+' '+L.n,byLv[li],totLv[li])}).concat(Object.keys(totTag).map(function(t){return rowH(t,byTag[t]||0,totTag[t])})).join('');
+  var weak=Object.keys(totTag).filter(function(t){return (byTag[t]||0)<totTag[t]}).sort(function(a,b){return ((byTag[a]||0)/totTag[a])-((byTag[b]||0)/totTag[b])});
+  var msg=ok===Q.length?'만점이에요. 현대사 단원은 완벽해요.':ok>=Q.length*0.8?'아주 잘했어요. 틀린 문제의 해설만 한 번 더 읽어 보세요.':ok>=Q.length*0.6?'기본기는 있어요. 약한 영역을 만화 수업에서 다시 확인해 보세요.':'만화 수업을 한 번 더 읽고 다시 도전해 보세요. 유물 짝꿍부터 다시 잡아요.';
+  var secs=Math.floor((Date.now()-st.t0)/1000);
+  document.getElementById('res').innerHTML='<section class="result" id="resBox"><h2>채점 결과</h2><div class="score"><div class="ring" style="background:conic-gradient(var(--ok) '+deg+'deg,var(--bg) 0)"><div>'+ok+' / '+Q.length+'<small>'+pct+'점</small></div></div><div class="rows">'+rows+'</div></div>'+
+  '<p class="msg">'+msg+(weak.length?' 보강할 부분: <b>'+weak.slice(0,3).join(', ')+'</b>.':'')+' 걸린 시간 '+Math.floor(secs/60)+'분 '+secs%60+'초.</p>'+
+  '<div class="acts">'+(wrong.length?'<button class="btn main" id="retryW">틀린 문제만 다시 풀기 ('+wrong.length+')</button>':'')+'<button class="btn" id="retryA">처음부터 다시 풀기</button><button class="btn" id="toStory">만화 수업 다시 보기</button></div></section>';
+  document.getElementById('retryA').onclick=function(){buildQuiz();window.scrollTo({top:0})};
+  document.getElementById('toStory').onclick=function(){show('story')};
+  var rw=document.getElementById('retryW');if(rw)rw.onclick=function(){retryWrong(wrong)};
+  if(auto)toast(Q.length+'문항을 모두 풀어서 자동으로 채점했어요.');
+  document.getElementById('resBox').scrollIntoView({behavior:'smooth',block:'start'});}
+function rowH(n,a,t){return '<div class="row"><span>'+n+'</span><span class="t"><i style="width:'+Math.round(a/t*100)+'%"></i></span><span>'+a+'/'+t+'</span></div>'}
+function retryWrong(wrong){
+  st.graded=false;document.getElementById('res').innerHTML='';
+  wrong.forEach(function(i){st.ans[i]=null;var card=document.getElementById('q'+i);card.classList.remove('ok','ng','lock');document.getElementById('m'+i).textContent='';document.getElementById('e'+i).hidden=true;
+    card.querySelectorAll('input').forEach(function(r){r.disabled=false;r.checked=false});card.querySelectorAll('label').forEach(function(l){l.classList.remove('right','wrong')});});
+  st.t0=Date.now();clearInterval(st.tm);st.tm=setInterval(tick,1000);update();
+  var f=document.getElementById('q'+wrong[0]);f.scrollIntoView({behavior:'smooth',block:'center'});toast('틀린 문제 '+wrong.length+'개만 열었어요. 다 풀면 다시 채점돼요.');}
+
+/* ===================== tabs / routing ===================== */
+var built=false;
+function show(v){var q=v==='quiz';
+  document.getElementById('view-story').hidden=q;document.getElementById('view-quiz').hidden=!q;
+  document.getElementById('tab-story').setAttribute('aria-selected',String(!q));document.getElementById('tab-quiz').setAttribute('aria-selected',String(q));
+  if(q&&!built){buildQuiz();built=true}
+  try{history.replaceState(null,'','#'+v)}catch(e){location.hash=v}
+  window.scrollTo({top:0});}
+document.getElementById('tab-story').onclick=function(){show('story')};
+document.getElementById('tab-quiz').onclick=function(){show('quiz')};
+window.addEventListener('hashchange',function(){show(location.hash==='#quiz'?'quiz':'story')});
+renderStory();if(location.hash==='#quiz')show('quiz');
+</script>
+<!-- BESTIAN-PATCH -->
+<style>
+.q[hidden],.lv[hidden],.box[hidden]{display:none!important}
+.rw-banner{margin-bottom:14px;border-color:var(--acc)}
+.rw-banner p{margin:4px 0;font-size:14.5px}
+.rw-note{margin:10px 0 0;font-size:15px;font-weight:700;color:var(--ok)}
+.send{margin-top:16px;border:3px dashed var(--comic);border-radius:12px;padding:14px 16px;background:var(--bg);display:grid;gap:8px}
+.send h3{font-family:var(--f-display);font-weight:400;font-size:20px;margin:0}
+.send label{font-size:14px;font-weight:700}
+.send input{font:inherit;font-size:16px;padding:8px 12px;border:2px solid var(--comic);border-radius:9px;background:var(--card);color:var(--fg);max-width:260px;width:100%}
+.send .code{font-size:14px;background:var(--card);border:2px solid var(--line);border-radius:9px;padding:9px 12px;word-break:keep-all;user-select:all;font-variant-numeric:tabular-nums}
+.send .row2{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+</style>
+<script>
+/* ===================== 베스티안: 결과 보내기 + 틀린 문제만 다시 풀기 ===================== */
+(function(){
+  var UNIT={"no": 8, "name": "현대"};
+  var KEY='bestian-student-name';
+  function getName(){try{return localStorage.getItem(KEY)||''}catch(e){return ''}}
+  function setName(v){try{localStorage.setItem(KEY,v)}catch(e){}}
+  function clean(v){return String(v||'').replace(/[·\[\]\n\r\t]/g,' ').replace(/\s+/g,' ').trim().slice(0,20)}
+  function two(n){return ('0'+n).slice(-2)}
+  function when(d){return (d.getMonth()+1)+'/'+d.getDate()+' '+two(d.getHours())+':'+two(d.getMinutes())}
+  var rs={first:null,mode:false,retried:[]};
+  var _build=buildQuiz,_grade=grade,_retry=retryWrong;
+
+  function showAll(){
+    quiz.querySelectorAll('article.q,h2.lv,.box.intro').forEach(function(el){el.hidden=false});
+    var b=document.getElementById('rwBanner');if(b)b.remove();
+  }
+
+  buildQuiz=function(){rs.first=null;rs.mode=false;rs.retried=[];_build();};
+
+  function codeLine(){
+    var f=rs.first,name=clean(document.getElementById('stuName')?document.getElementById('stuName').value:getName());
+    var wrongTxt=f.wrong.length?'오답 '+f.wrong.map(function(i){return i+1}).join(','):'오답 없음';
+    var fixed=f.wrong.filter(function(i){return st.ans[i]===Q[i].a}).length;
+    return '[베스티안 한국사] '+(name||'이름')+' · '+UNIT.no+'단원 '+UNIT.name+' · '+f.ok+'/'+Q.length+' · '+wrongTxt+' · 오답 해결 '+fixed+'/'+f.wrong.length+' · '+when(f.at);
+  }
+  function copyText(t,done,fail){
+    function fb(){var ta=document.createElement('textarea');ta.value=t;ta.style.position='fixed';ta.style.opacity='0';document.body.appendChild(ta);ta.select();var ok=false;try{ok=document.execCommand('copy')}catch(e){}document.body.removeChild(ta);ok?done():fail()}
+    if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(t).then(done,fb)}else fb();
+  }
+
+  grade=function(auto){
+    var wasMode=rs.mode;
+    _grade(auto);
+    if(!st.graded)return;
+    var wrongNow=[];Q.forEach(function(q,i){if(st.ans[i]!==q.a)wrongNow.push(i)});
+    if(!rs.first)rs.first={ok:Q.length-wrongNow.length,wrong:wrongNow.slice(),at:new Date()};try{var _k='bestian-hist-'+UNIT.no;if(!localStorage.getItem(_k))localStorage.setItem(_k,JSON.stringify({ok:rs.first.ok,total:Q.length,at:rs.first.at.toISOString()}))}catch(e){}
+    var box=document.getElementById('resBox');if(!box)return;
+    var f=rs.first,fixed=f.wrong.filter(function(i){return st.ans[i]===Q[i].a}).length;
+    if(wasMode){
+      var got=rs.retried.filter(function(i){return st.ans[i]===Q[i].a}).length;
+      box.querySelector('h2').textContent='틀린 문제 다시 풀기 채점';
+      var p=document.createElement('p');p.className='rw-note';
+      p.textContent='다시 푼 '+rs.retried.length+'문제 중 '+got+'문제 정답! 처음 틀린 '+f.wrong.length+'문제 중 '+fixed+'문제를 해결했어요.'+(fixed<f.wrong.length?' 남은 '+(f.wrong.length-fixed)+'문제도 다시 도전해 보세요.':' 오답을 모두 해결했어요.');
+      box.insertBefore(p,box.querySelector('.acts'));
+      toast('다시 푼 문제를 채점했어요.');
+    }
+    var s=document.createElement('div');s.className='send';s.id='sendBox';
+    s.innerHTML='<h3>결과 보내기</h3><p class="src" style="margin:0">점수는 <b>처음 푼 결과('+f.ok+'/'+Q.length+')</b>로 기록되고, 틀린 문제를 다시 풀면 “오답 해결” 수가 올라가요.</p>'+
+      '<label for="stuName">이름</label><input id="stuName" type="text" maxlength="20" autocomplete="name" placeholder="이름을 입력하세요">'+
+      '<div class="code" id="codeLine"></div>'+
+      '<div class="row2"><button class="btn main" id="copyCode">결과 복사</button><span class="src">복사한 결과를 담당 선생님 카톡에 붙여넣어 주세요.</span></div>';
+    box.appendChild(s);
+    var inp=document.getElementById('stuName');inp.value=getName();
+    function refresh(){document.getElementById('codeLine').textContent=codeLine()}
+    inp.addEventListener('input',function(){setName(clean(inp.value));refresh()});
+    refresh();
+    document.getElementById('copyCode').onclick=function(){
+      if(!clean(inp.value)){toast('이름을 먼저 입력해 주세요.');inp.focus();return}
+      var t=codeLine();
+      copyText(t,function(){toast('결과를 복사했어요. 선생님 카톡에 붙여넣어 주세요.')},function(){
+        var el=document.getElementById('codeLine'),r=document.createRange();r.selectNodeContents(el);var sel=window.getSelection();sel.removeAllRanges();sel.addRange(r);
+        toast('자동 복사가 막혀 있어요. 선택된 글자를 길게 눌러 복사해 주세요.')});
+    };
+  };
+
+  retryWrong=function(wrong){
+    rs.mode=true;rs.retried=wrong.slice();
+    var set={};wrong.forEach(function(i){set[i]=1});
+    quiz.querySelectorAll('article.q').forEach(function(c){c.hidden=!set[+c.id.slice(1)]});
+    quiz.querySelectorAll('h2.lv').forEach(function(h){var n=h.nextElementSibling,any=false;
+      while(n&&n.tagName!=='H2'){if(n.matches&&n.matches('article.q')&&!n.hidden)any=true;n=n.nextElementSibling}h.hidden=!any});
+    var intro=quiz.querySelector('.box.intro');if(intro)intro.hidden=true;
+    var old=document.getElementById('rwBanner');if(old)old.remove();
+    var b=document.createElement('div');b.className='box rw-banner';b.id='rwBanner';
+    b.innerHTML='<h3>틀린 문제만 다시 풀기 · '+wrong.length+'문제</h3><p>틀렸던 문제만 모았어요. 다 고르면 자동으로 채점되고 해설이 다시 열려요.</p><p class="src">처음 점수 '+(rs.first?rs.first.ok:'-')+'/'+Q.length+'은 그대로 기록돼요.</p><div class="acts" style="margin-top:8px"><button class="btn" id="rwAll">전체 문제 함께 보기</button></div>';
+    var res=document.getElementById('res');res.parentNode.insertBefore(b,res.nextSibling);
+    _retry(wrong);
+    document.getElementById('rwAll').onclick=function(){showAll();rs.mode=true;toast('전체 문제를 다시 보여 줘요. 다시 풀 문제만 선택할 수 있어요.')};
+  };
+})();
+</script>
+
+
+</body></html>

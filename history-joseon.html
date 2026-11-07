@@ -1,0 +1,796 @@
+<!doctype html><html lang="ko"><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>조선 시대 탐험대</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Jua&family=Noto+Sans+KR:wght@400;500;700&display=swap">
+<style>
+/* Layout concept: a comic-book reader (panel grid, speech bubbles) that hands off to a graded exam sheet. */
+:root{
+  --bg:#e9eef7; --fg:#1b1b2f; --muted:#5a6078; --card:#ffffff; --line:#c9d1e3;
+  --acc:#e5484d; --acc-ink:#ffffff; --hl:#ffd23f; --blue:#2f6fed; --ok:#17835a; --ok-bg:#e3f6ec; --no:#c9303f; --no-bg:#fde8ea;
+  --comic:#1b1b2f; --dots:rgba(47,111,237,.10);
+  --f-display:'Jua','Noto Sans KR',sans-serif; --f-body:'Noto Sans KR',system-ui,sans-serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#12141f; --fg:#eef0f8; --muted:#a6adc8; --card:#1d2032; --line:#33384f;
+  --acc:#ff6b70; --acc-ink:#1b1b2f; --hl:#ffd23f; --blue:#7aa2ff; --ok:#4ad19a; --ok-bg:#12332a; --no:#ff7a86; --no-bg:#3a1a20;
+  --dots:rgba(122,162,255,.10); color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#12141f; --fg:#eef0f8; --muted:#a6adc8; --card:#1d2032; --line:#33384f;
+  --acc:#ff6b70; --acc-ink:#1b1b2f; --hl:#ffd23f; --blue:#7aa2ff; --ok:#4ad19a; --ok-bg:#12332a; --no:#ff7a86; --no-bg:#3a1a20;
+  --dots:rgba(122,162,255,.10); color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);background-image:radial-gradient(var(--dots) 1.5px,transparent 1.6px);background-size:14px 14px;color:var(--fg);font-family:var(--f-body);line-height:1.6;
+  padding-block:0 48px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.wrap{max-width:1000px;margin:0 auto}
+header.top{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px;padding-block:18px 14px}
+h1{font-family:var(--f-display);font-weight:400;font-size:clamp(26px,5vw,38px);margin:0;letter-spacing:.01em;line-height:1.15}
+h1 small{display:block;font-family:var(--f-body);font-size:13px;color:var(--muted);letter-spacing:0;margin-top:4px}
+.tabs{display:flex;gap:8px}
+.tabs button{font:inherit;font-family:var(--f-display);font-size:17px;padding:8px 18px;border:3px solid var(--comic);border-radius:10px;background:var(--card);color:var(--fg);cursor:pointer;box-shadow:3px 3px 0 var(--comic)}
+.tabs button[aria-selected="true"]{background:var(--hl);color:var(--comic)}
+button:focus-visible,input:focus-visible+label{outline:3px solid var(--blue);outline-offset:2px}
+
+/* ---------- comic reader ---------- */
+.slide{background:var(--card);border:3px solid var(--comic);border-radius:14px;box-shadow:6px 6px 0 var(--comic);padding:clamp(14px,3vw,26px)}
+.shead{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin-bottom:14px}
+.chip{font-family:var(--f-display);background:var(--acc);color:var(--acc-ink);padding:2px 12px;border-radius:99px;font-size:15px;border:2px solid var(--comic)}
+.shead h2{font-family:var(--f-display);font-weight:400;font-size:clamp(22px,4vw,30px);margin:0;text-wrap:balance}
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+@media(max-width:640px){.grid{grid-template-columns:minmax(0,1fr)}}
+.panel{position:relative;border:3px solid var(--comic);border-radius:6px;overflow:hidden;background:#fff;box-shadow:4px 4px 0 var(--comic);display:flex;flex-direction:column}
+.panel svg{display:block;width:100%;height:auto;aspect-ratio:320/200}
+.cap{background:var(--hl);color:var(--comic);font-family:var(--f-display);font-size:16px;padding:5px 10px;border-top:3px solid var(--comic)}
+.bub{position:absolute;top:8px;max-width:68%;background:#fff;color:#1b1b2f;border:2.5px solid #1b1b2f;border-radius:16px;padding:6px 11px;font-family:var(--f-display);font-size:clamp(14px,2.2vw,16px);line-height:1.35;z-index:2}
+.bub.l{left:8px}.bub.r{right:8px}
+.bub::after{content:"";position:absolute;bottom:-11px;width:14px;height:14px;background:#fff;border-right:2.5px solid #1b1b2f;border-bottom:2.5px solid #1b1b2f;transform:rotate(45deg)}
+.bub.l::after{left:22px}.bub.r::after{right:22px}
+.bub.shout{background:#fff3b0;border-width:3px;border-radius:6px}
+.bub b{color:#d62839;font-weight:400}
+.radar{margin-top:18px;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.3fr);gap:14px}
+@media(max-width:700px){.radar{grid-template-columns:minmax(0,1fr)}}
+.box{border:2.5px solid var(--comic);border-radius:10px;padding:12px 14px;background:var(--bg)}
+.box h3{font-family:var(--f-display);font-weight:400;font-size:18px;margin:0 0 6px}
+.box ul{margin:0;padding-left:18px}.box li{margin:2px 0;font-size:14px}
+.big{font-family:var(--f-display);font-size:40px;line-height:1;color:var(--acc)}
+.big small{font-size:16px;color:var(--muted);font-family:var(--f-body)}
+.trap{display:flex;flex-wrap:wrap;gap:6px;margin-top:4px}
+.trap span{font-size:13px;border:2px dashed var(--no);color:var(--no);border-radius:6px;padding:0 8px;text-decoration:line-through;text-decoration-thickness:1.5px}
+.src{font-size:12.5px;color:var(--muted);margin-top:6px}
+.nav{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:16px}
+.nav button,.btn{font-family:var(--f-display);font-size:17px;padding:8px 20px;border:3px solid var(--comic);border-radius:10px;background:var(--card);color:var(--fg);cursor:pointer;box-shadow:3px 3px 0 var(--comic)}
+.nav button:disabled{opacity:.4;cursor:default}
+.btn.main{background:var(--acc);color:var(--acc-ink)}
+.dots{display:flex;gap:6px;flex-wrap:wrap;justify-content:center}
+.dots i{width:12px;height:12px;border-radius:50%;border:2px solid var(--comic);background:var(--card);display:block}
+.dots i.on{background:var(--acc)}
+.timeline{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-top:16px}
+@media(max-width:700px){.timeline{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.tl{border:3px solid var(--comic);border-radius:10px;padding:10px;background:var(--bg);text-align:center}
+.tl b{font-family:var(--f-display);font-weight:400;font-size:20px;display:block}
+.tl .n{font-family:var(--f-display);font-size:34px;color:var(--acc);line-height:1}
+.tl small{color:var(--muted);display:block;font-size:12.5px}
+.tl .bar{height:10px;border:2px solid var(--comic);border-radius:99px;margin-top:6px;overflow:hidden;background:var(--card)}
+.tl .bar i{display:block;height:100%;background:var(--blue)}
+.dict{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+@media(max-width:800px){.dict{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:520px){.dict{grid-template-columns:minmax(0,1fr)}}
+.dict .box h3{display:flex;justify-content:space-between;gap:8px}
+.dict .box h3 small{font-family:var(--f-body);font-size:12px;color:var(--muted)}
+table.cmp{width:100%;border-collapse:collapse;font-size:14px;margin-top:6px}
+table.cmp th,table.cmp td{border:2px solid var(--comic);padding:6px 8px;text-align:left;vertical-align:top}
+table.cmp th{background:var(--hl);color:var(--comic);font-family:var(--f-display);font-weight:400}
+.tw{overflow-x:auto}
+
+/* ---------- exam ---------- */
+.bar-sticky{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--card);border:3px solid var(--comic);border-radius:12px;box-shadow:4px 4px 0 var(--comic);padding:8px 14px;display:flex;flex-wrap:wrap;align-items:center;gap:12px;margin-bottom:16px}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--bg)}
+.prog{flex:1 1 160px;height:14px;border:2px solid var(--comic);border-radius:99px;overflow:hidden;background:var(--bg)}
+.prog i{display:block;height:100%;width:0;background:var(--acc);transition:width .25s}
+.bar-sticky b{font-family:var(--f-display);font-weight:400;font-size:18px;font-variant-numeric:tabular-nums}
+.intro{margin-bottom:16px}
+.intro p{margin:4px 0;font-size:14.5px}
+.lv{font-family:var(--f-display);font-weight:400;font-size:clamp(20px,3.5vw,26px);margin:26px 0 10px;display:flex;flex-wrap:wrap;align-items:baseline;gap:10px}
+.lv small{font-family:var(--f-body);font-size:13px;color:var(--muted)}
+.q{background:var(--card);border:3px solid var(--comic);border-radius:12px;padding:14px 16px;margin-bottom:14px;box-shadow:4px 4px 0 var(--comic)}
+.q.ok{border-color:var(--ok)}.q.ng{border-color:var(--no)}
+.qh{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-bottom:6px}
+.qn{font-family:var(--f-display);font-size:20px;background:var(--hl);color:var(--comic);border:2px solid var(--comic);border-radius:8px;padding:0 10px}
+.tag{font-size:12px;border:1.5px solid var(--line);border-radius:99px;padding:0 9px;color:var(--muted)}
+.mark{margin-left:auto;font-family:var(--f-display);font-size:18px}
+.q.ok .mark{color:var(--ok)}.q.ng .mark{color:var(--no)}
+.qt{white-space:pre-line;margin:4px 0 10px;font-weight:500}
+.pass{white-space:pre-line;background:var(--bg);border-left:5px solid var(--blue);padding:8px 12px;margin:0 0 10px;font-size:14.5px;border-radius:0 8px 8px 0}
+.opts{display:grid;gap:6px}
+.opts input{position:absolute;opacity:0;pointer-events:none}
+.opts label{display:flex;gap:10px;align-items:flex-start;border:2px solid var(--line);border-radius:9px;padding:8px 12px;cursor:pointer;background:var(--card)}
+.opts label:hover{border-color:var(--blue)}
+.opts .no{flex:none;width:24px;height:24px;border-radius:50%;border:2px solid var(--comic);display:grid;place-items:center;font-size:13px;font-weight:700;background:var(--bg)}
+.opts input:checked+label{border-color:var(--blue);background:color-mix(in srgb,var(--blue) 14%,var(--card))}
+.opts input:checked+label .no{background:var(--blue);color:#fff}
+.q.lock .opts label{cursor:default}
+.opts label.right{border-color:var(--ok);background:var(--ok-bg)}
+.opts label.wrong{border-color:var(--no);background:var(--no-bg)}
+.exp{margin-top:10px;border-top:2px dashed var(--line);padding-top:8px;font-size:14.5px}
+.exp b{font-family:var(--f-display);font-weight:400}
+.exp .from{font-size:12.5px;color:var(--muted);margin-top:4px}
+.result{background:var(--card);border:3px solid var(--comic);border-radius:14px;box-shadow:6px 6px 0 var(--comic);padding:18px;margin-bottom:20px}
+.result h2{font-family:var(--f-display);font-weight:400;margin:0 0 8px;font-size:26px}
+.score{display:flex;flex-wrap:wrap;gap:18px;align-items:center}
+.ring{width:140px;height:140px;border-radius:50%;display:grid;place-items:center;border:3px solid var(--comic)}
+.ring div{width:104px;height:104px;border-radius:50%;background:var(--card);display:grid;place-items:center;text-align:center;border:3px solid var(--comic);font-family:var(--f-display);font-size:28px;line-height:1.05;white-space:nowrap}
+.ring small{display:block;font-size:13px;font-family:var(--f-body);color:var(--muted)}
+.rows{flex:1 1 260px;display:grid;gap:7px}
+.row{display:grid;grid-template-columns:86px 1fr 52px;gap:8px;align-items:center;font-size:14px}
+.row .t{height:12px;border:2px solid var(--comic);border-radius:99px;background:var(--bg);overflow:hidden}
+.row .t i{display:block;height:100%;background:var(--ok)}
+.row span:last-child{text-align:right;font-variant-numeric:tabular-nums}
+.msg{margin:12px 0 0;font-size:15px}
+.acts{display:flex;flex-wrap:wrap;gap:10px;margin-top:14px}
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--comic);color:#fff;padding:10px 18px;border-radius:99px;font-family:var(--f-display);z-index:20;max-width:90vw;text-align:center}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+.timeline.t5{grid-template-columns:repeat(5,minmax(0,1fr))}
+@media(max-width:700px){.timeline.t5{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.nav button{white-space:nowrap;flex:none}.dots{gap:5px}.dots i{width:10px;height:10px}
+</style>
+
+<!-- ============ SVG symbol library (shared by every panel) ============ -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+<defs>
+<g id="o" stroke="#1b1b2f" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"></g>
+<symbol id="kid" viewBox="0 0 100 100"><g stroke="#1b1b2f" stroke-width="3" stroke-linejoin="round" stroke-linecap="round">
+<rect x="36" y="82" width="10" height="14" fill="#1b1b2f"/><rect x="54" y="82" width="10" height="14" fill="#1b1b2f"/>
+<path d="M30 54 L19 72 M70 54 L81 72" fill="none"/>
+<rect x="30" y="50" width="40" height="34" rx="10" fill="#3b82f6"/><path d="M42 50 Q50 58 58 50" fill="none"/>
+<circle cx="50" cy="32" r="19" fill="#ffd9b3"/>
+<path d="M31 31 Q32 11 51 11 Q69 12 69 31 Q60 21 50 22 Q40 21 31 31Z" fill="#2a2a3a"/>
+<circle cx="43" cy="35" r="2.4" fill="#1b1b2f" stroke="none"/><circle cx="57" cy="35" r="2.4" fill="#1b1b2f" stroke="none"/>
+<path d="M45 43 Q50 47 55 43" fill="none"/></g></symbol>
+<symbol id="tchr" viewBox="0 0 100 100"><g stroke="#1b1b2f" stroke-width="3" stroke-linejoin="round" stroke-linecap="round">
+<rect x="36" y="82" width="10" height="14" fill="#1b1b2f"/><rect x="54" y="82" width="10" height="14" fill="#1b1b2f"/>
+<path d="M28 56 L16 66 M72 56 L84 70" fill="none"/>
+<rect x="28" y="50" width="44" height="35" rx="8" fill="#2f9e6b"/><path d="M50 50 L50 85 M44 50 L50 60 L56 50" fill="none"/>
+<circle cx="50" cy="32" r="19" fill="#ffd9b3"/>
+<path d="M31 28 Q33 9 50 9 Q68 9 69 28 Q62 18 50 19 Q38 18 31 28Z" fill="#c4c8d4"/>
+<circle cx="42" cy="34" r="6.5" fill="#fff" fill-opacity=".5"/><circle cx="58" cy="34" r="6.5" fill="#fff" fill-opacity=".5"/><path d="M48.5 34 H51.5" fill="none"/>
+<circle cx="42" cy="34" r="1.8" fill="#1b1b2f" stroke="none"/><circle cx="58" cy="34" r="1.8" fill="#1b1b2f" stroke="none"/>
+<path d="M44 44 Q50 49 56 44" fill="none"/></g></symbol>
+<symbol id="dangun" viewBox="0 0 100 100"><g stroke="#1b1b2f" stroke-width="3" stroke-linejoin="round" stroke-linecap="round">
+<path d="M26 92 L32 50 H68 L74 92Z" fill="#f4f1e8"/><path d="M50 50 V92" fill="none"/>
+<path d="M28 30 Q28 8 50 8 Q72 8 72 30 L72 52 Q60 40 50 40 Q40 40 28 52Z" fill="#2a2a3a"/>
+<circle cx="50" cy="32" r="17" fill="#ffd9b3"/>
+<path d="M33 18 L38 4 L45 15 L50 2 L55 15 L62 4 L67 18Z" fill="#ffc933"/>
+<circle cx="44" cy="34" r="2.2" fill="#1b1b2f" stroke="none"/><circle cx="56" cy="34" r="2.2" fill="#1b1b2f" stroke="none"/>
+<path d="M45 42 Q50 46 55 42" fill="none"/></g></symbol>
+<symbol id="handaxe" viewBox="0 0 100 100"><g stroke="#1b1b2f" stroke-width="3" stroke-linejoin="round" stroke-linecap="round">
+<path d="M50 6 C74 30 80 62 62 88 C54 97 46 97 38 88 C20 62 26 30 50 6Z" fill="#9aa0a6"/>
+<path d="M50 14 L44 50 L52 84 M44 50 L30 62 M44 50 L62 56" fill="none" stroke-width="2"/></g></symbol>
+<symbol id="axe" viewBox="0 0 100 100"><g stroke="#1b1b2f" stroke-width="3" stroke-linejoin="round" stroke-linecap="round">
+<path d="M30 92 L66 18" stroke="#8a6a45" stroke-width="9" fill="none"/><path d="M30 92 L66 18" stroke-width="3" fill="none" opacity=".0"/>
+<path d="M54 14 L86 24 L80 52 L50 40Z" fill="#c7ccd6"/><path d="M60 22 L78 28" fill="none" stroke-width="2"/></g></symbol>
+<symbol id="cave" viewBox="0 0 100 100"><g stroke="#1b1b2f" stroke-width="3" stroke-linejoin="round">
+<path d="M3 97 L3 56 Q6 8 50 6 Q94 8 97 56 L97 97Z" fill="#7b6a5c"/>
+<path d="M24 97 L24 64 Q28 32 50 30 Q72 32 76 64 L76 97Z" fill="#1d1a24"/></g></symbol>
+<symbol id="tent" viewBox="0 0 100 100"><g stroke="#1b1b2f" stroke-width="3" stroke-linejoin="round" stroke-linecap="round">
+<path d="M6 94 L50 10 L94 94Z" fill="#c8a165"/><path d="M50 10 L38 94 M50 10 L62 94 M20 66 H80" fill="none" stroke-width="2"/>
+<path d="M41 94 L50 56 L59 94Z" fill="#3a2a1a"/></g></symbol>
+<symbol id="hut" viewBox="0 0 100 100"><g stroke="#1b1b2f" stroke-width="3" stroke-linejoin="round" stroke-linecap="round">
+<rect x="10" y="68" width="80" height="26" fill="#7a5a3a"/>
+<path d="M4 72 L50 16 L96 72Z" fill="#dcb85e"/><path d="M22 56 L34 72 M38 40 L52 72 M62 40 L72 72 M78 56 L84 72" fill="none" stroke-width="2"/>
+<path d="M42 94 V80 Q50 70 58 80 V94Z" fill="#2a1d12"/></g></symbol>
+<symbol id="pot" viewBox="0 0 100 100"><g stroke="#1b1b2f" stroke-width="3" stroke-linejoin="round" stroke-linecap="round">
+<path d="M26 20 H74 L62 80 L50 95 L38 80Z" fill="#c9774f"/><ellipse cx="50" cy="20" rx="24" ry="7" fill="#e6a27b"/>
+<path d="M32 36 L40 46 M42 36 L50 46 M52 36 L60 46 M62 36 L68 44 M36 52 L44 62 M46 52 L54 62 M56 52 L62 60" fill="none" stroke-width="2.5"/></g></symbol>
+<symbol id="pot2" viewBox="0 0 100 100"><g stroke="#1b1b2f" stroke-width="3" stroke-linejoin="round">
+<path d="M28 24 H72 L68 62 Q66 90 50 92 Q34 90 32 62Z" fill="#b98a5d"/><ellipse cx="50" cy="24" rx="22" ry="6" fill="#d8b48a"/></g></symbol>
+<symbol id="dolmen" viewBox="0 0 100 100"><g stroke="#1b1b2f" stroke-width="3" stroke-linejoin="round">
+<rect x="12" y="46" width="15" height="48" fill="#8d9096"/><rect x="73" y="46" width="15" height="48" fill="#8d9096"/>
+<path d="M2 50 L20 22 L84 16 L98 48Z" fill="#aab0b8"/><path d="M30 30 L50 28 M62 26 L76 32" fill="none" stroke-width="2"/></g></symbol>
+<symbol id="sword" viewBox="0 0 100 100"><g stroke="#1b1b2f" stroke-width="3" stroke-linejoin="round" stroke-linecap="round">
+<path d="M50 3 C62 20 70 34 60 50 L57 78 L43 78 L40 50 C30 34 38 20 50 3Z" fill="#d7a43a"/><path d="M50 10 V74" fill="none" stroke-width="2"/>
+<rect x="45" y="78" width="10" height="17" fill="#6b4a2b"/><path d="M38 78 H62" fill="none"/></g></symbol>
+<symbol id="halfmoon" viewBox="0 0 100 100"><g stroke="#1b1b2f" stroke-width="3" stroke-linejoin="round">
+<path d="M4 72 A46 46 0 0 1 96 72 Z" fill="#b8bcc4"/><circle cx="34" cy="62" r="5" fill="#eef2f8"/><circle cx="66" cy="62" r="5" fill="#eef2f8"/>
+<path d="M4 72 H96" fill="none"/></g></symbol>
+<symbol id="whorl" viewBox="0 0 100 100"><g stroke="#1b1b2f" stroke-width="3" stroke-linejoin="round" stroke-linecap="round">
+<rect x="47" y="4" width="6" height="64" fill="#8a6a45"/><ellipse cx="50" cy="72" rx="30" ry="14" fill="#c9774f"/><ellipse cx="50" cy="72" rx="5" ry="2.5" fill="#1b1b2f"/>
+<path d="M50 6 Q80 20 70 40 Q60 50 78 60" fill="none" stroke="#f4f1e8" stroke-width="3"/></g></symbol>
+<symbol id="grind" viewBox="0 0 100 100"><g stroke="#1b1b2f" stroke-width="3" stroke-linejoin="round">
+<path d="M6 66 Q50 50 94 66 L94 80 Q50 96 6 80Z" fill="#9aa0a6"/><ellipse cx="50" cy="52" rx="26" ry="11" fill="#bcc1c9"/>
+<circle cx="30" cy="68" r="2" fill="#f2d16b" stroke="none"/><circle cx="46" cy="72" r="2" fill="#f2d16b" stroke="none"/><circle cx="64" cy="68" r="2" fill="#f2d16b" stroke="none"/></g></symbol>
+<symbol id="deer" viewBox="0 0 100 100"><g stroke="#1b1b2f" stroke-width="3" stroke-linejoin="round" stroke-linecap="round">
+<rect x="26" y="66" width="7" height="26" fill="#a96a35"/><rect x="40" y="68" width="7" height="24" fill="#a96a35"/><rect x="62" y="66" width="7" height="26" fill="#a96a35"/><rect x="74" y="68" width="7" height="24" fill="#a96a35"/>
+<ellipse cx="52" cy="58" rx="32" ry="17" fill="#c07c3f"/><path d="M76 52 L88 34 L98 38 L94 50 L82 56Z" fill="#c07c3f"/>
+<path d="M88 34 L84 14 L78 20 M84 14 L92 8 M88 34 L96 16" fill="none"/><circle cx="92" cy="40" r="1.8" fill="#1b1b2f" stroke="none"/></g></symbol>
+<symbol id="fire" viewBox="0 0 100 100"><g stroke="#1b1b2f" stroke-width="3" stroke-linejoin="round" stroke-linecap="round">
+<path d="M50 6 C68 30 82 46 74 70 C70 86 60 92 50 92 C40 92 30 86 26 70 C20 46 38 36 50 6Z" fill="#ff7a1a"/>
+<path d="M50 40 C60 54 64 62 60 74 C58 82 54 84 50 84 C46 84 42 82 40 74 C38 62 44 54 50 40Z" fill="#ffd23f" stroke-width="2"/>
+<path d="M16 94 L84 82 M16 82 L84 94" stroke="#6b4a2b" stroke-width="6" fill="none"/></g></symbol>
+<symbol id="crop" viewBox="0 0 100 100"><g stroke="#1b1b2f" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round">
+<path d="M30 96 Q28 60 24 30 M50 96 Q50 58 50 22 M70 96 Q72 60 76 30" fill="none" stroke="#5a8a3a" stroke-width="4"/>
+<ellipse cx="24" cy="22" rx="6" ry="14" fill="#e9c24a"/><ellipse cx="50" cy="14" rx="6" ry="14" fill="#e9c24a"/><ellipse cx="76" cy="22" rx="6" ry="14" fill="#e9c24a"/></g></symbol>
+<symbol id="tree" viewBox="0 0 100 100"><g stroke="#1b1b2f" stroke-width="3" stroke-linejoin="round">
+<rect x="44" y="56" width="12" height="38" fill="#7a5a3a"/><circle cx="50" cy="38" r="30" fill="#4f9d56"/><circle cx="36" cy="46" r="14" fill="#5fb066"/></g></symbol>
+<symbol id="ironhoe" viewBox="0 0 100 100"><g stroke="#1b1b2f" stroke-width="3" stroke-linejoin="round" stroke-linecap="round">
+<path d="M22 94 L64 14" stroke="#8a6a45" stroke-width="9" fill="none"/>
+<path d="M54 10 L90 22 L84 48 L58 38Z" fill="#6c7380"/><path d="M62 18 L82 26" fill="none" stroke="#c7ccd6" stroke-width="2"/></g></symbol>
+<symbol id="coin" viewBox="0 0 100 100"><g stroke="#1b1b2f" stroke-width="3" stroke-linejoin="round">
+<path d="M28 6 Q48 0 56 10 L62 66 L50 96 L40 70Z" fill="#c9923a"/><circle cx="52" cy="22" r="5" fill="#eef2f8"/><path d="M42 40 H54 M44 52 H55" fill="none" stroke-width="2.5"/></g></symbol>
+<symbol id="sword2" viewBox="0 0 100 100"><g stroke="#1b1b2f" stroke-width="3" stroke-linejoin="round" stroke-linecap="round">
+<path d="M50 4 L61 30 L58 76 L42 76 L39 30Z" fill="#d7a43a"/><path d="M50 10 V72" fill="none" stroke-width="2"/><rect x="45" y="76" width="10" height="18" fill="#6b4a2b"/><path d="M36 76 H64" fill="none"/></g></symbol>
+<symbol id="drum" viewBox="0 0 100 100"><g stroke="#1b1b2f" stroke-width="3" stroke-linejoin="round" stroke-linecap="round">
+<path d="M18 36 V76 Q50 92 82 76 V36" fill="#b33a3a"/><ellipse cx="50" cy="36" rx="32" ry="12" fill="#f0d9a8"/>
+<path d="M18 52 Q50 68 82 52" fill="none" stroke-width="2"/><path d="M62 10 L48 30 M78 14 L56 32" stroke="#6b4a2b" stroke-width="5"/></g></symbol>
+<symbol id="sotae" viewBox="0 0 100 100"><g stroke="#1b1b2f" stroke-width="3" stroke-linejoin="round" stroke-linecap="round">
+<path d="M50 96 V30" stroke="#6b4a2b" stroke-width="7" fill="none"/><path d="M36 22 Q50 10 64 22 Q60 34 50 30 Q40 34 36 22Z" fill="#ffffff"/><path d="M62 20 L74 18" fill="none"/>
+<path d="M30 40 H70 M32 52 H68" fill="none" stroke="#c0392b" stroke-width="3"/></g></symbol>
+<symbol id="fence" viewBox="0 0 100 100"><g stroke="#1b1b2f" stroke-width="3" stroke-linejoin="round">
+<rect x="6" y="40" width="12" height="52" fill="#a07848"/><rect x="26" y="34" width="12" height="58" fill="#a07848"/><rect x="46" y="40" width="12" height="52" fill="#a07848"/><rect x="66" y="34" width="12" height="58" fill="#a07848"/><rect x="84" y="40" width="12" height="52" fill="#a07848"/>
+<path d="M4 56 H98 M4 74 H98" fill="none"/></g></symbol>
+<symbol id="scroll" viewBox="0 0 100 100"><g stroke="#1b1b2f" stroke-width="3" stroke-linejoin="round" stroke-linecap="round">
+<rect x="14" y="14" width="72" height="72" rx="6" fill="#f4e7bf"/><path d="M26 32 H74 M26 46 H74 M26 60 H62" fill="none"/>
+<rect x="8" y="8" width="84" height="10" rx="5" fill="#a07848"/><rect x="8" y="82" width="84" height="10" rx="5" fill="#a07848"/></g></symbol>
+<symbol id="mirror" viewBox="0 0 100 100"><g stroke="#1b1b2f" stroke-width="3" stroke-linejoin="round">
+<circle cx="50" cy="50" r="40" fill="#c9923a"/><circle cx="50" cy="50" r="28" fill="none"/><circle cx="50" cy="50" r="14" fill="none"/><circle cx="50" cy="22" r="4" fill="#1b1b2f"/></g></symbol>
+<symbol id="pin" viewBox="0 0 100 100"><g stroke="#1b1b2f" stroke-width="3" stroke-linejoin="round">
+<path d="M50 96 C28 66 22 54 22 38 A28 28 0 0 1 78 38 C78 54 72 66 50 96Z" fill="#e5484d"/><circle cx="50" cy="38" r="10" fill="#fff"/></g></symbol>
+<symbol id="star" viewBox="0 0 100 100"><path d="M50 4 L61 36 L95 38 L68 58 L78 92 L50 72 L22 92 L32 58 L5 38 L39 36Z" fill="#ffd23f" stroke="#1b1b2f" stroke-width="3" stroke-linejoin="round"/></symbol>
+</defs>
+<symbol id="king" viewBox="0 0 100 100"><g stroke="#1b1b2f" stroke-width="3" stroke-linejoin="round" stroke-linecap="round">
+<path d="M24 94 L30 50 H70 L76 94Z" fill="#c0392b"/><path d="M50 50 V94 M40 50 L50 64 L60 50" fill="none"/>
+<path d="M30 30 Q30 10 50 10 Q70 10 70 30 L70 50 Q60 42 50 42 Q40 42 30 50Z" fill="#2a2a3a"/>
+<circle cx="50" cy="32" r="17" fill="#ffd9b3"/>
+<path d="M32 20 L36 4 L44 14 L50 2 L56 14 L64 4 L68 20Z" fill="#ffc933"/>
+<circle cx="44" cy="35" r="2.2" fill="#1b1b2f" stroke="none"/><circle cx="56" cy="35" r="2.2" fill="#1b1b2f" stroke="none"/>
+<path d="M44 43 Q50 49 56 43" fill="none"/></g></symbol>
+<symbol id="warrior" viewBox="0 0 100 100"><g stroke="#1b1b2f" stroke-width="3" stroke-linejoin="round" stroke-linecap="round">
+<path d="M82 6 V96" stroke="#6b4a2b" stroke-width="5" fill="none"/><path d="M82 4 L76 18 H88Z" fill="#c9d0d8"/>
+<rect x="36" y="82" width="10" height="14" fill="#1b1b2f"/><rect x="54" y="82" width="10" height="14" fill="#1b1b2f"/>
+<path d="M30 56 L18 70 M70 56 L82 52" fill="none"/>
+<rect x="28" y="50" width="44" height="34" rx="8" fill="#5b6f8a"/><path d="M34 62 H66 M34 72 H66" fill="none" stroke-width="2"/>
+<circle cx="50" cy="32" r="18" fill="#ffd9b3"/>
+<path d="M30 30 Q30 8 50 8 Q70 8 70 30 L66 28 Q50 20 34 28Z" fill="#8a8f99"/><path d="M50 4 V12" fill="none"/>
+<circle cx="43" cy="35" r="2.2" fill="#1b1b2f" stroke="none"/><circle cx="57" cy="35" r="2.2" fill="#1b1b2f" stroke="none"/>
+<path d="M44 43 Q50 47 56 43" fill="none"/></g></symbol>
+<symbol id="horse" viewBox="0 0 100 100"><g stroke="#1b1b2f" stroke-width="3" stroke-linejoin="round" stroke-linecap="round">
+<rect x="20" y="64" width="7" height="30" fill="#8a5a33"/><rect x="34" y="66" width="7" height="28" fill="#8a5a33"/><rect x="60" y="66" width="7" height="28" fill="#8a5a33"/><rect x="74" y="64" width="7" height="30" fill="#8a5a33"/>
+<ellipse cx="48" cy="56" rx="32" ry="17" fill="#a96a3b"/><path d="M70 48 L80 22 L96 28 L94 44 L82 56Z" fill="#a96a3b"/>
+<path d="M72 46 L78 22 M16 52 Q6 60 10 76" fill="none" stroke="#2a2a3a" stroke-width="5"/><circle cx="88" cy="32" r="2" fill="#1b1b2f" stroke="none"/></g></symbol>
+<symbol id="stele" viewBox="0 0 100 100"><g stroke="#1b1b2f" stroke-width="3" stroke-linejoin="round" stroke-linecap="round">
+<path d="M22 96 V28 Q22 6 50 6 Q78 6 78 28 V96Z" fill="#aab0b8"/><path d="M34 30 H66 M34 42 H66 M34 54 H66 M34 66 H62 M34 78 H58" fill="none" stroke-width="2.5"/>
+<rect x="12" y="92" width="76" height="6" fill="#7b8088"/></g></symbol>
+<symbol id="pyramid" viewBox="0 0 100 100"><g stroke="#1b1b2f" stroke-width="3" stroke-linejoin="round">
+<rect x="6" y="76" width="88" height="20" fill="#aab0b8"/><rect x="16" y="58" width="68" height="18" fill="#b8bec6"/><rect x="26" y="40" width="48" height="18" fill="#c5cbd2"/><rect x="36" y="22" width="28" height="18" fill="#d3d8de"/>
+<path d="M6 86 H94 M16 67 H84 M26 49 H74 M36 31 H64" fill="none" stroke-width="1.5"/></g></symbol>
+<symbol id="sack" viewBox="0 0 100 100"><g stroke="#1b1b2f" stroke-width="3" stroke-linejoin="round" stroke-linecap="round">
+<path d="M30 30 Q14 60 22 90 Q50 98 78 90 Q86 60 70 30Z" fill="#d9bb84"/><path d="M34 30 Q50 40 66 30 L62 20 Q50 26 38 20Z" fill="#c4a56e"/>
+<path d="M44 12 Q50 2 56 12 M50 12 V22" fill="none" stroke="#e9c24a" stroke-width="4"/><path d="M40 60 H60" fill="none" stroke-width="2"/></g></symbol>
+<symbol id="book" viewBox="0 0 100 100"><g stroke="#1b1b2f" stroke-width="3" stroke-linejoin="round" stroke-linecap="round">
+<path d="M8 28 Q30 18 50 30 Q70 18 92 28 V84 Q70 74 50 86 Q30 74 8 84Z" fill="#f4e7bf"/><path d="M50 30 V86" fill="none"/>
+<path d="M18 42 Q32 38 42 44 M18 54 Q32 50 42 56 M18 66 Q32 62 42 68 M58 44 Q68 38 82 42 M58 56 Q68 50 82 54 M58 68 Q68 62 82 66" fill="none" stroke-width="2"/></g></symbol>
+<symbol id="castle" viewBox="0 0 100 100"><g stroke="#1b1b2f" stroke-width="3" stroke-linejoin="round">
+<rect x="6" y="46" width="88" height="48" fill="#b9a98d"/><rect x="6" y="30" width="22" height="64" fill="#c8b999"/><rect x="72" y="30" width="22" height="64" fill="#c8b999"/>
+<path d="M6 30 H10 V24 H16 V30 H20 V24 H26 V30 H28 M72 30 H76 V24 H82 V30 H86 V24 H92 V30 H94" fill="none"/>
+<path d="M38 94 V68 Q50 54 62 68 V94Z" fill="#2a1d12"/></g></symbol>
+<symbol id="censer" viewBox="0 0 100 100"><g stroke="#1b1b2f" stroke-width="3" stroke-linejoin="round" stroke-linecap="round">
+<path d="M40 24 L46 10 L50 20 L54 8 L58 24" fill="#d7a43a"/><circle cx="50" cy="8" r="4" fill="#e5484d"/>
+<path d="M22 56 Q22 28 50 24 Q78 28 78 56Z" fill="#d7a43a"/><path d="M32 52 Q38 36 46 52 M50 52 Q58 34 66 52" fill="none" stroke-width="2"/>
+<path d="M18 56 H82 Q82 78 50 80 Q18 78 18 56Z" fill="#c9922e"/><path d="M50 80 V90 M30 94 Q50 82 70 94" fill="none"/></g></symbol>
+<symbol id="brick" viewBox="0 0 100 100"><g stroke="#1b1b2f" stroke-width="3" stroke-linejoin="round" stroke-linecap="round">
+<rect x="8" y="22" width="84" height="60" rx="4" fill="#b8805a"/><path d="M14 68 L32 40 L46 60 L60 36 L86 68Z" fill="#8f9a6e"/><circle cx="74" cy="34" r="6" fill="#f2d16b"/>
+<path d="M16 74 Q50 82 84 74" fill="none" stroke-width="2"/></g></symbol>
+<symbol id="hyunmu" viewBox="0 0 100 100"><g stroke="#1b1b2f" stroke-width="3" stroke-linejoin="round" stroke-linecap="round">
+<ellipse cx="46" cy="64" rx="32" ry="20" fill="#3d7a52"/><path d="M26 56 L38 50 M46 46 L58 52 M30 70 H60" fill="none" stroke-width="2"/>
+<circle cx="82" cy="62" r="9" fill="#4a9565"/><path d="M12 70 Q4 84 20 86 M30 82 L26 94 M62 82 L66 94" fill="none"/>
+<path d="M40 44 Q20 20 40 12 Q60 4 56 26 Q52 40 64 50" fill="none" stroke="#2a8f5c" stroke-width="7"/><path d="M40 44 Q20 20 40 12 Q60 4 56 26 Q52 40 64 50" fill="none" stroke-width="2"/></g></symbol>
+<symbol id="crown" viewBox="0 0 100 100"><g stroke="#1b1b2f" stroke-width="3" stroke-linejoin="round" stroke-linecap="round">
+<path d="M18 86 V56 H82 V86Z" fill="#e9b93a"/><path d="M22 56 V30 H32 V56 M42 56 V18 H52 V56 M62 56 V30 H72 V56" fill="#e9b93a"/>
+<path d="M50 6 V18 M27 20 V30 M67 20 V30" fill="none"/><circle cx="32" cy="72" r="4" fill="#3b82f6"/><circle cx="50" cy="72" r="4" fill="#e5484d"/><circle cx="68" cy="72" r="4" fill="#3b82f6"/></g></symbol>
+<symbol id="pagoda" viewBox="0 0 100 100"><g stroke="#1b1b2f" stroke-width="3" stroke-linejoin="round" stroke-linecap="round">
+<path d="M50 2 V10" fill="none"/>
+<path d="M30 20 L50 10 L70 20Z" fill="#9b5b3a"/><rect x="38" y="20" width="24" height="8" fill="#d9b88a"/>
+<path d="M26 36 L50 26 L74 36Z" fill="#9b5b3a"/><rect x="36" y="36" width="28" height="9" fill="#d9b88a"/>
+<path d="M22 54 L50 43 L78 54Z" fill="#9b5b3a"/><rect x="34" y="54" width="32" height="10" fill="#d9b88a"/>
+<path d="M18 72 L50 61 L82 72Z" fill="#9b5b3a"/><rect x="30" y="72" width="40" height="12" fill="#d9b88a"/>
+<rect x="10" y="84" width="80" height="12" fill="#a8adb5"/></g></symbol>
+<symbol id="stupa5" viewBox="0 0 100 100"><g stroke="#1b1b2f" stroke-width="3" stroke-linejoin="round" stroke-linecap="round">
+<path d="M50 4 V12" fill="none"/>
+<path d="M34 22 Q50 12 66 22 L62 26 H38Z" fill="#c5cbd2"/><rect x="40" y="26" width="20" height="8" fill="#b0b6bd"/>
+<path d="M30 40 Q50 30 70 40 L66 44 H34Z" fill="#c5cbd2"/><rect x="38" y="44" width="24" height="9" fill="#b0b6bd"/>
+<path d="M26 58 Q50 48 74 58 L70 62 H30Z" fill="#c5cbd2"/><rect x="36" y="62" width="28" height="10" fill="#b0b6bd"/>
+<path d="M22 76 Q50 66 78 76 L74 80 H26Z" fill="#c5cbd2"/><rect x="10" y="80" width="80" height="14" fill="#a0a6ad"/></g></symbol>
+<symbol id="cheom" viewBox="0 0 100 100"><g stroke="#1b1b2f" stroke-width="3" stroke-linejoin="round">
+<path d="M42 10 H58 L60 30 Q74 50 78 94 H22 Q26 50 40 30Z" fill="#b9bfc7"/><rect x="36" y="4" width="28" height="8" fill="#9aa0a8"/>
+<rect x="44" y="46" width="12" height="14" fill="#1d1a24"/><path d="M30 76 H70 M34 64 H66 M40 36 H60" fill="none" stroke-width="2"/></g></symbol>
+<symbol id="tomb" viewBox="0 0 100 100"><g stroke="#1b1b2f" stroke-width="3" stroke-linejoin="round">
+<path d="M6 96 V54 Q6 8 50 8 Q94 8 94 54 V96Z" fill="#b87a55"/><path d="M26 96 V60 Q26 30 50 30 Q74 30 74 60 V96Z" fill="#2a1d12"/>
+<path d="M14 40 H32 M68 40 H86 M10 56 H24 M76 56 H90 M12 74 H24 M76 74 H88" fill="none" stroke-width="2"/></g></symbol>
+<symbol id="flag" viewBox="0 0 100 100"><g stroke="#1b1b2f" stroke-width="3" stroke-linejoin="round" stroke-linecap="round">
+<path d="M26 96 V6" stroke="#6b4a2b" stroke-width="6" fill="none"/><path d="M28 10 H84 L72 28 L84 46 H28Z" fill="#e5484d"/></g></symbol>
+<symbol id="iron" viewBox="0 0 100 100"><g stroke="#1b1b2f" stroke-width="3" stroke-linejoin="round">
+<path d="M14 44 H86 L82 56 H18Z" fill="#6c7380"/><path d="M14 66 H86 L82 78 H18Z" fill="#7d8492"/><path d="M26 44 V56 M50 44 V56 M74 44 V56 M26 66 V78 M50 66 V78 M74 66 V78" fill="none" stroke-width="1.5"/></g></symbol>
+
+<symbol id="egg" viewBox="0 0 100 100"><g stroke="#1b1b2f" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"><path d="M50 8 Q82 8 82 58 Q82 92 50 92 Q18 92 18 58 Q18 8 50 8Z" fill="#fff4d6"/><circle cx="40" cy="42" r="4" fill="#e9c24a" stroke="none"/><circle cx="60" cy="60" r="5" fill="#e9c24a" stroke="none"/><circle cx="44" cy="72" r="3" fill="#e9c24a" stroke="none"/><path d="M34 22 Q40 14 50 14" fill="none" stroke="#fff" stroke-width="4"/></g></symbol>
+<symbol id="celadon" viewBox="0 0 100 100"><g stroke="#1b1b2f" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"><path d="M40 6 H60 V20 Q80 30 80 56 Q80 80 66 94 H34 Q20 80 20 56 Q20 30 40 20Z" fill="#9fd3c0"/><path d="M34 40 Q50 32 66 40" fill="none" stroke-width="2"/><circle cx="40" cy="62" r="5" fill="#fff"/><circle cx="58" cy="52" r="4" fill="#fff"/><path d="M36 76 Q50 84 64 76" fill="none" stroke-width="2"/></g></symbol>
+<symbol id="ship" viewBox="0 0 100 100"><g stroke="#1b1b2f" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"><path d="M8 68 H92 L78 90 H22Z" fill="#a07848"/><path d="M50 10 V68" fill="none" stroke="#6b4a2b" stroke-width="4"/><path d="M53 14 L86 58 H53Z" fill="#f4f1e8"/><path d="M47 24 L20 58 H47Z" fill="#e9e2cc"/></g></symbol>
+<symbol id="woodblock" viewBox="0 0 100 100"><g stroke="#1b1b2f" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"><rect x="6" y="38" width="12" height="30" fill="#8a6a45"/><rect x="82" y="38" width="12" height="30" fill="#8a6a45"/><rect x="14" y="26" width="72" height="54" rx="4" fill="#c9a26b"/><path d="M24 40 H76 M24 50 H76 M24 60 H76 M24 70 H60" fill="none" stroke-width="2.5"/></g></symbol>
+<symbol id="monk" viewBox="0 0 100 100"><g stroke="#1b1b2f" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"><rect x="36" y="82" width="10" height="14" fill="#1b1b2f"/><rect x="54" y="82" width="10" height="14" fill="#1b1b2f"/><path d="M30 56 L20 70 M70 56 L80 70" fill="none"/><rect x="28" y="50" width="44" height="35" rx="8" fill="#c97b2e"/><path d="M36 62 Q50 82 64 62" fill="none" stroke="#f4f1e8" stroke-width="3"/><circle cx="50" cy="32" r="19" fill="#ffd9b3"/><circle cx="43" cy="35" r="2.2" fill="#1b1b2f" stroke="none"/><circle cx="57" cy="35" r="2.2" fill="#1b1b2f" stroke="none"/><path d="M45 43 Q50 47 55 43" fill="none"/></g></symbol>
+</svg>
+
+
+<div class="wrap"><p style="margin:12px 0 0"><a href="index.html#history" style="font-family:'Jua',sans-serif;font-size:16px;color:var(--fg);text-decoration:none;border:3px solid #1b1b2f;border-radius:10px;background:var(--card);padding:5px 14px;box-shadow:3px 3px 0 #1b1b2f;display:inline-block">← 겨울방학 운영 · 한국사</a></p>
+<header class="top">
+  <h1>조선 시대 탐험대<small>조선 건국부터 대한제국까지, 만화 수업 + 채점 시험</small></h1>
+  <div class="tabs" role="tablist">
+    <button role="tab" id="tab-story" aria-selected="true">만화 수업</button>
+    <button role="tab" id="tab-quiz" aria-selected="false">시험 보기</button>
+  </div>
+</header>
+
+<section id="view-story" aria-live="polite"></section>
+<section id="view-quiz" hidden></section>
+</div>
+<div id="toast" class="toast" hidden></div>
+
+
+<script>
+/* ===================== comic builder ===================== */
+var BG={day:['#bfe6ff','#8fcf6e'],cave:['#5b4b63','#6b5646'],dusk:['#ffd3a1','#c9a26b'],night:['#2c2f63','#3d5a40'],lab:['#e6e0ff','#cfc6f2'],map:['#d6ebff','#b7d7a0'],gold:['#fff1b8','#e8c66a'],river:['#cdeeff','#7fc4e6']};
+function use(it){var id=it[0],x=it[1],y=it[2],w=it[3],f=it[4];
+  var t=f?' transform="translate('+(2*x+w)+',0) scale(-1,1)"':'';
+  return '<use href="#'+id+'" x="'+x+'" y="'+y+'" width="'+w+'" height="'+w+'"'+t+'/>';}
+function scene(bg,items,opt){opt=opt||{};var c=BG[bg]||BG.day,s='<svg viewBox="0 0 320 200" role="img" aria-label="'+(opt.alt||'만화 장면')+'" xmlns="http://www.w3.org/2000/svg">';
+  s+='<rect width="320" height="200" fill="'+c[0]+'"/>';
+  if(bg==='day'||bg==='river'||bg==='map'){s+='<circle cx="276" cy="34" r="17" fill="#ffd23f" stroke="#1b1b2f" stroke-width="3"/><ellipse cx="70" cy="34" rx="30" ry="9" fill="#fff" opacity=".9"/><ellipse cx="92" cy="28" rx="20" ry="8" fill="#fff" opacity=".9"/>';}
+  if(bg==='dusk'){s+='<circle cx="270" cy="60" r="26" fill="#ff8f5a" stroke="#1b1b2f" stroke-width="3"/>';}
+  if(bg==='night'){s+='<circle cx="270" cy="34" r="14" fill="#f4f1e8"/><circle cx="40" cy="30" r="2" fill="#fff"/><circle cx="120" cy="20" r="2" fill="#fff"/><circle cx="190" cy="40" r="2" fill="#fff"/>';}
+  if(bg==='gold'){for(var i=0;i<14;i++){var a=i*Math.PI*2/14;s+='<path d="M160 100 L'+(160+Math.cos(a)*260)+' '+(100+Math.sin(a)*260)+' L'+(160+Math.cos(a+.2)*260)+' '+(100+Math.sin(a+.2)*260)+'Z" fill="#fff9d6" opacity=".7"/>';}}
+  if(bg==='lab'){s+='<path d="M0 60 H320 M0 110 H320" stroke="#cfc6f2" stroke-width="2"/>';}
+  if(bg==='river'){s+='<rect y="150" width="320" height="50" fill="#7fc4e6"/><path d="M0 168 q20 -8 40 0 t40 0 t40 0 t40 0 t40 0 t40 0 t40 0 t40 0" stroke="#fff" stroke-width="2.5" fill="none"/>';}
+  else{s+='<rect y="150" width="320" height="50" fill="'+c[1]+'"/>';}
+  s+='<path d="M0 150 H320" stroke="#1b1b2f" stroke-width="3"/>';
+  items.forEach(function(it){s+=use(it);});
+  return s+'</svg>';}
+function panel(sc,cap){var b=sc.bub?'<div class="bub '+(sc.bub[1]||'l')+(sc.bub[2]?' shout':'')+'">'+sc.bub[0]+'</div>':'';
+  return '<figure class="panel" style="margin:0">'+b+sc.svg+'<figcaption class="cap">'+cap+'</figcaption></figure>';}
+function P(bg,items,bub,cap,alt){return panel({svg:scene(bg,items,{alt:alt||cap}),bub:bub},cap);}
+var KID=function(x,y,s,f){return ['kid',x,y,s||90,f]},TC=function(x,y,s,f){return ['tchr',x,y,s||90,f]};
+
+function radar(o){
+  return '<div class="radar"><div class="box"><h3>출제 포인트</h3><ul>'+o.pts.map(function(t){return '<li>'+t+'</li>';}).join('')+'</ul></div>'+
+  '<div class="box"><h3>'+(o.h||'이 시대가 아닌데 선지로 등장하는 말')+'</h3><div class="trap">'+o.traps.map(function(t){return '<span>'+t+'</span>';}).join('')+'</div><p class="src" style="margin-top:8px">'+o.note+'</p></div></div>';}
+function cnt(){var a=Array.prototype.slice.call(arguments);return Q.filter(function(q){return a.indexOf(q.tag)>-1}).length;}
+
+var SLIDES=[
+/* 0 cover */
+{chip:'시작',title:'조선 시대 탐험대, 출발!',html:function(){
+  return '<div class="grid" style="grid-template-columns:minmax(0,1fr)">'+
+  P('gold',[['star',12,10,36],['star',270,18,34],['crown',210,60,84],KID(50,76,100),TC(120,76,100),['scroll',8,96,52]],
+    ['얘들아, 이번엔 조선 건국부터 대한제국까지 달려 보자!','r',1],'오늘의 목표: 조선 500년과 개항기를 한 흐름으로','표지: 다온과 역사쌤')+'</div>'+
+  '<div class="box" style="margin-top:16px"><h3>이렇게 공부해요</h3><ul>'+
+  '<li><b>만화 수업</b> '+SLIDES.length+'장짜리 슬라이드를 넘기며 시기별 핵심을 잡아요. 슬라이드마다 출제 포인트와 함정이 붙어 있어요.</li>'+
+  '<li><b>시험 보기</b> '+Q.length+'문제를 쉬운 문제부터 풀어요. 마지막 문제를 풀면 바로 채점돼요.</li></ul></div>'+
+  '<p class="src">※ 조선 편은 교과서 핵심 개념과 자주 나오는 문제 유형을 바탕으로 새로 쓴 문제예요. 범위는 조선 건국(1392)부터 국권 피탈(1910)까지예요.</p>';}},
+
+/* 1 big picture */
+{chip:'큰 그림',title:'조선은 “나라의 틀 → 사림 → 전란 → 개혁 → 개항”',html:function(){
+  var G=[['건국·정치',cnt('건국·정치'),'태조 · 세종 · 경국대전'],['사림·붕당·개혁',cnt('사림·붕당','후기 개혁'),'사화 · 붕당 · 영조·정조'],['임진왜란·호란',cnt('대외 관계'),'이순신 · 인조 · 효종'],['경제·사회·문화',cnt('경제·사회','문화·과학'),'대동법 · 실학 · 서민 문화'],['개항·근대 개혁',cnt('개항기','근대 개혁'),'양요 · 동학 · 갑오 · 대한제국']];
+  var mx=Math.max.apply(null,G.map(function(g){return g[1]}));
+  return '<div class="grid">'+
+  P('day',[KID(40,72,100),TC(120,72,100)],['조선은 500년이 넘는데 어떻게 나눠요?','l'],'① 다온의 질문')+
+  P('day',[KID(60,72,100,1),TC(150,72,100,1)],['큰 사건을 기준으로 다섯 덩어리로 나누면 쉬워!','r'],'② 역사쌤의 대답')+'</div>'+
+  '<div class="box" style="margin-top:14px"><h3>시대의 흐름</h3><p style="margin:0;font-size:15px"><b>건국·제도 정비</b>(15세기) → <b>사림과 붕당</b>(16~17세기) → <b>임진왜란·호란</b> → <b>탕평·실학</b>(18세기) → <b>세도 정치</b>와 <b>개항</b>(19세기) → <b>대한제국</b> → 국권 피탈(1910)</p></div>'+
+  '<p style="margin:14px 0 4px;font-weight:700">이 시험지의 영역별 문항 수</p><div class="timeline t5">'+
+  G.map(function(r){
+    return '<div class="tl"><b>'+r[0]+'</b><span class="n">'+r[1]+'</span><small>'+r[2]+'</small><div class="bar"><i style="width:'+Math.round(r[1]/mx*100)+'%"></i></div></div>';}).join('')+'</div>'+
+  '<div class="box" style="margin-top:14px"><h3>알아 두면 좋은 것</h3><ul><li>1392년 이성계가 건국, 1897년 대한제국 수립, 1910년 국권 피탈로 이어져요.</li>'+
+  '<li>“<b>왕 한 명 + 정책 한 줄</b>”과 “<b>사건 순서</b>”를 묻는 문제로 풀려요. 짝꿍과 연도만 외우면 돼요.</li>'+
+  '<li>오답 선지는 <b>고려·삼국</b>의 말이거나 <b>다른 시기의 조선</b> 말이에요(함정 사전 참고).</li></ul></div>';}},
+
+/* 2 건국과 통치 체제 */
+{chip:'건국·통치',title:'나라의 틀을 짠 임금들',html:function(){
+  return '<div class="grid">'+
+  P('map',[['king',20,60,90],['pin',130,44,50],['castle',200,50,100]],['<b>태조 이성계</b>: 1392년 건국, <b>한양</b> 천도(1394)! 설계는 <b>정도전</b>.','r',1],'① 태조: 건국과 한양 천도')+
+  P('lab',[['king',20,60,86],['scroll',130,50,80],KID(220,80,70,1)],['<b>태종</b>: 6조 직계제, 호패법, 사병 혁파, <b>신문고</b>!','l',1],'② 태종: 왕권 강화')+
+  P('gold',[['king',20,60,86],['book',130,50,86],['scroll',220,52,70]],['<b>세종</b>: 집현전, <b>훈민정음</b>, 4군 6진, 측우기·칠정산!','r',1],'③ 세종: 문화와 영토')+
+  P('day',[['king',20,60,86],['book',130,50,86],['castle',210,50,100]],['<b>세조</b>는 직전법, <b>성종</b>은 <b>경국대전</b>을 완성했어요!','l',1],'④ 세조와 성종: 통치 체제 완성')+'</div>'+
+  radar({pts:['태조 = 한양 천도(1394) · 정도전 · 숭유억불 / 태종 = 6조 직계제 · 호패법 · 사병 혁파 · 신문고','세종 = 집현전 · 훈민정음(1443 창제, 1446 반포) · 4군 6진 · 의정부 서사제 · 농사직설 · 측우기 · 칠정산','세조 = 직전법 · 6조 직계제 부활 / 성종 = 경국대전(1485) · 홍문관 · 동국여지승람','중앙: 의정부 · 6조 · 3사(사헌부·사간원·홍문관) · 승정원 · 의금부 · 춘추관 / 지방: 8도 관찰사 · 수령'],traps:['중서문하성','도병마사','5도 양계','교정도감','전시과','음서'],note:'도병마사·중서문하성은 고려의 기구예요. 조선은 의정부와 6조가 중심이고, 6조 직계제와 의정부 서사제가 번갈아 쓰였어요.'});}},
+
+/* 3 사림과 붕당 */
+{chip:'사림·붕당',title:'훈구와 사림, 그리고 붕당',html:function(){
+  return '<div class="grid">'+
+  P('lab',[['king',20,60,86],['scroll',130,50,80],TC(220,78,80,1)],['성종 때부터 <b>사림</b>이 중앙에 진출하며 <b>훈구</b>와 부딪쳤어요.','r'],'① 훈구와 사림')+
+  P('night',[['warrior',20,66,86],['scroll',130,50,80],['flag',230,56,60]],['<b>4대 사화</b>: 무오(1498) → 갑자(1504) → 기묘(1519) → 을사(1545)!','r',1],'② 4대 사화')+
+  P('day',[['book',20,52,90],['hut',130,50,90],KID(240,80,66,1)],['사림은 <b>서원</b>과 <b>향약</b>으로 향촌에 뿌리를 내렸어요.','l'],'③ 서원과 향약')+
+  P('map',[['tchr',20,76,90],['flag',130,50,70],['flag',210,50,70]],['1575년 <b>동인</b>과 <b>서인</b>으로 갈라졌어요. 예송·환국으로 다툼이 이어졌죠.','r',1],'④ 붕당의 형성과 예송·환국')+'</div>'+
+  radar({pts:['무오(조의제문, 김종직) · 갑자(폐비 윤씨) · 기묘(조광조) · 을사(명종, 외척 다툼)','조광조 = 현량과 · 소격서 폐지 · 위훈 삭제 · 향약 보급','동인(이황·조식 → 남인·북인) ↔ 서인(이이·성혼 → 노론·소론)','예송(현종: 기해 1659 · 갑인 1674) · 환국(숙종: 경신 1680 · 기사 1689 · 갑술 1694)'],traps:['무신 정변','교정도감','전민변정도감','별무반','진대법','골품제'],note:'환국은 숙종이 한 붕당을 몰아내고 다른 붕당을 집권시킨 정권 교체예요. 영조·정조는 탕평책으로 붕당 간 균형을 꾀했어요.'});}},
+
+/* 4 임진왜란 */
+{chip:'임진왜란',title:'바다와 땅에서 나라를 지킨 사람들',html:function(){
+  return '<div class="grid">'+
+  P('night',[['ship',20,56,100],['warrior',130,66,86,1],['flag',230,56,60]],['1592년 <b>임진왜란</b>! 부산진·동래성이 무너지고 선조는 피난길에 올랐어요.','l'],'① 임진왜란 발발(1592)')+
+  P('river',[['ship',20,56,100],['warrior',150,66,86],['flag',230,50,70]],['<b>이순신</b>이 옥포·<b>한산도</b>에서 승리! 거북선이 활약했어요.','r',1],'② 수군의 승리')+
+  P('day',[['castle',20,50,100],['warrior',140,66,86],KID(230,80,66,1)],['<b>곽재우</b> 등 의병! <b>권율</b>은 행주, <b>김시민</b>은 진주에서 승리!','l',1],'③ 의병과 육전의 승리')+
+  P('gold',[['king',20,60,86],['scroll',130,50,80],['sword2',220,56,70]],['<b>훈련도감</b>과 <b>비변사</b>! 1597년 정유재란, 1598년 <b>노량</b>에서 이순신 전사.','r',1],'④ 전쟁 중·후의 변화')+'</div>'+
+  radar({pts:['한산도 대첩(1592, 이순신) · 진주 대첩(김시민) · 행주 대첩(1593, 권율) · 명량(1597) · 노량(1598)','의병: 곽재우(홍의장군) · 고경명 · 조헌 · 정문부 / 승병: 휴정 · 유정','훈련도감(1593, 삼수병) · 속오군 · 비변사의 상설 기구화','전후: 인구·토지 감소, 신분제 동요, 일본에 사절 파견(1607)'],traps:['4군 6진','병자호란','삼전도','신미양요','처인성','귀주 대첩'],note:'처인성과 귀주는 고려의 전투예요. 이순신은 한산도(1592) → 명량(1597) → 노량(1598) 순서로 외워요.'});}},
+
+/* 5 광해군·호란 */
+{chip:'광해군·호란',title:'중립 외교와 두 번의 호란',html:function(){
+  return '<div class="grid">'+
+  P('map',[['king',20,60,86],['flag',130,50,70],['flag',210,50,70]],['<b>광해군</b>: 명과 후금 사이 <b>중립 외교</b>! 대동법(1608)·동의보감(1610)도!','r',1],'① 광해군의 중립 외교')+
+  P('night',[['warrior',20,66,86],['castle',130,50,100],['king',240,60,60,1]],['1623년 <b>인조반정</b>! 친명 배금 정책으로 1627년 <b>정묘호란</b>이 일어났어요.','l',1],'② 인조반정과 정묘호란')+
+  P('night',[['castle',20,50,100],['horse',140,66,86],['warrior',220,66,86,1]],['1636년 <b>병자호란</b>! 인조는 남한산성에서 버티다 <b>삼전도</b>에서 항복했어요.','r',1],'③ 병자호란과 삼전도')+
+  P('dusk',[['king',20,60,86],['sword2',130,56,80],['horse',220,66,80,1]],['<b>효종</b>은 <b>북벌</b>을 준비했어요. 청의 요청으로 나선(러시아) 정벌에도 파병!','l',1],'④ 효종의 북벌 운동')+'</div>'+
+  radar({pts:['광해군 = 중립 외교(강홍립) · 대동법(경기, 1608) · 동의보감(허준, 1610) · 인조반정(1623)','정묘호란(1627, 후금, 형제 관계) → 병자호란(1636~37, 청, 군신 관계)','주화론(최명길) ↔ 척화론(김상헌) · 삼전도 항복 · 소현 세자·봉림 대군 인질','효종 = 북벌(어영청 강화) · 나선 정벌'],traps:['임진왜란','한산도 대첩','훈련도감 설치','행주 대첩','귀주 대첩','강동 6주'],note:'정묘호란은 후금과 형제 관계, 병자호란은 청과 군신 관계를 맺은 전쟁이에요. 훈련도감은 임진왜란 중에 설치됐어요.'});}},
+
+/* 6 영조·정조 */
+{chip:'영조·정조',title:'탕평과 개혁의 시대',html:function(){
+  return '<div class="grid">'+
+  P('lab',[['king',20,60,86],['stele',130,44,76],['scroll',220,52,70]],['<b>영조</b>: 탕평비, 균역법, 청계천 준천, 속대전, 신문고 부활!','r',1],'① 영조의 탕평과 민생')+
+  P('gold',[['sack',20,60,80],TC(110,76,90),KID(180,80,76),['sack',240,66,70]],['군포를 2필에서 <b>1필</b>로! 부족분은 결작·선무군관포 등으로 채웠어요.','l'],'② 균역법(1750)')+
+  P('day',[['king',20,60,86],['book',130,50,86],['castle',210,50,100]],['<b>정조</b>: 규장각, 초계문신제, 장용영, <b>수원 화성</b>, <b>신해통공</b>!','r',1],'③ 정조의 개혁')+
+  P('map',[['scroll',20,52,86],['pin',130,44,50],['fence',210,60,90]],['정조는 <b>대전통편</b>도 편찬! 정약용의 거중기로 화성을 쌓았어요.','l'],'④ 대전통편과 수원 화성')+'</div>'+
+  radar({pts:['영조 = 탕평비(1742) · 균역법(1750) · 준천 · 속대전 · 신문고 부활','정조 = 규장각 · 초계문신제 · 장용영 · 수원 화성 · 신해통공(금난전권 폐지) · 대전통편','법전: 경국대전(성종) → 속대전(영조) → 대전통편(정조) → 대전회통(고종)','정조 사후 순조 때부터 세도 정치(안동 김씨)가 시작돼요'],traps:['집현전','6조 직계제','경국대전','훈민정음','직전법','대전회통'],note:'규장각·장용영·신해통공은 정조, 균역법·속대전·탕평비는 영조예요. 두 왕의 짝꿍을 바꿔 묻는 문제가 많아요.'});}},
+
+/* 7 후기 경제·사회 */
+{chip:'경제·사회',title:'농업, 상업, 그리고 흔들리는 신분제',html:function(){
+  return '<div class="grid">'+
+  P('gold',[['crop',20,50,90],KID(130,76,80),TC(200,78,80,1)],['<b>이앙법</b>으로 <b>광작</b>이 늘고, 담배·인삼 같은 상품 작물도 재배했어요.','r'],'① 농업의 발달')+
+  P('lab',[['coin',20,50,80],['sack',120,56,80],['ship',210,56,90]],['<b>상평통보</b>가 퍼지고 <b>송상·만상·경강상인</b> 같은 사상이 성장!','l',1],'② 상업과 화폐')+
+  P('day',[['hut',20,56,90],KID(120,76,86),['scroll',200,50,80]],['돈으로 <b>공명첩</b>·납속을 사서 신분을 올리는 사람들이 늘었어요.','r'],'③ 신분제의 동요')+
+  P('night',[['warrior',20,66,86],['flag',130,50,70],['castle',210,50,100]],['<b>홍경래의 난</b>(1811), <b>임술 농민 봉기</b>(1862)! 삼정의 문란이 원인이에요.','l',1],'④ 농민 봉기')+'</div>'+
+  radar({pts:['대동법(광해군 1608 → 숙종 1708 전국) · 영정법(인조 1635) · 균역법(영조 1750)','이앙법 · 광작 · 상품 작물 · 상평통보(숙종) · 공인 · 사상 · 덕대(광산)','신분제 동요: 공명첩 · 납속 · 족보 매입 · 서얼 통청 운동','홍경래의 난(1811, 평안도 차별) · 임술 농민 봉기(1862, 진주 유계춘) → 삼정이정청'],traps:['전시과','벽란도','건원중보','은병','과전법','직전법'],note:'전시과·건원중보·은병·벽란도는 고려의 것이에요. 조선 후기는 상평통보와 사상의 성장이 열쇠예요.'});}},
+
+/* 8 문화·과학 */
+{chip:'문화·과학',title:'과학, 실학, 서민 문화',html:function(){
+  return '<div class="grid">'+
+  P('gold',[['book',20,52,90],['scroll',120,52,80],TC(220,78,80,1)],['<b>훈민정음</b>, 농사직설, 칠정산, 측우기, 앙부일구… 세종 때 과학이 꽃폈어요!','r',1],'① 세종 때의 문화·과학')+
+  P('lab',[['book',20,52,90],TC(120,76,86),KID(200,80,76,1),['scroll',250,56,60]],['<b>중농학파</b>(유형원·이익·정약용)와 <b>북학파</b>(박지원·박제가·홍대용)!','l',1],'② 실학')+
+  P('river',[['scroll',20,52,86],['pin',130,44,50],KID(220,80,70,1)],['<b>정선</b>의 진경산수화, <b>김홍도·신윤복</b>의 풍속화, 김정희의 추사체!','r',1],'③ 회화와 서예')+
+  P('gold',[['drum',20,52,90],['book',130,52,90],KID(230,80,66,1)],['<b>판소리·탈춤</b>, 한글 소설 <b>홍길동전</b>… 서민 문화가 꽃폈어요.','l'],'④ 서민 문화')+'</div>'+
+  radar({pts:['세종: 훈민정음 · 농사직설 · 칠정산 · 측우기 · 앙부일구 · 자격루 · 향약집성방','성종: 동국여지승람 · 악학궤범 / 광해군: 동의보감(허준) / 이제마: 동의수세보원','중농학파(유형원 균전론 · 이익 한전론 · 정약용 여전론) ↔ 북학파(박지원 열하일기 · 박제가 북학의)','정선(진경산수) · 김홍도·신윤복(풍속화) · 김정희(추사체) · 판소리 · 탈춤 · 한글 소설'],traps:['상감 청자','삼국유사','직지심체요절','팔만대장경','석굴암','금동 대향로'],note:'직지심체요절·팔만대장경·상감 청자는 고려의 문화유산이에요. 조선은 분청사기·백자, 후기에는 실학과 서민 문화가 중심이에요.'});}},
+
+/* 9 세도정치·개항 */
+{chip:'세도·개항',title:'세도 정치에서 강화도 조약까지',html:function(){
+  return '<div class="grid">'+
+  P('dusk',[['king',20,60,86],['castle',130,50,100],['sack',240,60,60]],['순조·헌종·철종 때 <b>안동 김씨</b> 같은 외척의 <b>세도 정치</b>! 삼정이 문란해졌어요.','r',1],'① 세도 정치와 삼정의 문란')+
+  P('lab',[['king',20,60,86],['castle',130,50,100],['scroll',230,52,70]],['<b>흥선 대원군</b>: 비변사 폐지, 서원 철폐, 경복궁 중건, 호포제, <b>대전회통</b>!','l',1],'② 흥선 대원군의 개혁')+
+  P('river',[['ship',20,56,100],['warrior',150,66,86],['stele',240,44,66]],['<b>병인양요</b>(프랑스)·<b>신미양요</b>(미국) 뒤 <b>척화비</b>를 세웠어요.','r',1],'③ 병인양요·신미양요와 척화비')+
+  P('map',[['ship',20,56,100],['flag',130,50,70],['scroll',210,52,80]],['1876년 <b>강화도 조약</b>! 1882년엔 조미 수호 통상 조약도 맺었어요.','l',1],'④ 강화도 조약과 개항')+'</div>'+
+  radar({pts:['흥선 대원군 = 비변사 폐지 · 서원 47개만 남김 · 경복궁 중건 · 호포제 · 사창제 · 대전회통','병인양요(1866, 프랑스, 외규장각 도서 약탈) · 신미양요(1871, 미국, 어재연 광성보) · 척화비','강화도 조약(1876) = 부산·원산·인천 개항 · 해안 측량권 · 치외 법권(불평등)','조미 수호 통상 조약(1882) = 최혜국 대우 · 거중 조정'],traps:['갑신정변','동학 농민 운동','갑오개혁','독립 협회','대한제국','을사늑약'],note:'서양과의 수교를 거부한 것은 흥선 대원군, 일본과의 개항은 그 뒤 고종이 직접 정치를 하면서 이루어졌어요.'});}},
+
+/* 10 개화 갈등·동학·갑오 */
+{chip:'개화·동학',title:'임오군란, 갑신정변, 동학, 갑오개혁',html:function(){
+  return '<div class="grid">'+
+  P('night',[['warrior',20,66,86],['castle',130,50,100],['flag',240,56,60]],['1882년 <b>임오군란</b>! 구식 군인이 차별에 반발했고, 청의 간섭이 커졌어요.','r'],'① 임오군란(1882)')+
+  P('dusk',[['tchr',20,76,90],['scroll',130,50,80],['flag',230,56,60]],['1884년 <b>갑신정변</b>! 김옥균 등 급진 개화파의 <b>14개조 정강</b>, 3일 만에 실패!','l',1],'② 갑신정변(1884)')+
+  P('day',[['warrior',20,66,86],['crop',130,50,86],['flag',230,50,70]],['<b>동학 농민 운동</b>(1894): 고부 봉기 → 전주 화약 → <b>집강소</b> → 2차 봉기!','r',1],'③ 동학 농민 운동')+
+  P('lab',[['king',20,60,86],['scroll',130,50,80],KID(220,80,70,1)],['<b>갑오개혁</b>: 군국기무처, 신분제·과거제 폐지… 일본의 간섭 속에 추진됐어요.','l'],'④ 갑오개혁(1894~1896)')+'</div>'+
+  radar({pts:['임오군란(1882) → 제물포 조약 · 청의 내정 간섭 강화','갑신정변(1884) → 한성 조약 · 톈진 조약(청·일 군대 동시 철수)','동학 농민 운동: 고부(전봉준·조병갑) → 1차 봉기 → 전주 화약 → 집강소 → 2차 봉기(우금치)','갑오개혁(군국기무처 · 홍범 14조) → 을미개혁(단발령, 을미사변 1895)'],traps:['척화비','병인양요','독립 협회','통감부','신민회','국채 보상 운동'],note:'갑신정변은 급진 개화파, 갑오개혁은 일본의 영향이라는 점이 달라요. 집강소는 동학 농민군이 전주 화약 뒤 설치한 자치 기구예요.'});}},
+
+/* 11 독립협회·대한제국 */
+{chip:'독립협회·대한제국',title:'자주 독립을 향한 노력',html:function(){
+  return '<div class="grid">'+
+  P('night',[['king',20,60,86],['castle',130,50,100],['flag',240,56,60]],['1895년 을미사변, 1896년 <b>아관파천</b>! 고종은 러시아 공사관으로 피신했어요.','r',1],'① 을미사변과 아관파천')+
+  P('day',[['tchr',20,76,90],['scroll',130,50,80],KID(220,80,70,1)],['<b>독립협회</b>: 독립신문(1896), 독립문, <b>만민공동회</b>, 헌의 6조!','l',1],'② 독립협회의 활동')+
+  P('gold',[['king',20,60,86],['crown',130,52,80],['flag',230,56,60]],['1897년 <b>대한제국</b>! 연호는 <b>광무</b>, 구본신참의 <b>광무개혁</b>!','r',1],'③ 대한제국(1897)')+
+  P('map',[['scroll',20,52,86],['pin',130,44,50],['coin',210,50,80]],['<b>지계아문</b>이 토지 문서(지계)를 발급하고, 상공업 진흥에도 힘썼어요.','l'],'④ 광무개혁의 내용')+'</div>'+
+  radar({pts:['독립협회(1896, 서재필): 독립신문 · 독립문 · 만민공동회 · 관민공동회 헌의 6조 → 1898년 해산','대한제국(1897): 환구단 · 황제 즉위 · 광무 연호 · 구본신참','광무개혁: 양전 사업 · 지계 발급 · 원수부 · 상공업 진흥','대한국 국제(1899): 황제권 강화'],traps:['군국기무처','홍범 14조','급진 개화파','14개조 정강','통감부','우금치 전투'],note:'군국기무처·홍범 14조는 갑오·을미개혁, 14개조 정강은 갑신정변의 내용이에요. 구본신참은 대한제국 광무개혁의 방침이에요.'});}},
+
+/* 12 국권 피탈 */
+{chip:'국권 피탈',title:'을사늑약에서 한일 병합까지',html:function(){
+  return '<div class="grid">'+
+  P('night',[['ship',20,56,100],['warrior',150,66,86],['flag',230,56,60]],['1904년 <b>러일 전쟁</b>, 1905년 <b>을사늑약</b>! 외교권을 빼앗기고 통감부가 설치됐어요.','r',1],'① 러일 전쟁과 을사늑약(1905)')+
+  P('dusk',[['king',20,60,86],['scroll',130,50,80],['flag',230,56,60]],['1907년 <b>헤이그 특사</b>! 하지만 고종은 강제 퇴위, <b>정미 7조약</b>과 군대 해산!','l',1],'② 헤이그 특사와 정미 7조약')+
+  P('map',[['warrior',20,66,86],['horse',110,66,86],['flag',210,50,70]],['<b>의병 전쟁</b>이 이어지고, <b>안중근</b>은 1909년 하얼빈에서 이토 히로부미를 처단했어요.','r',1],'③ 의병과 의열 투쟁')+
+  P('lab',[['book',20,52,90],['coin',130,50,80],KID(220,80,70,1)],['<b>국채 보상 운동</b>, <b>신민회</b>… 그러나 1910년 <b>한일 병합</b>!','l',1],'④ 애국 계몽 운동과 국권 피탈(1910)')+'</div>'+
+  radar({h:'다음 시대(일제 강점기)의 말',pts:['러일 전쟁(1904) → 제1차 한일 협약(고문 정치) → 을사늑약(1905, 통감부)','헤이그 특사(1907, 이준·이상설·이위종) → 고종 강제 퇴위 → 정미 7조약 · 군대 해산','의병: 을미(유인석) · 을사(최익현, 신돌석) · 정미(13도 창의군, 서울 진공 작전)','애국 계몽: 신민회(1907) · 국채 보상 운동(1907, 대구) · 대성학교 · 오산학교 · 대한매일신보'],traps:['3·1 운동','대한민국 임시 정부','봉오동 전투','토지 조사 사업','회사령','신간회'],note:'3·1 운동·임시 정부·토지 조사 사업·회사령은 일제 강점기의 일이에요. 을사늑약은 1905년, 한일 병합은 1910년이에요.'});}},
+
+/* 13 함정 사전 */
+{chip:'함정 사전',title:'오답 선지는 어느 시대 물건일까?',html:function(){
+  var D=[['삼국·통일 신라',['태학 · 진대법','골품제 · 화랑도','국학 · 독서삼품과','청해진 · 9서당']],
+   ['고려',['도병마사 · 식목도감','전시과 · 음서','별무반 · 동북 9성','교정도감 · 삼별초','팔만대장경 · 직지심체요절','상감 청자']],
+   ['일제 강점기',['토지 조사 사업 · 회사령','3·1 운동','대한민국 임시 정부','봉오동·청산리 전투','신간회 · 물산 장려 운동']],
+   ['조선 안에서의 시기 혼동',['직전법(세조) ↔ 과전법(고려 말)','신문고(태종 → 영조 부활)','훈련도감(임진왜란 중)','비변사 폐지(흥선 대원군)','군국기무처(1894)']]];
+  return '<p style="margin:0 0 12px">오답 선지는 대부분 다른 시대의 말이에요. 이름만 봐도 “이건 조선이 아니다”라고 말할 수 있어야 해요.</p><div class="dict">'+
+  D.map(function(d){return '<div class="box"><h3>'+d[0]+'<small>'+d[1].length+'개</small></h3><ul>'+d[1].map(function(x){return '<li>'+x+'</li>';}).join('')+'</ul></div>';}).join('')+'</div>'+
+  '<div class="box" style="margin-top:12px"><h3>꼭 구별할 쌍</h3><ul>'+
+  '<li><b>태종(6조 직계제 · 호패법) ↔ 세종(집현전 · 훈민정음)</b></li>'+
+  '<li><b>세조(직전법) ↔ 성종(경국대전)</b></li>'+
+  '<li><b>동인(남인·북인) ↔ 서인(노론·소론)</b></li>'+
+  '<li><b>광해군(중립 외교 · 대동법) ↔ 인조(반정 · 호란) ↔ 효종(북벌)</b></li>'+
+  '<li><b>영조(균역법 · 탕평비 · 속대전) ↔ 정조(규장각 · 장용영 · 수원 화성)</b></li>'+
+  '<li><b>병인양요(프랑스) ↔ 신미양요(미국)</b></li>'+
+  '<li><b>갑신정변(급진 개화파) ↔ 갑오개혁(일본의 영향) ↔ 광무개혁(구본신참)</b></li>'+
+  '<li><b>을사늑약(1905, 통감부) ↔ 정미 7조약(1907, 군대 해산)</b></li></ul></div>';}},
+
+/* 14 summary */
+{chip:'정리',title:'한 장으로 끝내는 조선 시대',html:function(){
+  var R=[['건국~15세기','태조 · 태종 · 세종 · 세조 · 성종','한양 천도 · 6조 직계제 · 훈민정음 · 경국대전','훈구'],
+   ['16세기','조광조 · 이황 · 이이','4대 사화 · 서원·향약 · 붕당(1575)','사림'],
+   ['임진·호란기','이순신 · 광해군 · 인조 · 효종','훈련도감 · 대동법 · 삼전도 · 북벌','서인·남인'],
+   ['18세기','영조 · 정조','탕평 · 균역법 · 규장각 · 수원 화성','탕평'],
+   ['19세기 전반','순조 · 헌종 · 철종','세도 정치 · 홍경래의 난 · 임술 농민 봉기','외척(안동 김씨)'],
+   ['개항~국권 피탈','흥선 대원군 · 고종','양요 · 강화도 조약 · 갑신정변 · 동학 · 갑오개혁 · 대한제국 · 을사늑약','개화 세력과 위정척사']];
+  return '<div class="tw"><table class="cmp"><tr><th>시기</th><th>핵심 인물·사건</th><th>제도·유산</th><th>중심 세력</th></tr>'+R.map(function(r){return '<tr>'+r.map(function(c,i){return '<td>'+(i?'':'<b>')+c+(i?'':'</b>')+'</td>';}).join('')+'</tr>';}).join('')+'</table></div>'+
+  '<div class="box" style="margin-top:14px"><h3>연표 한눈에</h3><ul><li>1392 건국 → 1394 한양 천도 → 1446 훈민정음 반포 → 1485 경국대전 → 1498 무오사화 → 1575 동·서인</li>'+
+  '<li>1592 임진왜란 → 1608 대동법(경기) → 1623 인조반정 → 1636 병자호란 → 1750 균역법 → 1796 수원 화성 → 1811 홍경래의 난 → 1862 임술 농민 봉기</li>'+
+  '<li>1866 병인양요 → 1871 신미양요 → 1876 강화도 조약 → 1882 임오군란 → 1884 갑신정변 → 1894 동학·갑오개혁 → 1897 대한제국 → 1905 을사늑약 → 1907 정미 7조약 → 1910 국권 피탈</li></ul></div>'+
+  '<div class="grid" style="margin-top:16px;grid-template-columns:minmax(0,1fr)">'+
+  P('gold',[['star',14,14,34],['star',272,20,32],KID(70,76,100),TC(140,76,100),['crown',230,64,76]],['이제 <b>시험</b>으로 실력을 확인해 볼까?','r',1],'수업 끝! 이어서 시험','마무리')+'</div>'+
+  '<div class="acts"><button class="btn main" id="go-quiz">시험 보러 가기</button></div>';}}
+];
+
+
+/* ===================== story controller ===================== */
+var cur=0,story=document.getElementById('view-story');
+function renderStory(){var s=SLIDES[cur];
+  var dots=SLIDES.map(function(_,i){return '<i class="'+(i===cur?'on':'')+'"></i>';}).join('');
+  story.innerHTML='<article class="slide"><div class="shead"><span class="chip">'+s.chip+'</span><h2>'+s.title+'</h2></div>'+s.html()+'</article>'+
+  '<div class="nav"><button id="prev"'+(cur===0?' disabled':'')+'>이전</button><div class="dots" aria-label="'+(cur+1)+' / '+SLIDES.length+'">'+dots+'</div><button id="next"'+(cur===SLIDES.length-1?' disabled':'')+'>다음</button></div>';
+  document.getElementById('prev').onclick=function(){go(cur-1)};
+  document.getElementById('next').onclick=function(){go(cur+1)};
+  var gq=document.getElementById('go-quiz'); if(gq) gq.onclick=function(){show('quiz')};
+}
+function go(n){if(n<0||n>=SLIDES.length)return;cur=n;renderStory();window.scrollTo({top:0})}
+document.addEventListener('keydown',function(e){if(story.hidden)return;if(e.key==='ArrowRight')go(cur+1);if(e.key==='ArrowLeft')go(cur-1);});
+
+
+var LV=[{n:'기본',s:'★',d:'인물·사건·제도를 바로 묻는 문제'},{n:'표준',s:'★★',d:'지문을 읽고 인물과 시기를 찾는 문제'},{n:'심화',s:'★★★',d:'보기 조합 · 연표 · 순서 · 표 해석 문제'}];
+var Q=[
+/* ---- 기본 (14) ---- */
+{lv:0,tag:'건국·정치',src:'한양 천도',q:'조선 태조가 1394년에 새 수도로 정한 곳은?',o:['개경','한양','평양','경주','수원'],a:1,
+ e:'태조는 1394년 도읍을 개경에서 한양으로 옮기고 경복궁 등을 지었어요. 개경은 고려의 수도이고, 수원 화성은 정조 때 쌓은 성이에요.'},
+{lv:0,tag:'건국·정치',src:'집현전',q:'세종 때 학문 연구와 편찬 사업을 위해 크게 확충한 기구는?',o:['성균관','규장각','비변사','집현전','승정원'],a:3,
+ e:'집현전은 세종 때 확대되어 훈민정음 창제와 여러 편찬 사업을 맡았어요. 규장각은 정조, 비변사는 임진왜란 이후 권한이 커진 기구, 승정원은 왕명을 출납한 비서 기관이에요.'},
+{lv:0,tag:'건국·정치',src:'경국대전',q:'조선의 기본 법전으로 성종 때 완성·반포된 것은?',o:['경제육전','속대전','경국대전','대전통편','대전회통'],a:2,
+ e:'경국대전은 세조 때 편찬을 시작해 성종 때(1485) 완성·반포된 조선의 기본 법전이에요. 속대전은 영조, 대전통편은 정조, 대전회통은 흥선 대원군 때 편찬했어요.'},
+{lv:0,tag:'사림·붕당',src:'서원',q:'사림이 선현에게 제사를 지내고 후학을 가르치며 향촌에서 성리학적 질서를 퍼뜨린 사립 교육 기관은?',o:['향교','서당','성균관','4부 학당','서원'],a:4,
+ e:'서원은 사림이 선현에게 제사를 지내고 후학을 가르치던 곳이에요(백운동 서원이 시초). 향교는 지방에 세운 관학, 성균관은 서울의 최고 교육 기관이에요.'},
+{lv:0,tag:'사림·붕당',src:'무오사화',q:'연산군 때 김종직의 조의제문이 문제가 되어 사림이 큰 화를 입은 사건은?',o:['무오사화','갑자사화','기묘사화','을사사화','임오군란'],a:0,
+ e:'무오사화(1498)는 조의제문을 사초에 실은 것이 문제가 되어 일어났어요. 갑자사화는 폐비 윤씨 문제, 기묘사화는 조광조 일파, 을사사화는 명종 때 외척 간 다툼에서 비롯되었어요.'},
+{lv:0,tag:'대외 관계',src:'한산도 대첩',q:'임진왜란 때 한산도에서 왜 수군을 크게 물리친 인물은?',o:['권율','곽재우','김시민','이순신','정문부'],a:3,
+ e:'이순신은 옥포·사천·한산도 등에서 연이어 승리했어요(한산도 대첩 1592). 권율은 행주 대첩, 김시민은 진주 대첩, 곽재우는 의병장이에요.'},
+{lv:0,tag:'대외 관계',src:'삼전도 항복',q:'병자호란 때 인조가 청 태종에게 항복 의식을 치른 곳은?',o:['남한산성','강화도','삼전도','행주산성','한산도'],a:2,
+ e:'인조는 남한산성에서 항전했지만 결국 삼전도에서 청 태종에게 항복했어요(1637). 남한산성은 인조가 피난해 버틴 곳이에요.'},
+{lv:0,tag:'후기 개혁',src:'균역법',q:'영조가 군포를 1년에 2필에서 1필로 줄여 백성의 부담을 덜어 준 제도는?',o:['대동법','균역법','영정법','호포제','직전법'],a:1,
+ e:'균역법(1750)은 군포를 1필로 줄이고 부족한 재정은 결작·선무군관포 등으로 채웠어요. 대동법은 공납 개혁, 영정법은 전세 고정, 호포제는 흥선 대원군이 양반에게도 군포를 부과한 제도예요.'},
+{lv:0,tag:'후기 개혁',src:'규장각',q:'정조가 왕권 강화와 인재 양성을 위해 설치한 왕실 도서관 겸 학술·정책 연구 기관은?',o:['집현전','홍문관','장용영','비변사','규장각'],a:4,
+ e:'규장각은 정조가 설치한 기관이에요. 집현전은 세종, 장용영은 정조가 둔 친위 부대, 비변사는 국방과 정치를 총괄한 기구예요.'},
+{lv:0,tag:'경제·사회',src:'대동법',q:'특산물 대신 쌀·삼베·동전으로 세금을 내게 한 제도로, 광해군 때 경기도에서 처음 시행된 것은?',o:['대동법','영정법','균역법','과전법','직전법'],a:0,
+ e:'대동법은 공납을 토지 기준으로 바꾼 제도예요(1608 경기도 → 1708 전국 확대). 영정법은 전세 고정, 균역법은 군포 감축이고, 과전법과 직전법은 토지 지급 제도예요.'},
+{lv:0,tag:'문화·과학',src:'동의보감',q:'광해군 때 허준이 우리 실정에 맞게 정리하여 완성한 의학 서적은?',o:['향약집성방','의방유취','동의보감','동의수세보원','농사직설'],a:2,
+ e:'동의보감(1610)은 허준이 쓴 의학 백과예요. 향약집성방과 의방유취는 조선 전기에 편찬되었고, 동의수세보원은 이제마의 사상 의학서이며, 농사직설은 세종 때의 농서예요.'},
+{lv:0,tag:'개항기',src:'강화도 조약',q:'1876년 일본과 맺은 조약으로 부산·원산·인천을 개항하게 된 조약은?',o:['톈진 조약','강화도 조약','제물포 조약','한성 조약','조미 수호 통상 조약'],a:1,
+ e:'강화도 조약(조일 수호 조규)은 해안 측량권과 치외 법권을 허용한 불평등 조약이에요. 조미 수호 통상 조약은 1882년 미국과, 제물포 조약은 임오군란 뒤 일본과 맺었어요.'},
+{lv:0,tag:'개항기',src:'척화비',q:'흥선 대원군이 서양과의 통상 수교를 거부한다는 뜻으로 전국에 세운 비는?',o:['순수비','광개토 대왕릉비','단양 적성비','척화비','북한산비'],a:3,
+ e:'척화비는 신미양요(1871) 뒤 세웠어요. 서양 오랑캐가 침범하는데 싸우지 않으면 화친하는 것이라는 뜻의 글이 새겨져 있어요.'},
+{lv:0,tag:'근대 개혁',src:'동학 농민 운동',q:'1894년 고부에서 봉기하여 동학 농민 운동을 이끈 인물은?',o:['김옥균','최제우','박영효','홍경래','전봉준'],a:4,
+ e:'전봉준은 고부 군수 조병갑의 수탈에 항거하여 봉기했고 동학 농민군을 이끌었어요. 김옥균·박영효는 갑신정변, 최제우는 동학 창시자, 홍경래는 1811년 평안도 봉기의 지도자예요.'},
+/* ---- 표준 (18) ---- */
+{lv:1,tag:'건국·정치',src:'세종의 업적',p:'◦ 집현전을 확충하여 학문을 진흥하였다.\n◦ 김종서와 최윤덕을 보내 4군 6진을 개척하였다.\n◦ 훈민정음을 창제하여 반포하였다.',q:'이 왕 때의 일로 옳은 것은?',o:['경국대전이 완성되었다.','탕평비가 세워졌다.','측우기가 제작되고 칠정산이 편찬되었다.','수원 화성이 축조되었다.','비변사가 설치되어 국정을 총괄하였다.'],a:2,
+ e:'세종 때 측우기(1441)와 칠정산(1442)이 만들어졌어요. 경국대전은 성종, 탕평비는 영조, 수원 화성은 정조 때의 일이고, 비변사는 중종 때 처음 설치되었어요.'},
+{lv:1,tag:'건국·정치',src:'태종의 왕권 강화',p:'◦ 의정부의 권한을 줄이고 6조가 직접 왕에게 보고하게 하였다.\n◦ 호패법을 시행하여 인구를 파악하였다.\n◦ 사병을 혁파하고 신문고를 설치하였다.',q:'이 왕의 정책으로 옳은 것은?',o:['6조 직계제를 시행하여 왕권을 강화하였다.','집현전을 확충하여 학문을 진흥하였다.','경국대전을 반포하였다.','직전법을 실시하여 수조권 지급 대상을 줄였다.','현량과를 실시하여 사림을 등용하였다.'],a:0,
+ e:'태종은 6조 직계제, 호패법, 사병 혁파, 신문고 설치로 왕권을 강화했어요. 집현전은 세종, 경국대전은 성종, 직전법은 세조, 현량과는 중종 때 조광조가 건의해 시행했어요.'},
+{lv:1,tag:'건국·정치',src:'중앙 정치 기구',q:'조선의 중앙 정치 기구에 대한 설명으로 옳은 것은?',o:['승정원은 관리를 감찰하는 기관이었다.','춘추관은 외교 문서를 작성하였다.','의금부는 6조에 속한 사법 기관이었다.','의정부는 6조의 업무를 직접 집행하였다.','사헌부·사간원·홍문관을 3사라 하여 언론을 담당하게 하였다.'],a:4,
+ e:'3사는 사헌부(감찰)·사간원(간쟁)·홍문관(왕의 자문)으로, 권력 견제와 언론 기능을 맡았어요. 승정원은 왕명을 출납한 왕의 비서 기관, 춘추관은 역사 기록, 의금부는 왕 직속 사법 기관, 의정부는 6조를 총괄·조정하는 합의 기구예요.'},
+{lv:1,tag:'사림·붕당',src:'조광조와 기묘사화',p:'◦ 현량과를 실시하여 새로운 인재를 등용하였다.\n◦ 소격서를 폐지하고 향약 보급을 추진하였다.\n◦ 중종반정 공신의 위훈을 삭제하려다 반발을 샀다.',q:'이 인물이 희생된 사건은?',o:['무오사화','기묘사화','갑자사화','을사사화','기축옥사'],a:1,
+ e:'조광조는 중종 때 급진적 개혁을 추진하다 훈구 세력의 반발로 기묘사화(1519)에 희생되었어요. 무오·갑자사화는 연산군, 을사사화는 명종 때의 일이에요.'},
+{lv:1,tag:'사림·붕당',src:'동인과 서인',p:'선조 때 이조 전랑 자리를 두고 김효원을 지지하는 세력과 심의겸을 지지하는 세력이 대립하면서 사림이 두 붕당으로 나뉘었다.',q:'이 두 붕당에 대한 설명으로 옳은 것은?',o:['동인은 훗날 노론과 소론으로 나뉘었다.','서인은 이황과 조식의 학문을 계승하였다.','동인은 이이와 성혼의 학문을 따랐다.','서인은 훗날 노론과 소론으로 갈라졌다.','두 붕당은 정조 때 처음 형성되었다.'],a:3,
+ e:'김효원 중심의 동인은 이황·조식, 심의겸 중심의 서인은 이이·성혼의 학문을 계승했어요. 동인은 남인과 북인으로, 서인은 숙종 때 노론과 소론으로 갈라졌어요.'},
+{lv:1,tag:'사림·붕당',src:'예송',p:'효종이 죽자 인조의 계비인 자의 대비가 상복을 입는 기간을 두고 논쟁이 일어났다. 한쪽은 1년을, 다른 쪽은 3년을 주장하였다.',q:'이 논쟁에 대한 설명으로 옳은 것은?',o:['서인과 남인이 왕실의 예법을 두고 벌인 정치 논쟁이었다.','사림과 훈구 세력이 충돌한 사화의 원인이 되었다.','북벌과 북학을 둘러싼 논쟁이었다.','영조가 탕평을 내세운 계기가 되었다.','정조가 규장각을 설치한 배경이 되었다.'],a:0,
+ e:'이 논쟁은 예송(기해예송)이에요. 서인과 남인이 왕실의 복상 기간을 두고 왕권과 신권의 문제를 다투었어요. 사화는 16세기, 탕평과 규장각은 18세기의 일이에요.'},
+{lv:1,tag:'대외 관계',src:'임진왜란 중 대응',p:'◦ 곽재우, 고경명, 조헌 등이 의병을 일으켰다.\n◦ 권율이 행주산성에서 왜군을 크게 물리쳤다.\n◦ 이순신이 명량에서 승리하였다.',q:'이 전쟁 중 조선 정부의 대응으로 옳은 것은?',o:['4군 6진을 개척하였다.','북벌을 준비하여 어영청을 강화하였다.','통리기무아문을 설치하였다.','삼정이정청을 설치하였다.','훈련도감을 설치하여 군제를 개편하였다.'],a:4,
+ e:'임진왜란 중에 조선은 포수·살수·사수의 삼수병으로 이루어진 훈련도감을 설치했어요(1593). 4군 6진은 세종, 북벌은 효종, 통리기무아문은 1880년, 삼정이정청은 1862년의 일이에요.'},
+{lv:1,tag:'대외 관계',src:'광해군의 정책',p:'◦ 명과 후금 사이에서 중립 외교를 펼쳤다.\n◦ 서인 세력이 일으킨 인조반정으로 왕위에서 물러났다.',q:'이 왕 때의 일로 옳은 것은?',o:['병자호란이 일어났다.','북벌 정책이 추진되었다.','동의보감이 간행되고 대동법이 경기도에서 시행되었다.','균역법이 시행되었다.','탕평비가 세워졌다.'],a:2,
+ e:'광해군 때 동의보감이 간행되고(1613) 대동법이 경기도에 시행되었어요(1608). 병자호란은 인조, 북벌은 효종, 균역법과 탕평비는 영조 때의 일이에요.'},
+{lv:1,tag:'대외 관계',src:'병자호란 이후',p:'◦ 청 태종이 직접 대군을 이끌고 침입하였다.\n◦ 인조가 남한산성에서 항전하였다.\n◦ 최명길은 화친을, 김상헌은 끝까지 싸울 것을 주장하였다.',q:'이 전쟁 이후의 상황으로 옳은 것은?',o:['임진왜란이 일어났다.','소현 세자와 봉림 대군이 청에 인질로 끌려갔다.','훈련도감이 설치되었다.','광해군이 폐위되었다.','정묘호란이 일어났다.'],a:1,
+ e:'병자호란(1636~1637) 뒤 조선은 청과 군신 관계를 맺고, 소현 세자와 봉림 대군 등이 인질로 끌려갔어요. 나머지는 모두 병자호란 이전의 일이에요.'},
+{lv:1,tag:'후기 개혁',src:'영조의 정책',p:'◦ 성균관 입구에 탕평비를 세웠다.\n◦ 군포를 1년에 1필로 줄였다.\n◦ 청계천을 정비하는 준천 사업을 벌였다.',q:'이 왕의 정책으로 옳은 것은?',o:['장용영을 설치하였다.','규장각을 설치하였다.','신해통공을 실시하였다.','속대전을 편찬하였다.','삼정이정청을 설치하였다.'],a:3,
+ e:'영조는 탕평책, 균역법, 준천, 속대전 편찬 등을 추진했어요. 장용영·규장각·신해통공은 정조 때, 삼정이정청은 철종 때 설치되었어요.'},
+{lv:1,tag:'후기 개혁',src:'정조의 업적',p:'◦ 초계문신제를 실시하여 신진 관료를 재교육하였다.\n◦ 수원에 화성을 축조하였다.\n◦ 금난전권을 폐지하는 신해통공을 시행하였다.',q:'이 왕의 업적으로 옳은 것은?',o:['친위 부대인 장용영을 설치하였다.','신문고를 부활하였다.','속대전을 편찬하였다.','균역법을 시행하였다.','서원을 대폭 정리하였다.'],a:0,
+ e:'정조는 규장각·초계문신제, 장용영, 수원 화성, 신해통공, 대전통편 편찬 등으로 개혁을 추진했어요. 신문고 부활·속대전·균역법은 영조, 서원 정리는 흥선 대원군의 정책이에요.'},
+{lv:1,tag:'경제·사회',src:'대동법의 특징',p:'이 제도는 가호 단위로 거두던 특산물을 토지 결수에 따라 쌀, 삼베, 동전 등으로 내게 하였다. 이 제도의 시행으로 관청에 물품을 납품하는 공인이 등장하였다.',q:'이 제도에 대한 설명으로 옳은 것은?',o:['군포를 2필에서 1필로 줄였다.','전세를 1결당 4~6두로 고정하였다.','공납의 부담을 줄이고 상품 화폐 경제의 발달에 영향을 주었다.','양반에게도 군포를 부과하였다.','연분 9등법과 전분 6등법을 정하였다.'],a:2,
+ e:'대동법은 공납을 토지 기준으로 바꾸어 농민의 부담을 줄였고, 공인의 등장으로 상품 화폐 경제가 발달했어요. 군포 감축은 균역법, 전세 고정은 영정법, 양반 군포는 호포제, 연분 9등법은 세종 때의 공법이에요.'},
+{lv:1,tag:'경제·사회',src:'조선 후기 경제',p:'◦ 이앙법이 널리 보급되어 노동력이 절감되고 광작이 가능해졌다.\n◦ 담배, 인삼, 면화 등 상품 작물 재배가 늘었다.',q:'이 시기의 경제 모습으로 옳은 것은?',o:['벽란도가 국제 무역항으로 번성하였다.','건원중보가 주로 유통되었다.','전시과로 관리에게 수조권을 지급하였다.','은병이 화폐로 널리 쓰였다.','송상·만상 등 사상이 성장하였다.'],a:4,
+ e:'조선 후기에는 상평통보가 유통되고, 개성의 송상과 의주의 만상 같은 사상이 성장했어요. 벽란도·건원중보·은병·전시과는 고려의 모습이에요.'},
+{lv:1,tag:'경제·사회',src:'임술 농민 봉기',p:'진주 지방에서 경상 우병사 백낙신의 수탈에 항거하여 유계춘 등이 봉기하였고, 이는 전국으로 확산되었다.',q:'이 봉기에 대한 정부의 대응으로 옳은 것은?',o:['통리기무아문을 설치하였다.','삼정이정청을 설치하여 삼정의 문란을 바로잡으려 하였다.','교정도감을 설치하였다.','군국기무처를 설치하였다.','집강소를 설치하였다.'],a:1,
+ e:'1862년 임술 농민 봉기에 대응해 정부는 삼정이정청을 설치했지만 근본적인 개혁은 이루지 못했어요. 통리기무아문은 1880년, 군국기무처는 1894년의 기구이고, 집강소는 동학 농민군의 자치 기구예요.'},
+{lv:1,tag:'문화·과학',src:'북학파',p:'◦ 청의 앞선 문물을 받아들이고 상공업을 진흥해야 한다고 주장하였다.\n◦ 대표 저서로 열하일기, 북학의가 있다.',q:'이 학자들에 대한 설명으로 옳은 것은?',o:['토지를 균등하게 나누자는 한전론을 주장하였다.','국어와 역사 연구에 힘써 동사강목을 편찬하였다.','성리학의 이론만 연구하였다.','박지원·박제가 등으로 대표되는 북학파이다.','양명학을 받아들인 강화 학파이다.'],a:3,
+ e:'열하일기(박지원)와 북학의(박제가)를 쓴 북학파는 상공업 발전과 청의 기술 수용을 강조했어요. 한전론은 이익, 동사강목은 안정복이 쓴 책이에요.'},
+{lv:1,tag:'문화·과학',src:'조선 후기 문화',q:'조선 후기의 문화에 대한 설명으로 옳은 것은?',o:['정선이 우리 산천을 그린 진경산수화를 그렸다.','안견이 몽유도원도를 그렸다.','상감 청자가 크게 유행하였다.','경천사지 십층 석탑이 건립되었다.','훈민정음이 창제되었다.'],a:0,
+ e:'정선은 인왕제색도 등 진경산수화로 유명하고, 김홍도와 신윤복은 풍속화를 그렸어요. 몽유도원도(안견)와 훈민정음은 조선 전기, 상감 청자와 경천사지 십층 석탑은 고려의 것이에요.'},
+{lv:1,tag:'개항기',src:'흥선 대원군의 정책',p:'◦ 비변사의 기능을 축소하고 의정부의 기능을 회복시켰다.\n◦ 서원을 47개만 남기고 철폐하였다.\n◦ 경복궁을 중건하고 호포제를 시행하였다.',q:'이 인물이 집권하던 시기에 있었던 일로 옳은 것은?',o:['강화도 조약이 체결되었다.','임오군란이 일어났다.','병인양요와 신미양요가 일어났다.','갑신정변이 일어났다.','동학 농민 운동이 일어났다.'],a:2,
+ e:'흥선 대원군 집권기에 프랑스(병인양요, 1866)와 미국(신미양요, 1871)이 강화도를 침략했어요. 강화도 조약(1876)은 그가 물러난 뒤, 임오군란·갑신정변·동학 농민 운동은 그 이후의 일이에요.'},
+{lv:1,tag:'근대 개혁',src:'갑오개혁',p:'◦ 군국기무처를 설치하였다.\n◦ 과거제를 폐지하고 신분제를 철폐하였다.\n◦ 은 본위 화폐제를 채택하였다.',q:'이 개혁에 대한 설명으로 옳은 것은?',o:['구본신참을 내세워 점진적으로 추진되었다.','독립 협회가 주도하였다.','지계를 발급하여 토지 소유권을 확인하였다.','급진 개화파가 14개조 정강을 발표하였다.','일본의 영향 아래 1894년에 추진되었다.'],a:4,
+ e:'1894~1896년의 갑오개혁은 일본의 간섭 속에 군국기무처 중심으로 추진되었어요. 구본신참과 지계 발급은 대한제국의 광무개혁, 14개조 정강은 갑신정변(1884)의 내용이에요.'},
+/* ---- 심화 (8) ---- */
+{lv:2,tag:'연표',src:'연표 속 위치 찾기',p:'<연표>\n조선 건국(1392) — (가) — 훈민정음 반포(1446) — (나) — 임진왜란(1592) — (다) — 병자호란(1636) — (라) — 균역법 시행(1750) — (마) — 강화도 조약(1876)',q:'대동법이 전국으로 확대 실시된 시기(1708)를 연표에서 고른 것은?',o:['(가)','(나)','(다)','(라)','(마)'],a:3,
+ e:'대동법은 광해군 때 경기도에서 시작해 숙종 때(1708) 전국으로 확대되었어요. 병자호란(1636) 이후, 균역법(1750) 이전이므로 (라)예요.'},
+{lv:2,tag:'개항기',src:'개항기 사건의 순서',q:'다음 사건을 일어난 순서대로 바르게 나열한 것은?\n(가) 병인양요\n(나) 임오군란\n(다) 강화도 조약\n(라) 신미양요',o:['(가) – (라) – (다) – (나)','(가) – (다) – (라) – (나)','(라) – (가) – (다) – (나)','(가) – (라) – (나) – (다)','(다) – (가) – (라) – (나)'],a:0,
+ e:'병인양요(1866) → 신미양요(1871) → 강화도 조약(1876) → 임오군란(1882) 순서예요. 가 – 라 – 다 – 나로 외워 두세요.'},
+{lv:2,tag:'근대 개혁',src:'개화기 사건 <보기>',q:'개화기 사건에 대한 설명으로 옳은 것만을 <보기>에서 고른 것은?\n\nㄱ. 임오군란은 구식 군인들에 대한 차별 대우에 반발하여 일어났다.\nㄴ. 갑신정변은 동학교도가 주도하여 청과 일본의 간섭을 배격하려 하였다.\nㄷ. 동학 농민군은 전주 화약 이후 집강소를 설치하여 폐정 개혁을 추진하였다.\nㄹ. 독립 협회는 군국기무처를 설치하여 갑오개혁을 주도하였다.',o:['ㄱ, ㄴ','ㄱ, ㄷ','ㄴ, ㄷ','ㄴ, ㄹ','ㄷ, ㄹ'],a:1,
+ e:'임오군란은 구식 군인의 차별에 반발한 사건이고(ㄱ), 동학 농민군은 전주 화약 뒤 집강소를 통해 폐정 개혁을 추진했어요(ㄷ). 갑신정변은 급진 개화파가 주도했고(ㄴ 오답), 군국기무처는 갑오개혁을 추진한 기구로 독립 협회와 관련이 없어요(ㄹ 오답).'},
+{lv:2,tag:'경제·사회',src:'조세 제도 표 해석',p:'제도 | 시행 시기 | 개혁 대상\n(가) | 인조 | 전세\n(나) | 광해군(경기) ~ 숙종(전국) | 공납\n(다) | 영조 | 군역(군포)',q:'(가)~(다)에 대한 설명으로 옳은 것은?',o:['(가)는 공인의 등장을 가져왔다.','(나)는 군포를 1필로 줄였다.','(다)는 특산물 대신 쌀을 내게 하였다.','(나)는 양반에게도 군포를 부과하였다.','(가)는 토지 1결당 쌀 4~6두로 전세를 고정하였다.'],a:4,
+ e:'(가)는 영정법, (나)는 대동법, (다)는 균역법이에요. 영정법은 풍흉과 관계없이 전세를 1결당 4~6두로 고정했어요. 공인의 등장은 대동법, 군포를 1필로 줄인 것은 균역법, 양반에게 군포를 부과한 것은 흥선 대원군의 호포제예요.'},
+{lv:2,tag:'경제·사회',src:'조선 후기 변화 옳지 않은 것',q:'조선 후기 사회·경제 변화에 대한 설명으로 옳지 않은 것은?',o:['이앙법이 확산되어 광작이 나타났다.','상평통보가 전국적으로 유통되었다.','관영 수공업이 크게 발달하고 민영 수공업은 쇠퇴하였다.','공명첩과 납속으로 신분 상승이 가능하였다.','광산 개발에서 덕대가 경영을 맡는 사례가 늘었다.'],a:2,
+ e:'조선 후기에는 관영 수공업이 쇠퇴하고 민영 수공업이 발달했어요. 나머지는 모두 조선 후기의 변화로 옳아요.'},
+{lv:2,tag:'근대 개혁',src:'대한제국과 광무개혁',p:'◦ 고종이 환궁한 뒤 황제로 즉위하고 국호를 대한제국으로 정하였다.\n◦ 광무라는 연호를 사용하였다.\n◦ 옛것을 근본으로 하고 새것을 참작한다는 방침을 내세웠다.',q:'이 나라가 추진한 정책으로 옳은 것은?',o:['군국기무처를 설치하여 개혁을 주도하였다.','신분제를 철폐하고 과거제를 폐지하였다.','홍범 14조를 반포하였다.','지계아문을 설치하여 토지 소유권 증서인 지계를 발급하였다.','통감부를 설치하여 외교권을 장악하였다.'],a:3,
+ e:'대한제국의 광무개혁은 구본신참을 내세우며 양전 사업과 지계 발급, 상공업 진흥 등을 추진했어요. 군국기무처·신분제 철폐·홍범 14조는 갑오·을미개혁, 통감부는 일본이 을사늑약 뒤 설치한 기구예요.'},
+{lv:2,tag:'연표',src:'국권 피탈 과정의 순서',q:'다음 사건을 일어난 순서대로 바르게 나열한 것은?\n(가) 을사늑약\n(나) 정미 7조약\n(다) 한일 병합 조약\n(라) 러일 전쟁 발발',o:['(라) – (가) – (나) – (다)','(가) – (라) – (나) – (다)','(라) – (나) – (가) – (다)','(가) – (나) – (라) – (다)','(라) – (가) – (다) – (나)'],a:0,
+ e:'러일 전쟁(1904) → 을사늑약(1905) → 정미 7조약(1907) → 한일 병합 조약(1910) 순서예요. 라 – 가 – 나 – 다로 기억해요.'},
+{lv:2,tag:'사림·붕당',src:'환국과 탕평 <보기>',q:'붕당 정치에 대한 설명으로 옳은 것만을 <보기>에서 고른 것은?\n\nㄱ. 기사환국으로 남인이 정권을 잡았다.\nㄴ. 갑술환국으로 남인이 집권하고 서인이 몰락하였다.\nㄷ. 영조는 탕평비를 세워 탕평의 의지를 밝혔다.\nㄹ. 정조는 환국을 단행하여 붕당 간 힘의 균형을 맞추었다.',o:['ㄴ, ㄹ','ㄱ, ㄷ','ㄱ, ㄹ','ㄴ, ㄷ','ㄷ, ㄹ'],a:1,
+ e:'기사환국(1689)으로 남인이 집권했고(ㄱ), 영조는 성균관 앞에 탕평비를 세웠어요(ㄷ). 갑술환국(1694)은 남인이 몰락하고 서인(노론·소론)이 다시 집권한 사건이고(ㄴ 오답), 환국은 숙종 때 나타난 정권 교체 방식이에요(ㄹ 오답).'}
+];
+
+
+/* ===================== exam controller ===================== */
+var quiz=document.getElementById('view-quiz'),st={ans:[],graded:false,locked:{},t0:0,tm:null};
+function resetState(){st.ans=Q.map(function(){return null});st.graded=false;st.locked={};st.t0=Date.now();}
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
+function buildQuiz(){resetState();
+  var h='<div class="bar-sticky" id="bar"><b id="cnt">0 / '+Q.length+'</b><div class="prog"><i id="pg"></i></div><b id="tm">00:00</b></div>'+
+  '<div id="res"></div>'+
+  '<div class="box intro"><h3>시험 안내</h3><p>'+Q.length+'문제 · 쉬운 문제부터 어려운 문제 순서 · 문제마다 보기 5개 중 하나 선택</p><p>마지막 문제까지 모두 고르면 <b>자동으로 채점</b>돼요. 채점 뒤에는 문제마다 해설이 열려요.</p></div>';
+  var n=0;
+  LV.forEach(function(L,li){var items=Q.map(function(q,i){return [q,i]}).filter(function(x){return x[0].lv===li});
+    h+='<h2 class="lv">'+L.s+' '+L.n+'<small>'+items.length+'문항 · '+L.d+'</small></h2>';
+    items.forEach(function(x){var q=x[0],i=x[1];n++;
+      h+='<article class="q" id="q'+i+'"><div class="qh"><span class="qn">'+(i+1)+'</span><span class="tag">'+q.tag+'</span><span class="mark" id="m'+i+'"></span></div>'+
+      (q.p?'<div class="pass">'+esc(q.p)+'</div>':'')+'<div class="qt">'+esc(q.q)+'</div><div class="opts">'+
+      q.o.map(function(o,j){return '<div><input type="radio" name="r'+i+'" id="r'+i+'_'+j+'" value="'+j+'"><label for="r'+i+'_'+j+'"><span class="no">'+(j+1)+'</span><span>'+esc(o)+'</span></label></div>'}).join('')+
+      '</div><div class="exp" id="e'+i+'" hidden></div></article>';});});
+  h+='<div class="acts"><button class="btn" id="force">지금 채점하기</button></div>';
+  quiz.innerHTML=h;
+  quiz.querySelectorAll('input[type=radio]').forEach(function(r){r.addEventListener('change',function(){
+    var i=+r.name.slice(1);st.ans[i]=+r.value;update();
+    if(!st.graded&&st.ans.every(function(a){return a!==null})){grade(true)}});});
+  document.getElementById('force').onclick=function(){grade(false)};
+  clearInterval(st.tm);st.tm=setInterval(tick,1000);update();}
+function tick(){if(st.graded)return;var s=Math.floor((Date.now()-st.t0)/1000);var el=document.getElementById('tm');if(el)el.textContent=('0'+Math.floor(s/60)).slice(-2)+':'+('0'+s%60).slice(-2)}
+function update(){var c=st.ans.filter(function(a){return a!==null}).length;document.getElementById('cnt').textContent=c+' / '+Q.length;document.getElementById('pg').style.width=(c/Q.length*100)+'%'}
+function toast(m){var t=document.getElementById('toast');t.textContent=m;t.hidden=false;clearTimeout(toast.h);toast.h=setTimeout(function(){t.hidden=true},3200)}
+function grade(auto){
+  var un=st.ans.filter(function(a){return a===null}).length;
+  if(!auto&&un>0){toast('아직 '+un+'문제를 풀지 않았어요. 모두 풀면 자동으로 채점돼요.');return}
+  st.graded=true;clearInterval(st.tm);
+  var ok=0,byLv=[0,0,0],totLv=[0,0,0],byTag={},totTag={},wrong=[];
+  Q.forEach(function(q,i){var a=st.ans[i],good=a===q.a;totLv[q.lv]++;totTag[q.tag]=(totTag[q.tag]||0)+1;
+    if(good){ok++;byLv[q.lv]++;byTag[q.tag]=(byTag[q.tag]||0)+1}else wrong.push(i);
+    var card=document.getElementById('q'+i);card.classList.remove('ok','ng');card.classList.add('lock',good?'ok':'ng');
+    document.getElementById('m'+i).textContent=good?'정답':'오답';
+    card.querySelectorAll('input').forEach(function(r){r.disabled=true});
+    q.o.forEach(function(_,j){var lb=card.querySelector('label[for=r'+i+'_'+j+']');lb.classList.remove('right','wrong');if(j===q.a)lb.classList.add('right');else if(j===a)lb.classList.add('wrong')});
+    var e=document.getElementById('e'+i);e.hidden=false;
+    e.innerHTML='<b>정답 '+(q.a+1)+'번</b>'+(good?'':' · 내가 고른 답 '+(a===null?'없음':(a+1)+'번'))+'<br>'+esc(q.e)+'<div class="from">출제 포인트: '+q.src+'</div>';});
+  var pct=Math.round(ok/Q.length*100),deg=Math.round(ok/Q.length*360);
+  var rows=LV.map(function(L,li){return rowH(L.s+' '+L.n,byLv[li],totLv[li])}).concat(Object.keys(totTag).map(function(t){return rowH(t,byTag[t]||0,totTag[t])})).join('');
+  var weak=Object.keys(totTag).filter(function(t){return (byTag[t]||0)<totTag[t]}).sort(function(a,b){return ((byTag[a]||0)/totTag[a])-((byTag[b]||0)/totTag[b])});
+  var msg=ok===Q.length?'만점이에요. 조선 시대 단원은 완벽해요.':ok>=Q.length*0.8?'아주 잘했어요. 틀린 문제의 해설만 한 번 더 읽어 보세요.':ok>=Q.length*0.6?'기본기는 있어요. 약한 영역을 만화 수업에서 다시 확인해 보세요.':'만화 수업을 한 번 더 읽고 다시 도전해 보세요. 유물 짝꿍부터 다시 잡아요.';
+  var secs=Math.floor((Date.now()-st.t0)/1000);
+  document.getElementById('res').innerHTML='<section class="result" id="resBox"><h2>채점 결과</h2><div class="score"><div class="ring" style="background:conic-gradient(var(--ok) '+deg+'deg,var(--bg) 0)"><div>'+ok+' / '+Q.length+'<small>'+pct+'점</small></div></div><div class="rows">'+rows+'</div></div>'+
+  '<p class="msg">'+msg+(weak.length?' 보강할 부분: <b>'+weak.slice(0,3).join(', ')+'</b>.':'')+' 걸린 시간 '+Math.floor(secs/60)+'분 '+secs%60+'초.</p>'+
+  '<div class="acts">'+(wrong.length?'<button class="btn main" id="retryW">틀린 문제만 다시 풀기 ('+wrong.length+')</button>':'')+'<button class="btn" id="retryA">처음부터 다시 풀기</button><button class="btn" id="toStory">만화 수업 다시 보기</button></div></section>';
+  document.getElementById('retryA').onclick=function(){buildQuiz();window.scrollTo({top:0})};
+  document.getElementById('toStory').onclick=function(){show('story')};
+  var rw=document.getElementById('retryW');if(rw)rw.onclick=function(){retryWrong(wrong)};
+  if(auto)toast(Q.length+'문항을 모두 풀어서 자동으로 채점했어요.');
+  document.getElementById('resBox').scrollIntoView({behavior:'smooth',block:'start'});}
+function rowH(n,a,t){return '<div class="row"><span>'+n+'</span><span class="t"><i style="width:'+Math.round(a/t*100)+'%"></i></span><span>'+a+'/'+t+'</span></div>'}
+function retryWrong(wrong){
+  st.graded=false;document.getElementById('res').innerHTML='';
+  wrong.forEach(function(i){st.ans[i]=null;var card=document.getElementById('q'+i);card.classList.remove('ok','ng','lock');document.getElementById('m'+i).textContent='';document.getElementById('e'+i).hidden=true;
+    card.querySelectorAll('input').forEach(function(r){r.disabled=false;r.checked=false});card.querySelectorAll('label').forEach(function(l){l.classList.remove('right','wrong')});});
+  st.t0=Date.now();clearInterval(st.tm);st.tm=setInterval(tick,1000);update();
+  var f=document.getElementById('q'+wrong[0]);f.scrollIntoView({behavior:'smooth',block:'center'});toast('틀린 문제 '+wrong.length+'개만 열었어요. 다 풀면 다시 채점돼요.');}
+
+/* ===================== tabs / routing ===================== */
+var built=false;
+function show(v){var q=v==='quiz';
+  document.getElementById('view-story').hidden=q;document.getElementById('view-quiz').hidden=!q;
+  document.getElementById('tab-story').setAttribute('aria-selected',String(!q));document.getElementById('tab-quiz').setAttribute('aria-selected',String(q));
+  if(q&&!built){buildQuiz();built=true}
+  try{history.replaceState(null,'','#'+v)}catch(e){location.hash=v}
+  window.scrollTo({top:0});}
+document.getElementById('tab-story').onclick=function(){show('story')};
+document.getElementById('tab-quiz').onclick=function(){show('quiz')};
+window.addEventListener('hashchange',function(){show(location.hash==='#quiz'?'quiz':'story')});
+renderStory();if(location.hash==='#quiz')show('quiz');
+</script>
+<!-- BESTIAN-PATCH -->
+<style>
+.q[hidden],.lv[hidden],.box[hidden]{display:none!important}
+.rw-banner{margin-bottom:14px;border-color:var(--acc)}
+.rw-banner p{margin:4px 0;font-size:14.5px}
+.rw-note{margin:10px 0 0;font-size:15px;font-weight:700;color:var(--ok)}
+.send{margin-top:16px;border:3px dashed var(--comic);border-radius:12px;padding:14px 16px;background:var(--bg);display:grid;gap:8px}
+.send h3{font-family:var(--f-display);font-weight:400;font-size:20px;margin:0}
+.send label{font-size:14px;font-weight:700}
+.send input{font:inherit;font-size:16px;padding:8px 12px;border:2px solid var(--comic);border-radius:9px;background:var(--card);color:var(--fg);max-width:260px;width:100%}
+.send .code{font-size:14px;background:var(--card);border:2px solid var(--line);border-radius:9px;padding:9px 12px;word-break:keep-all;user-select:all;font-variant-numeric:tabular-nums}
+.send .row2{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+</style>
+<script>
+/* ===================== 베스티안: 결과 보내기 + 틀린 문제만 다시 풀기 ===================== */
+(function(){
+  var UNIT={"no": 6, "name": "조선 시대"};
+  var KEY='bestian-student-name';
+  function getName(){try{return localStorage.getItem(KEY)||''}catch(e){return ''}}
+  function setName(v){try{localStorage.setItem(KEY,v)}catch(e){}}
+  function clean(v){return String(v||'').replace(/[·\[\]\n\r\t]/g,' ').replace(/\s+/g,' ').trim().slice(0,20)}
+  function two(n){return ('0'+n).slice(-2)}
+  function when(d){return (d.getMonth()+1)+'/'+d.getDate()+' '+two(d.getHours())+':'+two(d.getMinutes())}
+  var rs={first:null,mode:false,retried:[]};
+  var _build=buildQuiz,_grade=grade,_retry=retryWrong;
+
+  function showAll(){
+    quiz.querySelectorAll('article.q,h2.lv,.box.intro').forEach(function(el){el.hidden=false});
+    var b=document.getElementById('rwBanner');if(b)b.remove();
+  }
+
+  buildQuiz=function(){rs.first=null;rs.mode=false;rs.retried=[];_build();};
+
+  function codeLine(){
+    var f=rs.first,name=clean(document.getElementById('stuName')?document.getElementById('stuName').value:getName());
+    var wrongTxt=f.wrong.length?'오답 '+f.wrong.map(function(i){return i+1}).join(','):'오답 없음';
+    var fixed=f.wrong.filter(function(i){return st.ans[i]===Q[i].a}).length;
+    return '[베스티안 한국사] '+(name||'이름')+' · '+UNIT.no+'단원 '+UNIT.name+' · '+f.ok+'/'+Q.length+' · '+wrongTxt+' · 오답 해결 '+fixed+'/'+f.wrong.length+' · '+when(f.at);
+  }
+  function copyText(t,done,fail){
+    function fb(){var ta=document.createElement('textarea');ta.value=t;ta.style.position='fixed';ta.style.opacity='0';document.body.appendChild(ta);ta.select();var ok=false;try{ok=document.execCommand('copy')}catch(e){}document.body.removeChild(ta);ok?done():fail()}
+    if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(t).then(done,fb)}else fb();
+  }
+
+  grade=function(auto){
+    var wasMode=rs.mode;
+    _grade(auto);
+    if(!st.graded)return;
+    var wrongNow=[];Q.forEach(function(q,i){if(st.ans[i]!==q.a)wrongNow.push(i)});
+    if(!rs.first)rs.first={ok:Q.length-wrongNow.length,wrong:wrongNow.slice(),at:new Date()};try{var _k='bestian-hist-'+UNIT.no;if(!localStorage.getItem(_k))localStorage.setItem(_k,JSON.stringify({ok:rs.first.ok,total:Q.length,at:rs.first.at.toISOString()}))}catch(e){}
+    var box=document.getElementById('resBox');if(!box)return;
+    var f=rs.first,fixed=f.wrong.filter(function(i){return st.ans[i]===Q[i].a}).length;
+    if(wasMode){
+      var got=rs.retried.filter(function(i){return st.ans[i]===Q[i].a}).length;
+      box.querySelector('h2').textContent='틀린 문제 다시 풀기 채점';
+      var p=document.createElement('p');p.className='rw-note';
+      p.textContent='다시 푼 '+rs.retried.length+'문제 중 '+got+'문제 정답! 처음 틀린 '+f.wrong.length+'문제 중 '+fixed+'문제를 해결했어요.'+(fixed<f.wrong.length?' 남은 '+(f.wrong.length-fixed)+'문제도 다시 도전해 보세요.':' 오답을 모두 해결했어요.');
+      box.insertBefore(p,box.querySelector('.acts'));
+      toast('다시 푼 문제를 채점했어요.');
+    }
+    var s=document.createElement('div');s.className='send';s.id='sendBox';
+    s.innerHTML='<h3>결과 보내기</h3><p class="src" style="margin:0">점수는 <b>처음 푼 결과('+f.ok+'/'+Q.length+')</b>로 기록되고, 틀린 문제를 다시 풀면 “오답 해결” 수가 올라가요.</p>'+
+      '<label for="stuName">이름</label><input id="stuName" type="text" maxlength="20" autocomplete="name" placeholder="이름을 입력하세요">'+
+      '<div class="code" id="codeLine"></div>'+
+      '<div class="row2"><button class="btn main" id="copyCode">결과 복사</button><span class="src">복사한 결과를 담당 선생님 카톡에 붙여넣어 주세요.</span></div>';
+    box.appendChild(s);
+    var inp=document.getElementById('stuName');inp.value=getName();
+    function refresh(){document.getElementById('codeLine').textContent=codeLine()}
+    inp.addEventListener('input',function(){setName(clean(inp.value));refresh()});
+    refresh();
+    document.getElementById('copyCode').onclick=function(){
+      if(!clean(inp.value)){toast('이름을 먼저 입력해 주세요.');inp.focus();return}
+      var t=codeLine();
+      copyText(t,function(){toast('결과를 복사했어요. 선생님 카톡에 붙여넣어 주세요.')},function(){
+        var el=document.getElementById('codeLine'),r=document.createRange();r.selectNodeContents(el);var sel=window.getSelection();sel.removeAllRanges();sel.addRange(r);
+        toast('자동 복사가 막혀 있어요. 선택된 글자를 길게 눌러 복사해 주세요.')});
+    };
+  };
+
+  retryWrong=function(wrong){
+    rs.mode=true;rs.retried=wrong.slice();
+    var set={};wrong.forEach(function(i){set[i]=1});
+    quiz.querySelectorAll('article.q').forEach(function(c){c.hidden=!set[+c.id.slice(1)]});
+    quiz.querySelectorAll('h2.lv').forEach(function(h){var n=h.nextElementSibling,any=false;
+      while(n&&n.tagName!=='H2'){if(n.matches&&n.matches('article.q')&&!n.hidden)any=true;n=n.nextElementSibling}h.hidden=!any});
+    var intro=quiz.querySelector('.box.intro');if(intro)intro.hidden=true;
+    var old=document.getElementById('rwBanner');if(old)old.remove();
+    var b=document.createElement('div');b.className='box rw-banner';b.id='rwBanner';
+    b.innerHTML='<h3>틀린 문제만 다시 풀기 · '+wrong.length+'문제</h3><p>틀렸던 문제만 모았어요. 다 고르면 자동으로 채점되고 해설이 다시 열려요.</p><p class="src">처음 점수 '+(rs.first?rs.first.ok:'-')+'/'+Q.length+'은 그대로 기록돼요.</p><div class="acts" style="margin-top:8px"><button class="btn" id="rwAll">전체 문제 함께 보기</button></div>';
+    var res=document.getElementById('res');res.parentNode.insertBefore(b,res.nextSibling);
+    _retry(wrong);
+    document.getElementById('rwAll').onclick=function(){showAll();rs.mode=true;toast('전체 문제를 다시 보여 줘요. 다시 풀 문제만 선택할 수 있어요.')};
+  };
+})();
+</script>
+
+
+</body></html>
