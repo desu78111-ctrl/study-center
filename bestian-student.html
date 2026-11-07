@@ -68,6 +68,19 @@ main{max-width:1080px;margin:0 auto;padding:18px 16px}
 .no{display:inline-block;font-size:11.5px;font-weight:900;background:var(--blue);color:#fff;border-radius:999px;padding:1px 9px;justify-self:start}.card.lock .no{background:#aab3bb}
 .lockic{position:absolute;top:12px;right:12px;font-size:18px}
 .panel img{display:block;width:100%;max-width:620px;margin:0 auto;border-radius:8px;border:1px solid var(--line)}
+/* 식사 주문 */
+.meal{display:grid;gap:10px}
+.mopts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}@media(min-width:700px){.mopts{grid-template-columns:repeat(3,minmax(0,1fr))}}
+.mopt{border:1.5px solid var(--line);background:#fff;border-radius:12px;padding:10px 12px;text-align:left;cursor:pointer;min-height:58px;display:flex;gap:10px;align-items:center;color:var(--ink);min-width:0}
+.mopt .mtx{display:grid;gap:2px;min-width:0}.mth{width:52px;height:52px;object-fit:cover;border-radius:8px;flex:none;background:#eef2f5}
+.mcat{font-size:13px;font-weight:900;color:var(--blue);margin:6px 0 -2px}.mtop{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.mtop .inp{flex:1;min-width:160px}.mtop .mopt{min-height:44px;padding:8px 14px}.mmy{font-size:14.5px}
+.mopt b{font-size:15.5px;color:var(--blued);word-break:keep-all}.mopt small{color:var(--mute);font-size:12.5px}
+.mopt.on{border-color:var(--blue);background:#e8f3fb;box-shadow:0 0 0 2px rgba(0,114,181,.18)}
+.mopt.skip b{color:var(--mute)}.mopt.skip.on b{color:var(--blued)}
+.mopt[disabled]{cursor:not-allowed;opacity:.55}
+.mimg{display:block;width:100%;max-height:460px;object-fit:contain;border-radius:10px;border:1px solid var(--line);background:#f5f7f9}
+.mstat{display:inline-block;font-size:12.5px;font-weight:900;border-radius:999px;padding:2px 10px}.mstat.open{background:#e3f6ec;color:var(--green)}.mstat.closed{background:#eef2f5;color:var(--mute)}
+.mbanner{display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap;background:#fff8d6;border:1px solid #e8d27a;color:#6a5300;border-radius:10px;padding:10px 14px;font-size:14.5px}
 /* 로그인 */
 .login{max-width:440px;margin:40px auto;display:grid;gap:14px}
 .login .code{font-size:34px;letter-spacing:.4em;text-align:center;padding:12px;font-weight:900;font-variant-numeric:tabular-nums}
@@ -80,7 +93,7 @@ main{max-width:1080px;margin:0 auto;padding:18px 16px}
   <div class="me"><div class="who" id="who" hidden></div><img src="logo.png" alt="BESTIAN"></div>
 </div></div>
 <nav aria-label="메뉴"><div class="in">
-  <a href="#planner">스케줄러</a><a href="#history">한국사</a><a href="#korean">매삼비 매삼문</a><a href="#rules">일과표·규칙</a><a href="bestian-live-seats.html">온라인 실시간</a>
+  <a href="#planner">스케줄러</a><a href="#meal">식사 주문</a><a href="#history">한국사</a><a href="#korean">매삼비 매삼문</a><a href="#rules">일과표·규칙</a><a href="bestian-live-seats.html">온라인 실시간</a>
 </div></nav>
 
 <main>
@@ -96,6 +109,7 @@ main{max-width:1080px;margin:0 auto;padding:18px 16px}
 
 <section class="view" id="v-planner" hidden><div class="wrap">
   <div class="title"><h2 id="plTitle">오늘 스케줄러</h2><span>독서실 키오스크에서 입실하면 자동으로 시작돼요 · 무엇을 공부하는지만 적고 '지금'을 누르면 시간이 채워져요</span></div>
+  <div class="mbanner" id="mealBanner" hidden></div>
   <div class="g3" id="plStudy"></div>
   <div class="state" id="plState"></div>
   <div class="g3" id="plKpi"></div>
@@ -119,6 +133,12 @@ main{max-width:1080px;margin:0 auto;padding:18px 16px}
   </div>
 </div></section>
 
+<section class="view" id="v-meal" hidden><div class="wrap">
+  <div class="title"><h2 id="mlTitle">오늘 식사 주문</h2><span>메뉴를 누르면 바로 주문돼요 · 마감 전까지는 몇 번이든 바꿀 수 있어요</span></div>
+  <div id="mealBox" style="display:grid;gap:16px"></div>
+  <p class="hint" id="mealMsg" role="status"></p>
+</div></section>
+
 <section class="view" id="v-history" hidden><div class="wrap">
   <div class="title"><h2>한국사 · 선사시대부터 현대까지</h2><span>1단원 시험을 풀어야 2단원이 열려요 · 채점 후 이름 넣고 [결과 복사] → 담당 선생님 카톡</span></div>
   <div class="cards" id="hGrid"></div>
@@ -127,12 +147,10 @@ main{max-width:1080px;margin:0 auto;padding:18px 16px}
 
 <section class="view" id="v-korean" hidden><div class="wrap">
   <div class="title"><h2>매삼비 매삼문</h2><span>매일 비문학 3지문 + 문학 3지문 · Day 1을 풀어야 Day 2가 열려요</span></div>
-  <div class="cards" style="grid-template-columns:repeat(3,minmax(0,1fr))">
-    <a class="card" href="korean-30.html"><span class="no">고1 과정</span><b>중3 · 예비 고1</b><small>30일 · 고1 학평 기출 · Day 순서대로 열림</small></a>
-    <a class="card" href="korean-go2.html"><span class="no">고2 과정</span><b>고1 · 예비 고2</b><small>30일 · 고2 학평 기출 · Day 순서대로 열림</small></a>
-    <a class="card" href="korean-go3.html"><span class="no">고3 과정</span><b>고2 · 예비 고3</b><small>31일 · 고3 학평 기출 · Day 순서대로 열림</small></a>
+  <div class="cards" style="grid-template-columns:minmax(0,1fr)">
+    <a class="card" href="https://claude.ai/artifact/5Lee1N7ZPczmuTZ9SsQZKG" target="_blank" rel="noopener"><span class="no">고1 · 고2 · 고3 과정</span><b>매삼비 매삼문 열기</b><small>새 창에서 열려요 · 위쪽 메뉴의 <b>매삼비 매삼문</b>을 누르고 자기 학년을 고르세요</small></a>
   </div>
-  <div class="panel"><h3>이렇게 해요</h3><ul><li>자기 학년 과정을 열고 <b>내 이름</b>을 고른 뒤 오늘 Day를 풀어요</li><li>Day 1을 제출해야 Day 2가 열려요. 제출하면 자동 채점되고 틀린 문항 해설이 바로 열려요</li></ul></div>
+  <div class="panel"><h3>이렇게 해요</h3><ul><li>기출 문제 저작권 때문에 매삼비 매삼문은 센터 전용 페이지에서 풀어요. 자기 학년 과정을 열면 등록 없이 바로 <b>내 학습표</b>가 나와요. Day 1은 처음부터 열려 있어요</li><li>채점 화면의 <b>결과 복사</b>를 눌러 카톡으로 멘토 선생님께 보내요</li><li>Day 1을 제출해야 Day 2가 열려요. 제출하면 자동 채점되고 틀린 문항 해설이 바로 열려요</li></ul></div>
 </div></section>
 
 <section class="view" id="v-rules" hidden><div class="wrap">
@@ -184,11 +202,11 @@ function minutesOf(row,isToday){if(!row||!row.check_in_time)return 0;var ci=tMin
 
 /* ===== 상태 ===== */
 var ME=LSg('bs_student',null),SEAT=null,ROWS=[],TODAY=null,chan=null;
-var views=['planner','history','korean','rules'];
+var views=['planner','meal','history','korean','rules'];
 function route(){var h=(location.hash||'').replace('#','');var cur=views.indexOf(h)>-1?h:'planner';
   $('#v-login').hidden=!!ME;views.forEach(function(v){$('#v-'+v).hidden=!ME||v!==cur});
   document.querySelectorAll('nav a').forEach(function(a){if(a.getAttribute('href')==='#'+cur)a.setAttribute('aria-current','page');else a.removeAttribute('aria-current')});
-  if(ME&&cur==='history')renderH();if(ME&&cur==='planner')plTick()}
+  if(ME&&cur==='history')renderH();if(ME&&cur==='planner')plTick();if(ME&&cur==='meal')renderMeal()}
 window.addEventListener('hashchange',function(){route();window.scrollTo({top:0})});
 function renderWho(){var w=$('#who');if(!ME){w.hidden=true;return}w.hidden=false;w.innerHTML=esc(ME.name)+' 학생<i>'+(SEAT?'자리 '+esc(SEAT)+'번':'자리 미배정')+'</i><button type="button" id="logout">다른 학생</button>';
   $('#logout').onclick=function(){if(!confirm('다른 학생으로 바꿀까요? (이 기기의 기억을 지웁니다)'))return;ME=null;SEAT=null;LSs('bs_student',null);stopLive();route();renderWho()}}
@@ -262,8 +280,62 @@ function renderH(){var h={};UNITS.forEach(function(u){var v=LSg('bestian-hist-'+
     return '<a class="card'+(done?' done':'')+'" href="'+u.h+'"><span class="no">'+u.no+'주차</span><b>'+esc(u.t)+'</b><small>만화 수업 → 시험 · '+u.q+'문항</small><span class="st'+(done?'':' now')+'">'+(done?'✓ 완료 '+done.ok+'/'+done.total:'열림 · 지금 공부할 단원')+'</span></a>'}).join('')}
 window.addEventListener('focus',function(){if(ME)renderH()});
 
+/* ===== 식사 주문 (운영 계획 · 식사 주문 관리에서 올린 메뉴) ===== */
+var MEAL_NAMES={lunch:'점심',dinner:'저녁'},MENUS={},MYORD={},mealErr='',mealChan=null,MQ={};
+var MK='mock_meal';function mget(){try{return JSON.parse(localStorage.getItem(MK)||'{}')}catch(e){return {}}}function mset(o){try{localStorage.setItem(MK,JSON.stringify(o))}catch(e){}}
+function mvals(o){return Object.keys(o||{}).map(function(k){return o[k]})}
+function mealDate(){return fmtD(new Date())}
+function nowHM(){var d=new Date();return pad(d.getHours())+':'+pad(d.getMinutes())}
+function won(n){return Number(n).toLocaleString('ko-KR')+'원'}
+var mapi={
+  menus:async function(d){if(MOCK)return mvals(mget().menus).filter(function(r){return r.meal_date===d});
+    var r=await db.from('bestian_meal_menu').select('*').eq('meal_date',d);if(r.error)throw r.error;return r.data||[]},
+  mine:async function(d){if(MOCK)return mvals(mget().orders).filter(function(r){return r.meal_date===d&&r.student_id===String(ME.id)});
+    var r=await db.from('bestian_meal_orders').select('meal,choice').eq('meal_date',d).eq('student_id',String(ME.id));if(r.error)throw r.error;return r.data||[]},
+  order:async function(row){if(MOCK){var o=mget();o.orders=o.orders||{};o.orders[row.meal_date+'|'+row.meal+'|'+row.student_id]=row;mset(o);return}
+    var r=await db.from('bestian_meal_orders').upsert(row,{onConflict:'meal_date,meal,student_id'});if(r.error)throw r.error}
+};
+function mealOpen(m){return !!m&&!!m.is_open&&(!m.deadline||nowHM()<=m.deadline)}
+function hasMenu(k){return !!MENUS[k]&&(MENUS[k].options||[]).length>0}
+async function loadMeal(){if(!ME||(!db&&!MOCK))return;var d=mealDate();
+  try{var ms=await mapi.menus(d);var M={};ms.forEach(function(r){M[r.meal]=r});var mine=await mapi.mine(d);var O={};mine.forEach(function(r){O[r.meal]=r.choice});MENUS=M;MYORD=O;mealErr=''}
+  catch(e){mealErr=(e&&(e.code==='42P01'||e.code==='PGRST205'||/bestian_meal/.test(e.message||'')))?'setup':'net'}
+  renderMeal();renderMealBanner()}
+function optLabel(m,c){if(c==='none')return '안 먹어요';var o=(m.options||[]).filter(function(x){return x.id===c})[0];return o?o.name:'바뀐 메뉴'}
+function renderMeal(){var box=$('#mealBox');if(!box)return;var d=new Date();$('#mlTitle').textContent=(d.getMonth()+1)+'/'+d.getDate()+' ('+'일월화수목금토'[d.getDay()]+') 식사 주문';
+  if(mealErr==='setup'){box.innerHTML='<div class="panel empty">식사 주문을 준비하고 있어요. 곧 열려요.</div>';return}
+  if(mealErr==='net'&&!hasMenu('lunch')&&!hasMenu('dinner')){box.innerHTML='<div class="panel empty">메뉴를 불러오지 못했어요. 잠시 후 자동으로 다시 시도해요.</div>';return}
+  var keys=['lunch','dinner'].filter(hasMenu);
+  if(!keys.length){box.innerHTML='<div class="panel empty">아직 오늘 메뉴가 올라오지 않았어요.<br>올라오면 여기에 바로 나타나요.</div>';return}
+  box.innerHTML=keys.map(function(k){var m=MENUS[k],my=MYORD[k],open=mealOpen(m),opts=m.options||[],many=opts.length>=10,q=(MQ[k]||'').trim();
+    var st=open?'<span class="mstat open">주문 받는 중'+(m.deadline?' · '+esc(m.deadline)+' 마감':'')+'</span>':'<span class="mstat closed">주문 마감</span>';
+    var btn=function(o){var id=o.id,on=my===id,skip=id==='none';return '<button type="button" class="mopt'+(skip?' skip':'')+(on?' on':'')+'" data-meal="'+k+'" data-choice="'+esc(id)+'"'+(open?'':' disabled')+' aria-pressed="'+(on?'true':'false')+'">'+(o.img?'<img class="mth" src="'+esc(o.img)+'" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.remove()">':'')+'<span class="mtx"><b>'+(on?'✓ ':'')+esc(o.name)+'</b>'+(o.price?'<small>'+won(o.price)+'</small>':'')+'</span></button>'};
+    var shown=q?opts.filter(function(o){return String(o.name||'').toLowerCase().indexOf(q.toLowerCase())>-1}):opts;
+    var hasCat=shown.some(function(o){return o.cat});var body='';
+    if(hasCat){var order=[],byCat={};shown.forEach(function(o){var c=o.cat||'기타';if(!byCat[c]){byCat[c]=[];order.push(c)}byCat[c].push(o)});
+      body=order.map(function(c){return '<div class="mcat">'+esc(c)+'</div><div class="mopts">'+byCat[c].map(btn).join('')+'</div>'}).join('')}
+    else body='<div class="mopts">'+shown.map(btn).join('')+'</div>';
+    if(q&&!shown.length)body='<p class="empty">"'+esc(q)+'" 메뉴가 없어요.</p>';
+    var mine='<p class="hint mmy">'+(my?'내 주문: <b>'+esc(optLabel(m,my))+'</b>'+(open?' · 마감 전까지 바꿀 수 있어요':''):(open?'아직 고르지 않았어요. 메뉴를 누르면 바로 주문돼요.':'주문하지 않았어요'))+'</p>';
+    var top=many?'<div class="mtop"><input class="inp" type="search" data-mq="'+k+'" placeholder="메뉴 검색 · 예: 치킨마요" value="'+esc(q)+'" autocomplete="off">'+btn({id:'none',name:'안 먹어요'})+'</div>':'';
+    if(!many)body=body.replace(/<\/div>\s*$/,'')+btn({id:'none',name:'안 먹어요'})+'</div>';
+    return '<div class="panel meal"><div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap"><h3 style="margin:0">'+MEAL_NAMES[k]+(many?' <span class="hint" style="font-weight:500">메뉴 '+opts.length+'개</span>':'')+'</h3>'+st+'</div>'+(m.note?'<p class="hint">'+esc(m.note)+'</p>':'')+
+      (m.image_url?'<a href="'+esc(m.image_url)+'" target="_blank" rel="noopener" title="크게 보기"><img class="mimg" src="'+esc(m.image_url)+'" alt="'+MEAL_NAMES[k]+' 메뉴 사진" loading="lazy"></a>':'')+mine+top+body+'</div>'}).join('')}
+document.addEventListener('input',function(e){var t=e.target;if(!t.hasAttribute||!t.hasAttribute('data-mq'))return;var k=t.getAttribute('data-mq');MQ[k]=t.value;var pos=t.selectionStart;renderMeal();var n=document.querySelector('[data-mq="'+k+'"]');if(n){n.focus();try{n.setSelectionRange(pos,pos)}catch(_){}}});
+function renderMealBanner(){var b=$('#mealBanner');if(!b)return;var need=['lunch','dinner'].filter(function(k){return hasMenu(k)&&mealOpen(MENUS[k])&&!MYORD[k]});
+  if(!ME||!need.length){b.hidden=true;return}var k=need[0],m=MENUS[k];b.hidden=false;
+  b.innerHTML='<span>🍱 오늘 <b>'+MEAL_NAMES[k]+'</b> 메뉴가 올라왔어요'+(m.deadline?' · '+esc(m.deadline)+' 마감':'')+'</span><a class="btn sm" href="#meal">주문하기</a>'}
+document.addEventListener('click',async function(e){var t=e.target.closest('.mopt[data-choice]');if(!t||t.disabled||!ME)return;
+  var k=t.getAttribute('data-meal'),c=t.getAttribute('data-choice'),m=MENUS[k];if(!mealOpen(m)){renderMeal();return}
+  var prev=MYORD[k];MYORD[k]=c;renderMeal();renderMealBanner();$('#mealMsg').textContent='저장 중…';
+  try{await mapi.order({meal_date:mealDate(),meal:k,student_id:String(ME.id),student_name:ME.name,choice:c,updated_at:new Date().toISOString()});$('#mealMsg').textContent=MEAL_NAMES[k]+' 주문을 저장했어요: '+optLabel(m,c)}
+  catch(err){MYORD[k]=prev;renderMeal();renderMealBanner();$('#mealMsg').textContent='저장하지 못했어요. 인터넷을 확인하고 다시 눌러 주세요.'}});
+function startMealLive(){if(MOCK){if(!mealChan){mealChan=1;window.addEventListener('storage',function(e){if(e.key===MK)loadMeal()})}return}
+  if(!db||mealChan)return;try{mealChan=db.channel('bs-meal').on('postgres_changes',{event:'*',schema:'public',table:'bestian_meal_menu'},function(){loadMeal()}).subscribe()}catch(e){}}
+setInterval(function(){if(ME)loadMeal()},60000);
+
 /* ===== 시작 ===== */
-async function boot(){route();renderWho();if(!ME)return;try{SEAT=await api.seat(ME.id)}catch(e){SEAT=null}renderWho();loadP();startLive();renderH()}
+async function boot(){route();renderWho();if(!ME)return;try{SEAT=await api.seat(ME.id)}catch(e){SEAT=null}renderWho();loadP();startLive();renderH();loadMeal();startMealLive()}
 boot();
 })();
 </script>
