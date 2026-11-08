@@ -222,7 +222,7 @@ function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){retur
 function show(name){if(!MASK||!name||name.length<2)return name;return name.charAt(0)+'○'+name.slice(2)}
 /* 순위에는 항상 성만 남기고 가림: 신호빈 → 신○○ */
 function rankName(name){if(!name)return '';return name.charAt(0)+Array(name.length).join('○')}
-/* 좌석에는 가운데 글자만 가림: 이소윤 → 이○윤, 김분홍 → 김○홍, 두 글자 이름은 김○ */
+/* 좌석에는 가운데 글자만 가림: 홍길동 → 홍○동, 두 글자 이름은 홍○ */
 function seatLabel(name){if(!name)return '';if(name.length<=2)return name.charAt(0)+'○';return name.charAt(0)+'○'+name.slice(2)}
 function todayStr(){var d=new Date();if(d.getHours()<1||(d.getHours()===1&&d.getMinutes()<10))d.setDate(d.getDate()-1);return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate())}
 function tsOf(hms){if(!hms)return null;var p=hms.split(':'),d=new Date(todayStr()+'T00:00:00');d.setHours(+p[0],+p[1],+(p[2]||0),0);if(+p[0]<1||(+p[0]===1&&+p[1]<10))d.setDate(d.getDate()+1);return d.getTime()}
