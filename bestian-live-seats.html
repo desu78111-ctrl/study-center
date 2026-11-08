@@ -39,18 +39,43 @@ body{background:#eaf4ec}
 .gap{min-width:0}.x{display:flex;align-items:center;justify-content:center;color:#b6c4bb}.door{display:flex;align-items:center;justify-content:center;font-size:11px;color:var(--mute);background:#fff;border-radius:8px;border:1px dashed #bfe0cc}
 .legend{display:flex;gap:12px;flex-wrap:wrap;font-size:13px;color:var(--mute)}.legend i{display:inline-block;width:14px;height:14px;border-radius:4px;vertical-align:-2px;margin-right:4px;border:1px solid #c9e2d1;background:#fff}.legend i.in{background:var(--blue);border-color:var(--blued)}.legend i.out{background:var(--yellow)}.legend i.done{background:#f4f6f5}
 .kpi{grid-template-columns:repeat(3,minmax(0,1fr))}
+[hidden]{display:none!important}
+.seg{display:inline-flex;background:#fff;border:1px solid var(--line);border-radius:12px;padding:3px;gap:3px;justify-self:start}
+.seg button{border:0;background:none;padding:9px 22px;border-radius:9px;font-weight:900;color:var(--mute);cursor:pointer;min-height:40px;font-size:15px}
+.seg button[aria-pressed="true"]{background:var(--blue);color:#fff}
+.rank{list-style:none;margin:0;padding:0;display:grid;gap:6px}
+.rank li{display:grid;grid-template-columns:34px minmax(0,1fr) auto;gap:10px;align-items:center;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:#fff}
+.rank li em{font-style:normal;font-weight:900;color:var(--blued);text-align:center;font-size:17px;font-variant-numeric:tabular-nums}
+.rank li:nth-child(1){border-color:#e8c84a;background:#fff9de}.rank li:nth-child(1) em{color:#9a7a00}
+.rank li span{font-weight:800;font-size:16px;letter-spacing:.04em;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.rank li span u{text-decoration:none;font-size:11.5px;font-weight:900;background:var(--red);color:#fff;border-radius:999px;padding:1px 8px;margin-left:6px;letter-spacing:0}
+.rank li b{font-variant-numeric:tabular-nums;font-size:15px;white-space:nowrap}
+.rank li.me{border-color:var(--blue);background:#e8f3fb}
+.rank li.live b{color:var(--green)}
+.dot{display:inline-block;width:9px;height:9px;border-radius:50%;background:#2fb36b;margin-left:7px;vertical-align:1px;box-shadow:0 0 0 3px rgba(47,179,107,.2)}
+.mine{background:#e8f3fb;border:1px solid #b9d9ee;border-radius:10px;padding:10px 14px;font-size:14.5px;color:var(--blued)}
+.mine b{font-size:17px}
 </style>
 </head>
 <body>
 <div class="top"><div class="in"><h1><small>BESTIAN STUDY CENTER</small>베스티안 온라인 실시간</h1><img src="logo.png" alt="BESTIAN"></div></div>
 <main>
   <div class="kpi" id="kpi"></div>
-  <div class="panel" style="display:grid;gap:10px">
+  <div class="seg" id="vseg"><button type="button" data-v="seat" aria-pressed="true">좌석도</button><button type="button" data-v="rank" aria-pressed="false">순위</button></div>
+  <div class="panel" id="vSeat" style="display:grid;gap:10px">
     <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap"><div class="tabs" id="tabs"></div><span class="upd" id="upd"></span></div>
     <div id="halls" style="display:grid;gap:14px"></div>
     <div class="legend"><span><i class="in"></i>공부 중</span><span><i class="out"></i>외출</span><span><i class="done"></i>하원</span><span><i></i>빈자리</span><span id="msg"></span></div>
   </div>
-  <p class="hint" style="text-align:center">이름은 보이지 않아요. 자리 번호만 표시돼요 · 키오스크 입실·외출·하원이 바로 반영돼요 · <a href="bestian-student.html" style="color:var(--blue);font-weight:700">내 스케줄러로</a></p>
+  <div class="panel" id="vRank" style="display:grid;gap:10px" hidden>
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap"><h3 style="margin:0">순공시간 순위</h3><div class="tabs" id="rtabs"></div></div>
+    <div class="hint" id="rrange"></div>
+    <div class="mine" id="rmine" hidden></div>
+    <ol class="rank" id="rlist"></ol>
+    <p class="hint" id="rmsg" style="color:var(--red)"></p>
+    <p class="hint">센터 TV 순위와 같은 방식이에요. 입실부터 하원까지에서 외출한 시간을 뺀 순공시간으로 계산하고, 이름은 성만 보여요. 초록 점은 지금 공부 중이에요.</p>
+  </div>
+  <p class="hint" style="text-align:center">좌석도에는 이름이 없고 순위에는 성만 보여요 · 키오스크 입실·외출·하원이 바로 반영돼요 · <a href="bestian-student.html" style="color:var(--blue);font-weight:700">내 스케줄러로</a></p>
 </main>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
 <script>
@@ -93,7 +118,72 @@ function render(){
     if(c==='gap'||c==='blank')return '<div class="gap"></div>';if(c==='x')return '<div class="x">✕</div>';if(c==='door')return '<div class="door">출입구</div>';
     var id=sid[c],st=id?statusOf(byId[id]):'none';var cls=st==='in'?'in':st==='out'?'out':st==='done'?'done':'';if(ME&&id&&ME.id===id)cls+=' me';
     return '<div class="seat '+cls+'" title="'+c+'번">'+c+'</div>'}).join('')}).join('')+'</div></div>'}).join('')}
+
+/* ===== 순위 (센터 TV 방영 화면과 같은 계산) ===== */
+var RK={rows:[],users:{}},RSEL='day',VIEW='seat',rankBusy=false;
+function bizDate(){return new Date(bizToday()+'T00:00:00')}
+function weekStartStr(){var d=bizDate();d.setDate(d.getDate()-((d.getDay()+6)%7));return fmtD(d)}
+function monthStartStr(){var d=bizDate();return fmtD(new Date(d.getFullYear(),d.getMonth(),1))}
+function tsOn(date,hms,next){if(!hms)return null;var p=String(hms).split(':'),d=new Date(date+'T00:00:00');d.setHours(+p[0],+p[1],+(p[2]||0),0);if(next)d.setDate(d.getDate()+1);return d.getTime()}
+function netOf(a,today){
+  var cin=tsOn(a.attend_date,a.check_in_time);if(!cin)return 0;
+  var end=a.check_out_time?tsOn(a.attend_date,a.check_out_time,a.check_out_is_next_day):(a.attend_date===today?Date.now():null);
+  if(!end)return 0;
+  var ms=end-cin;
+  [[a.out_1_start,a.out_1_end,a.out_1_end_is_next_day],[a.out_2_start,a.out_2_end,a.out_2_end_is_next_day]].forEach(function(o){if(o[0]&&o[1]){var d=tsOn(a.attend_date,o[1],o[2])-tsOn(a.attend_date,o[0]);if(d>0)ms-=d}});
+  ms-=(Number(a.extra_out_minutes)||0)*60000;
+  if(a.pending_out_start&&!a.check_out_time&&a.attend_date===today)ms-=Date.now()-tsOn(a.attend_date,a.pending_out_start);
+  return Math.max(0,ms)}
+function rankList(from){var td=bizToday(),sum={};RK.rows.forEach(function(a){if(String(a.attend_date)<from)return;var n=netOf(a,td);if(n>0)sum[a.student_id]=(sum[a.student_id]||0)+n});
+  return Object.keys(sum).map(function(id){return {id:id,ms:sum[id]}}).sort(function(x,y){return y.ms-x.ms})}
+function rankName(n){return n?n.charAt(0)+Array(n.length).join('○'):''}
+function md(ds){var d=new Date(ds+'T00:00:00');return (d.getMonth()+1)+'/'+d.getDate()}
+function fromOf(){return RSEL==='day'?bizToday():RSEL==='week'?weekStartStr():monthStartStr()}
+function rtabs(){var L={day:'오늘',week:'이번 주',month:'이번 달'};$('#rtabs').innerHTML=['day','week','month'].map(function(k){return '<button class="'+(RSEL===k?'on':'')+'" data-r="'+k+'">'+L[k]+'</button>'}).join('')}
+$('#rtabs').addEventListener('click',function(e){var b=e.target.closest('[data-r]');if(!b)return;RSEL=b.getAttribute('data-r');rtabs();renderRank()});
+function renderRank(){
+  var td=bizToday(),from=fromOf(),list=rankList(from),top=list.slice(0,10),live={};
+  ATT.forEach(function(a){if(statusOf(a)==='in')live[String(a.student_id)]=1});
+  $('#rrange').textContent=RSEL==='day'?md(td)+' ('+'일월화수목금토'[bizDate().getDay()]+') 오늘의 순위':md(from)+' ~ '+md(td)+' 누적 순위';
+  var meId=ME?String(ME.id):null,mine=-1,i;
+  if(meId){for(i=0;i<list.length;i++){if(String(list[i].id)===meId){mine=i;break}}}
+  var box=$('#rmine');
+  if(!ME){box.hidden=false;box.innerHTML='학생 센터에서 번호를 입력하면 <b>내 순위</b>가 여기에 보여요. <a href="bestian-student.html" style="color:var(--blue);font-weight:800">학생 센터 열기</a>'}
+  else if(mine>-1){box.hidden=false;box.innerHTML='내 순위 <b>'+(mine+1)+'위</b> · '+fmtM(Math.round(list[mine].ms/60000))+' <span class="hint">(전체 '+list.length+'명 중)</span>'}
+  else{box.hidden=false;box.innerHTML='아직 이 기간의 내 기록이 없어요. 키오스크에서 입실하면 순위에 올라가요.'}
+  $('#rlist').innerHTML=top.length?top.map(function(r,k){var me=meId&&String(r.id)===meId,nm=RK.users[String(r.id)]||'';
+    return '<li class="'+(me?'me ':'')+(live[String(r.id)]?'live':'')+'"><em>'+(k+1)+'</em><span>'+esc(rankName(nm)||'○○○')+(me?'<u>나</u>':'')+(live[String(r.id)]?'<i class="dot" title="지금 공부 중"></i>':'')+'</span><b>'+fmtM(Math.round(r.ms/60000))+'</b></li>'}).join('')
+    :'<li style="display:block;text-align:center;color:var(--mute)">아직 기록이 없어요. 입실하면 여기에 올라가요.</li>'}
+function mockRank(){
+  var names=['김베스','이티안','박하안','정광명','최소하','한지원','오서준','윤다은','장민재','서예린','강하늘','임도현'],td=bizToday(),base=bizDate();RK.users={};RK.rows=[];
+  names.forEach(function(n,i){RK.users['u'+i]=n;for(var k=0;k<12;k++){var d=new Date(base);d.setDate(d.getDate()-k);var ds=fmtD(d);if(((i*7+k*3)%5)===0)continue;
+    var inH=9+((i+k)%3),outH=Math.min(23,inH+7+((i*5+k)%6)),row={student_id:'u'+i,attend_date:ds,check_in_time:pad(inH)+':00:00',out_1_start:'12:00:00',out_1_end:'13:00:00'};
+    row.check_out_time=ds===td?(i%4===3?pad(inH+5)+':00:00':null):pad(outH)+':00:00';RK.rows.push(row)}})}
+async function fetchAllAtt(from){var all=[],page=0,size=1000,sel='student_id,attend_date,check_in_time,check_out_time,check_out_is_next_day,pending_out_start,out_1_start,out_1_end,out_1_end_is_next_day,out_2_start,out_2_end,out_2_end_is_next_day,extra_out_minutes';
+  while(page<12){var r=await db.from('reading_room_attendance').select(sel).gte('attend_date',from).order('attend_date',{ascending:true}).order('student_id',{ascending:true}).range(page*size,page*size+size-1);
+    if(r.error)throw r.error;var d=r.data||[];all=all.concat(d);if(d.length<size)break;page++}
+  return all}
+async function loadRank(){if(rankBusy)return;rankBusy=true;
+  try{
+    if(MOCK)mockRank();
+    else{if(!db)throw new Error('no db');
+      var from=weekStartStr()<monthStartStr()?weekStartStr():monthStartStr();RK.rows=await fetchAllAtt(from);
+      var ids={};[bizToday(),weekStartStr(),monthStartStr()].forEach(function(f){rankList(f).slice(0,10).forEach(function(r){ids[r.id]=1})});
+      var keys=Object.keys(ids),nm={};
+      if(keys.length){var u=await db.from('users').select('id,name').in('id',keys);if(u.error)throw u.error;(u.data||[]).forEach(function(x){nm[String(x.id)]=x.name})}
+      RK.users=nm}
+    $('#rmsg').textContent='';renderRank();
+  }catch(e){$('#rmsg').textContent='순위를 불러오지 못했어요. 잠시 후 다시 시도해요.'}
+  finally{rankBusy=false}}
+function setView(v){VIEW=v;$('#vSeat').hidden=v!=='seat';$('#vRank').hidden=v!=='rank';
+  $$('#vseg button').forEach(function(b){b.setAttribute('aria-pressed',b.getAttribute('data-v')===v?'true':'false')});
+  try{history.replaceState(null,'',v==='rank'?'#rank':location.pathname+location.search)}catch(e){}
+  if(v==='rank'){rtabs();loadRank()}}
+$('#vseg').addEventListener('click',function(e){var b=e.target.closest('[data-v]');if(b)setView(b.getAttribute('data-v'))});
+setInterval(function(){if(VIEW==='rank'&&document.visibilityState!=='hidden')loadRank()},60000);
+setInterval(function(){if(VIEW==='rank'&&RK.rows.length)renderRank()},30000);
 tabs();load();setInterval(load,15000);
+setView(location.hash==='#rank'?'rank':'seat');
 })();
 </script>
 </body>

@@ -79,7 +79,7 @@ function gateOk(){if(location.protocol==='file:')return Promise.resolve(true);
   if(!k||!(window.crypto&&crypto.subtle&&window.TextEncoder))return Promise.resolve(false);
   return crypto.subtle.digest('SHA-256',new TextEncoder().encode(k)).then(function(b){var hex=Array.prototype.map.call(new Uint8Array(b),function(x){return ('0'+x.toString(16)).slice(-2)}).join('');
     if(hex!==GATE_H)return false;try{localStorage.setItem('bestian_staff_k',k)}catch(e){}return true}).catch(function(){return false})}
-function lockPage(where){document.querySelector('main').innerHTML='<div class="panel" style="text-align:center;padding:36px 18px"><h3 style="font-size:20px">직원용 화면이에요</h3><p class="hint" style="font-size:14.5px">'+where+'의 <b>스터디센터 라이브</b> 탭에 있는 버튼으로 열어 주세요.<br>한 번 열면 이 기기에서는 다음부터 바로 열려요.</p></div>'}
+function lockPage(){document.querySelector('main').innerHTML='<div class="panel" style="text-align:center;padding:36px 18px"><h3 style="font-size:20px">직원용 화면이에요</h3><p class="hint" style="font-size:14.5px">따로 받은 <b>직원 링크</b>나 <b>멘토 센터</b>의 스터디센터 라이브 버튼으로 한 번 열어 주세요.<br>한 번 열면 이 기기에서는 다음부터 운영 계획 버튼으로도 바로 열려요.</p></div>'}
 var USERS=[],ATT=[],SEATS=[],chan=null,Q='';
 $('#q').addEventListener('input',function(){Q=this.value.trim();render()});
 $('#refresh').onclick=load;
@@ -116,7 +116,7 @@ function render(){
   $('#tNone').textContent='아직 안 온 학생 '+c.none+'명';$('#tDone').textContent='하원한 학생 '+c.done+'명';
   $('#noneList').innerHTML=none.length?none.map(function(x){return chip(x,'none')}).join(''):'<span class="hint">'+(Q?'해당 없음':'모두 입실했어요!')+'</span>';
   $('#doneList').innerHTML=done.length?done.map(function(x){return chip(x,'done')}).join(''):'<span class="hint">아직 없음</span>';}
-gateOk().then(function(ok){if(!ok){lockPage('운영 계획');return}load();setInterval(load,15000)});
+gateOk().then(function(ok){if(!ok){lockPage();return}load();setInterval(load,15000)});
 })();
 </script>
 </body>
