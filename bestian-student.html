@@ -174,14 +174,15 @@ var api={
 };
 
 /* ===== 출결 해석 ===== */
-function outs(row){var o=[];[['out_1_start','out_1_end'],['out_2_start','out_2_end']].forEach(function(p){if(row[p[0]])o.push({s:tMin(row[p[0]]),e:row[p[1]]?tMin(row[p[1]]):null})});
-  (Array.isArray(row.extra_outs)?row.extra_outs:[]).forEach(function(x){if(x&&x.start)o.push({s:tMin(x.start),e:x.end?tMin(x.end):null})});
+function outs(row){var o=[];[['out_1_start','out_1_end'],['out_2_start','out_2_end']].forEach(function(p){if(row[p[0]])o.push({s:tMin(row[p[0]]),e:row[p[1]]?tMin(row[p[1]])+(row[p[1]+'_is_next_day']?1440:0):null})});
+  
   if(row.pending_out_start)o.push({s:tMin(row.pending_out_start),e:null});return o}
 function statusOf(row){if(!row||!row.check_in_time)return 'none';if(row.check_out_time)return 'done';return outs(row).some(function(o){return o.e==null})?'out':'in'}
-function minutesOf(row,isToday){if(!row||!row.check_in_time)return 0;var ci=tMin(row.check_in_time),end=row.check_out_time?tMin(row.check_out_time):(isToday?nowMin():ci);if(end==null||ci==null)return 0;var m=end-ci;outs(row).forEach(function(o){if(o.s==null)return;var e=o.e==null?(isToday?nowMin():end):o.e;m-=Math.max(0,Math.min(e,end)-o.s)});m-=Number(row.extra_out_minutes)||0;return Math.max(0,m)}
+function minutesOf(row,isToday){if(!row||!row.check_in_time)return 0;var ci=tMin(row.check_in_time),end=row.check_out_time?tMin(row.check_out_time)+(row.check_out_is_next_day?1440:0):(isToday?nowMin():ci);if(end==null||ci==null)return 0;var m=end-ci;outs(row).forEach(function(o){if(o.s==null)return;var e=o.e==null?(isToday?nowMin():end):o.e;m-=Math.max(0,Math.min(e,end)-o.s)});m-=Number(row.extra_out_minutes)||0;return Math.max(0,m)}
 
 /* ===== 상태 ===== */
-var ME=LSg('bs_student',null),SEAT=null,ROWS=[],TODAY=null,chan=null;
+var SK=MOCK?'bs_student_mock':'bs_student',ME=LSg(SK,null),SEAT=null,ROWS=[],TODAY=null,chan=null;
+if(!MOCK&&ME&&/^u\d+$/.test(String(ME.id))){ME=null;LSs(SK,null)} /* 예시 데이터로 로그인했던 기기 정리 */
 var views=['planner','history','korean','rules'];
 function route(){var h=(location.hash||'').replace('#','');var cur=views.indexOf(h)>-1?h:'planner';
   $('#v-login').hidden=!!ME;views.forEach(function(v){$('#v-'+v).hidden=!ME||v!==cur});
@@ -189,20 +190,20 @@ function route(){var h=(location.hash||'').replace('#','');var cur=views.indexOf
   if(ME&&cur==='history')renderH();if(ME&&cur==='planner')plTick()}
 window.addEventListener('hashchange',function(){route();window.scrollTo({top:0})});
 function renderWho(){var w=$('#who');if(!ME){w.hidden=true;return}w.hidden=false;w.innerHTML=esc(ME.name)+' 학생<i>'+(SEAT?'자리 '+esc(SEAT)+'번':'자리 미배정')+'</i><button type="button" id="logout">다른 학생</button>';
-  $('#logout').onclick=function(){if(!confirm('다른 학생으로 바꿀까요? (이 기기의 기억을 지웁니다)'))return;ME=null;SEAT=null;LSs('bs_student',null);stopLive();route();renderWho()}}
+  $('#logout').onclick=function(){if(!confirm('다른 학생으로 바꿀까요? (이 기기의 기억을 지웁니다)'))return;ME=null;SEAT=null;ROWS=[];TODAY=null;P=null;LSs(SK,null);stopLive();route();renderWho()}}
 
 /* ===== 로그인 ===== */
 async function login(){var code=$('#loginCode').value.replace(/\D/g,'');var err=$('#loginErr');if(code.length<4){err.textContent='네 자리 번호를 입력하세요';return}
   if(!db&&!MOCK){err.textContent='연결 준비가 안 됐어요. 인터넷을 확인하고 새로고침하세요.';return}
   err.textContent='확인 중…';
   try{var s=await api.student(code);if(!s){err.textContent='해당 번호의 학생을 찾을 수 없어요. 데스크에 문의하세요.';return}
-    ME={id:s.id,name:s.name,school:s.school||'',grade:s.grade||'',code:code};LSs('bs_student',ME);err.textContent='';$('#loginCode').value='';await boot()}
+    ME={id:s.id,name:s.name,school:s.school||'',grade:s.grade||'',code:code};LSs(SK,ME);err.textContent='';$('#loginCode').value='';await boot()}
   catch(e){err.textContent='조회 오류. 다시 시도해 주세요.'}}
 $('#loginBtn').addEventListener('click',login);$('#loginCode').addEventListener('keydown',function(e){if(e.key==='Enter')login()});
 
 /* ===== 출결 불러오기 + 실시간 ===== */
 async function loadAtt(){if(!ME)return;var t=bizToday(),d=new Date(t+'T00:00:00');var first=fmtD(new Date(d.getFullYear(),d.getMonth(),1));var dow=(d.getDay()+6)%7;var mon=new Date(d);mon.setDate(d.getDate()-dow);var from=fmtD(mon)<first?fmtD(mon):first;
-  try{ROWS=await api.att(ME.id,from,t);TODAY=ROWS.filter(function(r){return r.attend_date===t})[0]||null;$('#plState').dataset.err=''}catch(e){$('#plState').dataset.err='1'}
+  var sid=ME.id;try{var rows=await api.att(sid,from,t);if(!ME||ME.id!==sid)return;ROWS=rows;TODAY=ROWS.filter(function(r){return r.attend_date===t})[0]||null;$('#plState').dataset.err=''}catch(e){if(!ME||ME.id!==sid)return;$('#plState').dataset.err='1'}
   plTick()}
 function startLive(){stopLive();loadAtt();if(!db||!ME)return;try{chan=db.channel('bs-'+ME.id).on('postgres_changes',{event:'*',schema:'public',table:'reading_room_attendance',filter:'student_id=eq.'+ME.id},function(){loadAtt()}).subscribe()}catch(e){}}
 function stopLive(){try{if(chan&&db)db.removeChannel(chan)}catch(e){}chan=null}

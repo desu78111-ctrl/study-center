@@ -224,8 +224,8 @@ function show(name){if(!MASK||!name||name.length<2)return name;return name.charA
 function rankName(name){if(!name)return '';return name.charAt(0)+Array(name.length).join('○')}
 /* 좌석에는 가운데 글자만 가림: 이소윤 → 이○윤, 김분홍 → 김○홍, 두 글자 이름은 김○ */
 function seatLabel(name){if(!name)return '';if(name.length<=2)return name.charAt(0)+'○';return name.charAt(0)+'○'+name.slice(2)}
-function todayStr(){var d=new Date();return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate())}
-function tsOf(hms){if(!hms)return null;var p=hms.split(':'),d=new Date();d.setHours(+p[0],+p[1],+(p[2]||0),0);return d.getTime()}
+function todayStr(){var d=new Date();if(d.getHours()<1||(d.getHours()===1&&d.getMinutes()<10))d.setDate(d.getDate()-1);return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate())}
+function tsOf(hms){if(!hms)return null;var p=hms.split(':'),d=new Date(todayStr()+'T00:00:00');d.setHours(+p[0],+p[1],+(p[2]||0),0);if(+p[0]<1||(+p[0]===1&&+p[1]<10))d.setDate(d.getDate()+1);return d.getTime()}
 function since(v){if(!v||!v.since)return '';var ms=Date.now()-v.since-(v.out||0)-(v.outAt?Date.now()-v.outAt:0);var s=Math.max(0,Math.floor(ms/1000)),h=Math.floor(s/3600),m=Math.floor(s%3600/60);return h+':'+pad(m)}
 
 /* 그리기 */
@@ -330,8 +330,8 @@ function reconcile(){
 /* 순위: 오늘 · 이번 주(월~일) · 이번 달. 순공시간 = 입실~퇴실(진행 중이면 지금) - 외출 - 추가 외출 분 */
 var attRows=[],users={};
 function dstr(d){return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate())}
-function weekStart(){var d=new Date();d.setHours(0,0,0,0);d.setDate(d.getDate()-((d.getDay()+6)%7));return d}
-function monthStart(){var d=new Date();return new Date(d.getFullYear(),d.getMonth(),1)}
+function weekStart(){var d=new Date(todayStr()+'T00:00:00');d.setDate(d.getDate()-((d.getDay()+6)%7));return d}
+function monthStart(){var d=new Date(todayStr()+'T00:00:00');return new Date(d.getFullYear(),d.getMonth(),1)}
 function rangeStart(){var w=weekStart(),m=monthStart();return dstr(w<m?w:m)}
 function tsOn(date,hms,next){if(!hms)return null;var p=hms.split(':'),d=new Date(date+'T00:00:00');d.setHours(+p[0],+p[1],+(p[2]||0),0);if(next)d.setDate(d.getDate()+1);return d.getTime()}
 function netOf(a){
@@ -369,6 +369,7 @@ function renderRanks(){
 var db=null,loading=false,dirty=false;
 function setConn(ok,t){$('#dot').className='dot'+(ok?'':' off');$('#conn').textContent=t}
 function banner(t){var b=$('#banner');b.hidden=!t;b.textContent=t||''}
+function attPages(from,i,acc){return db.from('reading_room_attendance').select('student_id,attend_date,check_in_time,check_out_time,check_out_is_next_day,pending_out_start,out_1_start,out_1_end,out_1_end_is_next_day,out_2_start,out_2_end,out_2_end_is_next_day,extra_out_minutes').gte('attend_date',from).order('attend_date').order('student_id').range(i*1000,i*1000+999).then(function(r){if(r.error)return r;acc=acc.concat(r.data||[]);return (r.data||[]).length<1000||i>=11?{data:acc}:attPages(from,i+1,acc)})} /* 1000줄 넘게 받기 */
 function load(){
   if(!db)return;
   if(loading){dirty=true;return}
@@ -376,7 +377,7 @@ function load(){
   var td=todayStr(),from=rangeStart();
   Promise.all([
     db.from('reading_room_seats').select('seat_no,student_id'),
-    db.from('reading_room_attendance').select('student_id,attend_date,check_in_time,check_out_time,check_out_is_next_day,pending_out_start,out_1_start,out_1_end,out_1_end_is_next_day,out_2_start,out_2_end,out_2_end_is_next_day,extra_out_minutes').gte('attend_date',from).limit(5000)
+    attPages(from,0,[])
   ]).then(function(rs){
     if(rs[0].error)throw rs[0].error;if(rs[1].error)throw rs[1].error;
     var seats=rs[0].data||[],att={},ids=[];

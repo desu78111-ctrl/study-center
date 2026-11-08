@@ -66,9 +66,9 @@ function fmtD(d){return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDat
 function bizToday(){var d=new Date();if(d.getHours()<1||(d.getHours()===1&&d.getMinutes()<10))d.setDate(d.getDate()-1);return fmtD(d)}
 function tMin(t){if(!t)return null;var m=String(t).match(/^(\d{1,2}):(\d{2})/);return m?(+m[1])*60+(+m[2]):null}
 function nowMin(){var d=new Date();var m=d.getHours()*60+d.getMinutes();if(bizToday()!==fmtD(d))m+=1440;return m}
-function outs(r){var o=[];[['out_1_start','out_1_end'],['out_2_start','out_2_end']].forEach(function(p){if(r[p[0]])o.push({s:tMin(r[p[0]]),e:r[p[1]]?tMin(r[p[1]]):null})});(Array.isArray(r.extra_outs)?r.extra_outs:[]).forEach(function(x){if(x&&x.start)o.push({s:tMin(x.start),e:x.end?tMin(x.end):null})});if(r.pending_out_start)o.push({s:tMin(r.pending_out_start),e:null});return o}
+function outs(r){var o=[];[['out_1_start','out_1_end'],['out_2_start','out_2_end']].forEach(function(p){if(r[p[0]])o.push({s:tMin(r[p[0]]),e:r[p[1]]?tMin(r[p[1]])+(r[p[1]+'_is_next_day']?1440:0):null})});if(r.pending_out_start)o.push({s:tMin(r.pending_out_start),e:null});return o}
 function statusOf(r){if(!r||!r.check_in_time)return 'none';if(r.check_out_time)return 'done';return outs(r).some(function(o){return o.e==null})?'out':'in'}
-function minutesOf(r){if(!r||!r.check_in_time)return 0;var ci=tMin(r.check_in_time),end=r.check_out_time?tMin(r.check_out_time):nowMin();var m=end-ci;outs(r).forEach(function(o){if(o.s==null)return;var e=o.e==null?nowMin():o.e;m-=Math.max(0,Math.min(e,end)-o.s)});m-=Number(r.extra_out_minutes)||0;return Math.max(0,m)}
+function minutesOf(r){if(!r||!r.check_in_time)return 0;var ci=tMin(r.check_in_time),end=r.check_out_time?tMin(r.check_out_time)+(r.check_out_is_next_day?1440:0):nowMin();var m=end-ci;outs(r).forEach(function(o){if(o.s==null)return;var e=o.e==null?nowMin():o.e;m-=Math.max(0,Math.min(e,end)-o.s)});m-=Number(r.extra_out_minutes)||0;return Math.max(0,m)}
 function fmtM(m){m=Math.max(0,Math.round(m));return m>=60?Math.floor(m/60)+'시간 '+pad(m%60)+'분':m+'분'}
 var GATE_H='d8553e3ac2d808918a2ff3be6f092d23550436d4f051d0fccb41dc675a3bd83a';
 function gateOk(){if(location.protocol==='file:')return Promise.resolve(true);
@@ -105,12 +105,12 @@ async function load(){if(!LIST){$('#tbl').innerHTML='<tr><td style="color:var(--
   try{
     if(MOCK){users=LIST.students.map(function(n,i){return {id:'u'+i,name:n}});att=[{student_id:'u0',attend_date:bizToday(),check_in_time:'09:05:00'},{student_id:'u1',attend_date:bizToday(),check_in_time:'09:30:00',pending_out_start:'12:30:00',pending_out_reason:'점심'}];seats=[{seat_no:16,student_id:'u0'},{seat_no:21,student_id:'u1'}]}
     else{if(!db)throw new Error('no db');
-      var u=await db.from('users').select('id,name,status,deleted_at').in('name',LIST.students).eq('reading_room_yn',true);if(u.error)throw u.error;users=(u.data||[]).filter(function(x){return x.status!=='inactive'&&!x.deleted_at});
+      var u=await db.from('users').select('id,name,status,deleted_at,reading_room_withdrawn_at').in('name',LIST.students).eq('reading_room_yn',true);if(u.error)throw u.error;users=(u.data||[]).filter(function(x){return x.status!=='inactive'&&!x.deleted_at&&!x.reading_room_withdrawn_at});
       var ids=users.map(function(x){return x.id});
       if(ids.length){var a=await db.from('reading_room_attendance').select('*').eq('attend_date',bizToday()).in('student_id',ids);if(a.error)throw a.error;att=a.data||[];var s=await db.from('reading_room_seats').select('seat_no,student_id').in('student_id',ids);if(!s.error)seats=s.data||[]}}
   }catch(e){$('#msg').textContent='출결 서버에 연결하지 못했어요. 잠시 후 다시 시도해요.';return}
-  var byName={};users.forEach(function(u){byName[u.name]=byName[u.name]||u});var byId={};att.forEach(function(r){byId[r.student_id]=r});var seatBy={};seats.forEach(function(s){seatBy[s.student_id]=s.seat_no});
-  var rows=LIST.students.map(function(n){var u=byName[n],r=u?byId[u.id]:null;return {n:n,known:!!u,seat:u?seatBy[u.id]:null,st:u?statusOf(r):'unknown',r:r,min:r?minutesOf(r):0}});
+  var byId={};att.forEach(function(r){byId[r.student_id]=r});var seatBy={};seats.forEach(function(s){seatBy[s.student_id]=s.seat_no});
+  var rows=[];LIST.students.forEach(function(n){var us=users.filter(function(u){return u.name===n});if(!us.length)us=[null];us.forEach(function(u){var r=u?byId[u.id]:null;rows.push({n:n+(us.length>1?' (동명이인)':''),known:!!u,seat:u?seatBy[u.id]:null,st:u?statusOf(r):'unknown',r:r,min:r?minutesOf(r):0})})});
   var c={in:0,out:0,done:0,none:0};rows.forEach(function(x){if(c[x.st]!=null)c[x.st]++});
   $('#kpi').innerHTML='<div><small>재실</small><b class="in">'+c.in+'명</b></div><div><small>외출</small><b class="out">'+c.out+'명</b></div><div><small>하원</small><b class="done">'+c.done+'명</b></div><div><small>미입실</small><b class="none">'+c.none+'명</b></div>';
   var ord={in:0,out:1,none:2,done:3,unknown:4};rows.sort(function(a,b){return ord[a.st]-ord[b.st]||a.n.localeCompare(b.n,'ko')});
