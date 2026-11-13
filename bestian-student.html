@@ -72,6 +72,33 @@ main{max-width:1080px;margin:0 auto;padding:18px 16px}
 .login{max-width:440px;margin:40px auto;display:grid;gap:14px}
 .login .code{font-size:34px;letter-spacing:.4em;text-align:center;padding:12px;font-weight:900;font-variant-numeric:tabular-nums}
 .login .err{color:var(--red);font-weight:700;min-height:20px;font-size:14px}
+/* 데스크 요청 */
+.dk-wake{display:grid;gap:10px;justify-items:center;text-align:center;padding:20px}
+.dk-wake .big{width:100%;max-width:520px;border:0;border-radius:14px;background:#3d4f8a;color:#fff;font-weight:900;font-size:22px;padding:18px;cursor:pointer;min-height:70px}
+.dk-wake .big:disabled{background:#c5ccd3;cursor:default}
+.dk-wake .cd{font-size:64px;font-weight:900;font-variant-numeric:tabular-nums;color:#3d4f8a;line-height:1}
+.dk-wake.due{background:#fff8d6;border-color:#e8d27a}.dk-wake.due .cd{color:var(--amber)}
+.dk-btns{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}@media(max-width:560px){.dk-btns{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.dk-btns button{border:1px solid var(--line);background:#fff;border-radius:14px;padding:16px 8px;font-weight:900;font-size:16px;cursor:pointer;color:var(--blued);display:grid;gap:4px;justify-items:center;min-height:96px}
+.dk-btns button b{font-size:30px}.dk-btns button.on{border-color:var(--blue);box-shadow:0 0 0 3px rgba(0,114,181,.2)}
+.dk-form{display:grid;gap:10px}
+.dk-chips{display:flex;gap:8px;flex-wrap:wrap}
+.dk-chips button{border:1px solid var(--line);background:#fff;border-radius:999px;padding:8px 14px;font-weight:700;cursor:pointer;min-height:40px}
+.dk-chips button.on{background:var(--blue);border-color:var(--blue);color:#fff}
+.dk-form textarea{width:100%;resize:vertical}
+.dk-prev{max-width:200px;border-radius:8px;border:1px solid var(--line)}
+.dk-item{border-top:1px dashed var(--line);padding:8px 0;display:grid;gap:3px;font-size:14px}.dk-item:first-child{border-top:0}
+.dk-item .h{display:flex;gap:6px;align-items:center;flex-wrap:wrap}.dk-item .t{color:var(--mute);font-size:12px;margin-left:auto}
+.dk-st{font-size:11.5px;font-weight:900;border-radius:6px;padding:1px 7px}
+.dk-st.new{background:#fff3c2;color:#6a5300}.dk-st.doing{background:#dcecf8;color:var(--blued)}.dk-st.done{background:#e3f6ec;color:var(--green)}.dk-st.cancel{background:#eee;color:var(--mute)}
+.dk-rep{background:var(--panel2);border-radius:8px;padding:5px 9px;font-weight:700;color:var(--blued)}
+#dkPill{position:fixed;left:50%;bottom:14px;transform:translateX(-50%);z-index:20;background:#3d4f8a;color:#fff;border-radius:999px;padding:8px 18px;font-weight:900;box-shadow:0 4px 14px rgba(0,0,0,.2);text-decoration:none;font-variant-numeric:tabular-nums}
+#dkPop,#dkUp{position:fixed;inset:0;z-index:30;background:rgba(15,25,40,.55);display:flex;align-items:center;justify-content:center;padding:18px}
+#dkPop[hidden],#dkUp[hidden],#dkPill[hidden]{display:none}
+#dkPop .box,#dkUp .box{background:#fff;border-radius:16px;max-width:460px;width:100%;padding:22px;display:grid;gap:12px;text-align:center;border-top:8px solid var(--blue)}
+#dkPop .box.call{border-top-color:var(--red)}#dkPop .box.notice{border-top-color:var(--yellow)}
+#dkPop .box small{color:var(--mute);font-weight:700}#dkPop .box p{margin:0;font-size:20px;font-weight:900;white-space:pre-wrap;word-break:break-word}
+#dkUp .box{border-top-color:var(--yellow);background:#fffdf3}#dkUp .cd{font-size:56px;font-weight:900;color:var(--amber);font-variant-numeric:tabular-nums}
 </style>
 </head>
 <body>
@@ -80,7 +107,7 @@ main{max-width:1080px;margin:0 auto;padding:18px 16px}
   <div class="me"><div class="who" id="who" hidden></div><img src="logo.png" alt="BESTIAN"></div>
 </div></div>
 <nav aria-label="메뉴"><div class="in">
-  <a href="#planner">스케줄러</a><a href="#history">한국사</a><a href="#korean">매삼비 매삼문</a><a href="#rules">일과표·규칙</a><a href="bestian-live-seats.html">온라인 실시간</a><a href="bestian-live-seats.html#rank">순위</a>
+  <a href="#planner">스케줄러</a><a href="#desk">🙋 데스크</a><a href="#history">한국사</a><a href="#korean">매삼비 매삼문</a><a href="#rules">일과표·규칙</a><a href="bestian-live-seats.html">온라인 실시간</a><a href="bestian-live-seats.html#rank">순위</a>
 </div></nav>
 
 <main>
@@ -116,6 +143,22 @@ main{max-width:1080px;margin:0 auto;padding:18px 16px}
       <div class="ticks"><span>9</span><span>12</span><span>15</span><span>18</span><span>21</span><span>24</span></div>
       <div class="tl" id="plList"></div>
     </div>
+  </div>
+</div></section>
+
+<section class="view" id="v-desk" hidden><div class="wrap">
+  <div class="title"><h2>데스크 요청</h2><span>누르면 데스크 컴퓨터에 바로 떠요 · 데스크 답장도 여기로 와요</span></div>
+  <div class="panel dk-wake" id="dkWake"></div>
+  <div class="dk-btns">
+    <button type="button" data-dk="question"><b>💬</b>질문하기</button>
+    <button type="button" data-dk="material"><b>📄</b>자료 요청</button>
+    <button type="button" data-dk="call"><b>🙋</b>데스크 호출</button>
+    <button type="button" data-dk="message"><b>✏️</b>메시지</button>
+  </div>
+  <div class="panel" id="dkForm" hidden></div>
+  <div class="g2">
+    <div class="panel"><h3>오늘 보낸 요청</h3><div id="dkMine"></div></div>
+    <div class="panel"><h3>데스크에서 온 메시지</h3><div id="dkMsgs"></div></div>
   </div>
 </div></section>
 
@@ -182,7 +225,7 @@ function minutesOf(row,isToday){if(!row||!row.check_in_time)return 0;var ci=tMin
 
 /* ===== 상태 ===== */
 var ME=LSg('bs_student',null),SEAT=null,ROWS=[],TODAY=null,chan=null;
-var views=['planner','history','korean','rules'];
+var views=['planner','desk','history','korean','rules'];
 function route(){var h=(location.hash||'').replace('#','');var cur=views.indexOf(h)>-1?h:'planner';
   $('#v-login').hidden=!!ME;views.forEach(function(v){$('#v-'+v).hidden=!ME||v!==cur});
   document.querySelectorAll('nav a').forEach(function(a){if(a.getAttribute('href')==='#'+cur)a.setAttribute('aria-current','page');else a.removeAttribute('aria-current')});
@@ -263,6 +306,168 @@ window.addEventListener('focus',function(){if(ME)renderH()});
 /* ===== 시작 ===== */
 async function boot(){route();renderWho();if(!ME)return;try{SEAT=await api.seat(ME.id)}catch(e){SEAT=null}renderWho();loadP();startLive();renderH()}
 boot();
+})();
+</script>
+
+<!-- ===== 데스크 연결: 요청 보내기 · 깨우기 · 데스크 메시지 (모든 탭에서 동작) ===== -->
+<a id="dkPill" href="#desk" hidden></a>
+<div id="dkPop" hidden><div class="box" id="dkPopBox"></div></div>
+<div id="dkUp" hidden><div class="box"><div style="font-size:22px;font-weight:900">⏰ 10분 지났어요</div><div class="cd" id="dkUpCd"></div><div class="hint">데스크 선생님이 깨우러 가고 있어요</div><button class="btn" type="button" id="dkUpBtn" style="font-size:18px;padding:14px">일어났어요</button></div></div>
+<script>
+(function(){
+"use strict";
+var SUPABASE_URL='https://qtpftloyumtffvgurvqv.supabase.co';
+var SUPABASE_KEY='sb_publishable_XGP9n-2fuBQFuJlAA5MJ8w_R8JYIi9O';
+var MOCK=/[?&]mock=1/.test(location.search),FAST=/[?&]fast=1/.test(location.search);
+var WAKE_MS=(FAST?20:600)*1000,WAKE_MAX=3;
+var db=null;try{if(!MOCK&&window.supabase)db=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY,{auth:{persistSession:false,storageKey:'bdesk-stu'}})}catch(e){db=null}
+
+var $=function(s){return document.querySelector(s)};
+var pad=function(n){return n<10?'0'+n:''+n};
+var esc=function(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})};
+var LSg=function(k,d){try{var v=localStorage.getItem(k);return v?JSON.parse(v):d}catch(e){return d}},LSs=function(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}};
+function fmtD(d){return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate())}
+var OFF=0;function now(){return Date.now()+OFF}
+function bizToday(){var d=new Date(now());if(d.getHours()<1||(d.getHours()===1&&d.getMinutes()<10))d.setDate(d.getDate()-1);return fmtD(d)}
+function hm(ts){var d=new Date(ts);return pad(d.getHours())+':'+pad(d.getMinutes())}
+function mmss(ms){ms=Math.abs(ms);var s=Math.floor(ms/1000);return pad(Math.floor(s/60))+':'+pad(s%60)}
+var KIND={question:'질문',material:'자료 요청',wake:'깨우기',call:'데스크 호출',message:'메시지'};
+var STAT={new:'보냄',doing:'데스크 확인',done:'완료',cancel:'취소됨'};
+async function syncClock(){if(MOCK||!db)return;try{var t0=Date.now();var r=await db.rpc('bestian_now');var t1=Date.now();if(!r.error&&r.data)OFF=new Date(r.data).getTime()-(t0+t1)/2}catch(e){}}
+
+/* ===== 데이터 (MOCK = 이 브라우저 안의 가짜 서버, bestian-desk.html?mock=1 과 함께 연습) ===== */
+var MK='bdesk_mock';
+function mget(){return LSg(MK,{req:[],msg:[],bonus:[],seq:1})}
+function mset(s){LSs(MK,s);setTimeout(onChange,0)}
+var api={
+  seat:async function(sid){if(MOCK)return 16;var r=await db.from('reading_room_seats').select('seat_no').eq('student_id',sid).limit(1);if(r.error||!r.data||!r.data.length)return null;return r.data[0].seat_no},
+  reqs:async function(sid,date){if(MOCK)return mget().req.filter(function(r){return r.student_id===sid&&r.biz_date===date});
+    var r=await db.from('bestian_desk_requests').select('*').eq('student_id',sid).eq('biz_date',date).order('created_at',{ascending:true});if(r.error)throw r.error;return r.data||[]},
+  msgs:async function(sid,date){if(MOCK)return mget().msg.filter(function(m){return m.biz_date===date&&(!m.student_id||m.student_id===sid)});
+    var r=await db.from('bestian_desk_messages').select('*').eq('biz_date',date).or('student_id.is.null,student_id.eq.'+sid).order('created_at',{ascending:true});if(r.error)throw r.error;return r.data||[]},
+  bonus:async function(sid,date){if(MOCK){var b=mget().bonus.filter(function(x){return x.student_id===sid&&x.biz_date===date})[0];return b?b.extra:0}
+    var r=await db.from('bestian_desk_wake_bonus').select('extra').eq('student_id',sid).eq('biz_date',date);if(r.error)return 0;return r.data&&r.data[0]?r.data[0].extra:0},
+  add:async function(o){
+    if(MOCK){var s=mget(),d=bizToday();
+      if(o.kind==='wake'){var mine=s.req.filter(function(r){return r.student_id===o.student_id&&r.kind==='wake'});
+        if(mine.some(function(r){return r.status==='new'||r.status==='doing'}))throw new Error('WAKE_ACTIVE');
+        var b=s.bonus.filter(function(x){return x.student_id===o.student_id&&x.biz_date===d})[0];
+        if(mine.filter(function(r){return r.biz_date===d}).length>=WAKE_MAX+(b?b.extra:0))throw new Error('WAKE_LIMIT')}
+      var row=Object.assign({id:s.seq++,created_at:new Date().toISOString(),biz_date:d,status:'new',reply:null,done_at:null,self_woke:false,wake_until:o.kind==='wake'?new Date(Date.now()+WAKE_MS).toISOString():null},o);
+      s.req.push(row);mset(s);return row}
+    var r=await db.from('bestian_desk_requests').insert(o).select().single();if(r.error)throw r.error;return r.data},
+  upd:async function(id,p){if(MOCK){var s=mget();s.req.forEach(function(r){if(r.id===id)Object.assign(r,p)});mset(s);return}
+    var r=await db.from('bestian_desk_requests').update(p).eq('id',id);if(r.error)throw r.error},
+  readMsg:async function(id){if(MOCK){var s=mget();s.msg.forEach(function(m){if(m.id===id)m.read_at=new Date().toISOString()});mset(s);return}
+    await db.from('bestian_desk_messages').update({read_at:new Date(now()).toISOString()}).eq('id',id)},
+  photo:async function(blob,sid){if(MOCK)return await new Promise(function(res){var fr=new FileReader();fr.onload=function(){res(fr.result)};fr.readAsDataURL(blob)});
+    var path=bizToday()+'/'+sid+'-'+Date.now()+'.jpg';var r=await db.storage.from('bestian-desk').upload(path,blob,{contentType:'image/jpeg',cacheControl:'86400',upsert:false});if(r.error)throw r.error;
+    return db.storage.from('bestian-desk').getPublicUrl(path).data.publicUrl}
+};
+
+/* ===== 상태 ===== */
+var ME=null,SEAT=null,REQ=[],MSG=[],BONUS=0,chan=null,FORM=null,PHOTO=null,SENDING=false;
+var SEENK='bdesk_seen';function seen(){return LSg(SEENK,{})}function markSeen(k){var s=seen();s[k]=1;LSs(SEENK,s)}
+
+function meNow(){var m=LSg('bs_student',null);return m&&m.id?m:null}
+async function checkMe(){var m=meNow();if((m&&m.id)!==(ME&&ME.id)){ME=m;REQ=[];MSG=[];BONUS=0;SEAT=null;stopLive();if(ME){try{SEAT=await api.seat(ME.id)}catch(e){}startLive()}render()}}
+async function load(){if(!ME)return;var d=bizToday();try{var r=await Promise.all([api.reqs(ME.id,d),api.msgs(ME.id,d),api.bonus(ME.id,d)]);REQ=r[0];MSG=r[1];BONUS=r[2]}catch(e){}render()}
+var tmr=null;function onChange(){clearTimeout(tmr);tmr=setTimeout(load,200)}
+function startLive(){load();if(MOCK||!db||!ME)return;
+  try{chan=db.channel('bdesk-'+ME.id).on('postgres_changes',{event:'*',schema:'public',table:'bestian_desk_requests',filter:'student_id=eq.'+ME.id},onChange)
+    .on('postgres_changes',{event:'*',schema:'public',table:'bestian_desk_messages'},onChange)
+    .on('postgres_changes',{event:'*',schema:'public',table:'bestian_desk_wake_bonus',filter:'student_id=eq.'+ME.id},onChange).subscribe()}catch(e){}}
+function stopLive(){try{if(chan&&db)db.removeChannel(chan)}catch(e){}chan=null}
+if(MOCK)window.addEventListener('storage',function(e){if(e.key===MK)onChange();if(e.key==='bs_student')checkMe()});
+
+function wakesToday(){return REQ.filter(function(r){return r.kind==='wake'})}
+function activeWake(){return wakesToday().filter(function(r){return r.status==='new'||r.status==='doing'})[0]||null}
+function left(){return WAKE_MAX+BONUS-wakesToday().length}
+
+/* ===== 그리기 ===== */
+function render(){renderWake();renderMine();renderMsgs();popup()}
+function renderWake(){var box=$('#dkWake'),pill=$('#dkPill'),up=$('#dkUp');
+  if(!ME){box.innerHTML='<div class="hint">먼저 학생 확인(네 자리 번호)을 해 주세요.</div>';pill.hidden=true;up.hidden=true;return}
+  var w=activeWake(),onDesk=location.hash==='#desk';
+  if(!w){var L=left();box.className='panel dk-wake';
+    box.innerHTML='<button class="big" type="button" id="dkSleep"'+(L<=0?' disabled':'')+'>😴 10분 자고 깨워주세요</button><div class="hint">'+(L>0?'오늘 <b>'+L+'회</b> 남음 · 누르면 데스크에 10분 타이머가 같이 시작돼요':'오늘 깨우기 횟수를 다 썼어요. 꼭 필요하면 데스크에 말해 주세요.')+'</div>';
+    pill.hidden=true;up.hidden=true;return}
+  var ms=new Date(w.wake_until).getTime()-now(),due=ms<=0;
+  box.className='panel dk-wake'+(due?' due':'');
+  box.innerHTML=(due?'<div style="font-weight:900;font-size:18px">⏰ 10분 지났어요 · 선생님이 깨우러 가요</div>':'<div style="font-weight:900;color:#3d4f8a">😴 자는 중 · 데스크와 같은 시간이 흘러가요</div>')
+    +'<div class="cd" data-cd="1">'+(due?'+':'')+mmss(ms)+'</div><button class="btn" type="button" id="dkAwake" style="font-size:17px;padding:12px 26px">일어났어요</button><div class="hint">일찍 일어나도 1회로 세요 · 오늘 '+wakesToday().length+' / '+(WAKE_MAX+BONUS)+'회</div>';
+  pill.hidden=onDesk||due;pill.textContent='😴 깨우기 '+mmss(ms);
+  up.hidden=!due;$('#dkUpCd').textContent='+'+mmss(ms);
+  if(due&&!w._buzz){w._buzz=1;try{navigator.vibrate&&navigator.vibrate([400,200,400,200,400])}catch(e){}}}
+function tickWake(){var w=activeWake();if(!w){if(!$('#dkPill').hidden||!$('#dkUp').hidden)renderWake();return}
+  var ms=new Date(w.wake_until).getTime()-now(),due=ms<=0;
+  if(due!==$('#dkWake').classList.contains('due')){renderWake();return}
+  var cd=document.querySelector('#dkWake [data-cd]');if(cd)cd.textContent=(due?'+':'')+mmss(ms);
+  $('#dkPill').textContent='😴 깨우기 '+mmss(ms);$('#dkPill').hidden=location.hash==='#desk'||due;$('#dkUpCd').textContent='+'+mmss(ms)}
+function renderMine(){var l=REQ.slice().reverse();
+  $('#dkMine').innerHTML=l.length?l.map(function(r){var st=r.kind==='wake'?(r.status==='done'?(r.self_woke?'스스로 일어남':'깨움 완료'):r.status==='cancel'?'취소됨':'자는 중'):STAT[r.status];
+    return '<div class="dk-item"><div class="h"><span class="chip" style="background:var(--blue)">'+KIND[r.kind]+(r.subject?' · '+esc(r.subject):'')+'</span><span class="dk-st '+r.status+'">'+st+'</span><span class="t">'+hm(r.created_at)+'</span></div>'
+      +(r.body?'<div>'+esc(r.body)+'</div>':'')+(r.image_url?'<img class="dk-prev" src="'+esc(r.image_url)+'" alt="보낸 사진">':'')
+      +(r.reply?'<div class="dk-rep">↩ 데스크: '+esc(r.reply)+'</div>':'')
+      +(r.kind!=='wake'&&r.status==='new'?'<div><button class="btn g sm" type="button" data-dkcancel="'+r.id+'">요청 취소</button></div>':'')+'</div>'}).join(''):'<div class="empty">아직 보낸 요청이 없어요</div>'}
+function renderMsgs(){var l=MSG.slice().reverse();
+  $('#dkMsgs').innerHTML=l.length?l.map(function(m){return '<div class="dk-item"><div class="h"><span class="chip" style="background:'+(m.kind==='notice'?'var(--amber)':m.kind==='call'?'var(--red)':'var(--blue)')+'">'+(m.kind==='notice'?'전체 공지':m.kind==='call'?'호출':'메시지')+'</span><span class="t">'+hm(m.created_at)+'</span></div><div style="font-weight:700">'+esc(m.body)+'</div></div>'}).join(''):'<div class="empty">아직 온 메시지가 없어요</div>'}
+
+/* 데스크에서 온 것(메시지·공지·답장)을 화면 가운데 팝업으로 하나씩 */
+var POP=null;
+function popup(){if(!ME){$('#dkPop').hidden=true;return}if(POP&&!$('#dkPop').hidden)return;var s=seen(),q=[];
+  MSG.forEach(function(m){if(m.student_id?!m.read_at&&!s['m'+m.id]:!s['n'+m.id])q.push({k:m.student_id?'m'+m.id:'n'+m.id,id:m.id,personal:!!m.student_id,kind:m.kind,title:m.kind==='notice'?'📢 전체 공지':m.kind==='call'?'🙋 데스크 호출':'💬 데스크 메시지',body:m.body,t:m.created_at})});
+  REQ.forEach(function(r){if(r.reply&&!s['r'+r.id+'_'+r.replied_at])q.push({k:'r'+r.id+'_'+r.replied_at,kind:'msg',title:'↩ 데스크 답장 · '+KIND[r.kind],body:r.reply,t:r.replied_at})});
+  if(!q.length){$('#dkPop').hidden=true;POP=null;return}
+  POP=q[0];$('#dkPopBox').className='box '+POP.kind;
+  $('#dkPopBox').innerHTML='<small>'+POP.title+' · '+hm(POP.t)+'</small><p>'+esc(POP.body)+'</p><button class="btn" type="button" id="dkPopOk" style="font-size:17px;padding:12px">확인했어요</button>';
+  $('#dkPop').hidden=false;try{navigator.vibrate&&navigator.vibrate(200)}catch(e){}}
+document.addEventListener('click',async function(e){var t=e.target;
+  if(t.id==='dkPopOk'&&POP){var p=POP;markSeen(p.k);POP=null;$('#dkPop').hidden=true;if(p.personal){try{await api.readMsg(p.id)}catch(er){}}popup();return}});
+
+/* ===== 요청 양식 ===== */
+var OPTS={material:['일일N제','수학 프린트','단어시험지','교재','필기구','기타'],call:['화장실 열쇠','몸이 안 좋아요','자리 문제','덥거나 추워요','기타']};
+function openForm(k){FORM={kind:k,pick:''};PHOTO=null;document.querySelectorAll('[data-dk]').forEach(function(b){b.classList.toggle('on',b.getAttribute('data-dk')===k)});var f=$('#dkForm');f.hidden=false;
+  var h='<div class="dk-form"><h3 style="margin:0">'+({question:'💬 질문하기',material:'📄 자료 요청',call:'🙋 데스크 호출',message:'✏️ 데스크에 메시지'})[k]+'</h3>';
+  if(k==='question')h+='<select class="inp" id="dkSubj"><option>수학</option><option>영어</option><option>국어</option><option>과학</option><option>사회</option><option>한국사</option><option>기타</option></select>';
+  if(OPTS[k])h+='<div class="dk-chips">'+OPTS[k].map(function(o){return '<button type="button" data-pick="'+o+'">'+o+'</button>'}).join('')+'</div>';
+  h+='<textarea class="inp" id="dkBody" rows="3" maxlength="300" placeholder="'+({question:'어떤 문제가 궁금한지 적어 주세요 (교재, 페이지, 번호)',material:'필요한 것을 자세히 (예: 쎈 수학 B단계 3장)',call:'무슨 일인지 짧게 적어 주세요 (선택)',message:'데스크에 보낼 말'})[k]+'"></textarea>';
+  if(k==='question')h+='<label class="btn g" style="justify-self:start">📷 문제 사진 첨부<input type="file" accept="image/*" capture="environment" id="dkFile" hidden></label><img class="dk-prev" id="dkPrev" hidden alt="첨부 미리보기">';
+  h+='<div style="display:flex;gap:8px"><button class="btn" type="button" id="dkSend" style="flex:1;font-size:17px">데스크로 보내기</button><button class="btn g" type="button" id="dkClose">닫기</button></div><div class="hint" id="dkErr"></div></div>';
+  f.innerHTML=h;var fi=$('#dkFile');if(fi)fi.addEventListener('change',function(){var file=fi.files&&fi.files[0];if(!file)return;shrink(file,function(b){PHOTO=b;var p=$('#dkPrev');p.src=URL.createObjectURL(b);p.hidden=false})})}
+function closeForm(){FORM=null;PHOTO=null;$('#dkForm').hidden=true;$('#dkForm').innerHTML='';document.querySelectorAll('[data-dk]').forEach(function(b){b.classList.remove('on')})}
+function shrink(file,cb){var img=new Image();img.onload=function(){var max=MOCK?700:1400,w=img.width,h=img.height,r=Math.min(1,max/Math.max(w,h));var c=document.createElement('canvas');c.width=Math.round(w*r);c.height=Math.round(h*r);c.getContext('2d').drawImage(img,0,0,c.width,c.height);c.toBlob(function(b){cb(b)},'image/jpeg',.8)};img.src=URL.createObjectURL(file)}
+async function send(){if(!ME||!FORM||SENDING)return;var body=($('#dkBody').value||'').trim(),err=$('#dkErr');
+  if(OPTS[FORM.kind]&&!FORM.pick&&!body){err.textContent='무엇이 필요한지 골라 주세요';return}
+  if((FORM.kind==='question'||FORM.kind==='message')&&!body&&!PHOTO){err.textContent='내용을 적어 주세요';return}
+  SENDING=true;err.textContent='보내는 중…';
+  try{var url=null;if(PHOTO)url=await api.photo(PHOTO,ME.id);
+    var subj=FORM.kind==='question'?$('#dkSubj').value:FORM.pick||null;
+    await api.add({student_id:ME.id,student_name:ME.name,seat_no:SEAT,kind:FORM.kind,subject:subj,body:body||null,image_url:url});
+    closeForm();load();flash('데스크로 보냈어요')}
+  catch(e){err.textContent='보내지 못했어요. 인터넷을 확인하고 다시 눌러 주세요.'}
+  SENDING=false}
+function flash(t){var d=document.createElement('div');d.textContent=t;d.style.cssText='position:fixed;left:50%;top:18px;transform:translateX(-50%);background:#1f7a4d;color:#fff;padding:10px 18px;border-radius:999px;font-weight:900;z-index:40';document.body.appendChild(d);setTimeout(function(){d.remove()},1800)}
+
+document.addEventListener('click',async function(e){var t=e.target.closest('button,a');if(!t)return;var k;
+  if((k=t.getAttribute('data-dk'))){if(!ME){location.hash='#planner';return}openForm(k);return}
+  if((k=t.getAttribute('data-pick'))&&FORM){FORM.pick=FORM.pick===k?'':k;document.querySelectorAll('[data-pick]').forEach(function(b){b.classList.toggle('on',b.getAttribute('data-pick')===FORM.pick)});return}
+  if(t.id==='dkSend'){send();return}
+  if(t.id==='dkClose'){closeForm();return}
+  if((k=t.getAttribute('data-dkcancel'))){if(!confirm('이 요청을 취소할까요?'))return;try{await api.upd(+k,{status:'cancel',done_at:new Date(now()).toISOString(),done_by:'학생'});load()}catch(er){}return}
+  if(t.id==='dkSleep'){if(!ME||SENDING)return;if(!confirm('10분 뒤에 데스크 선생님이 깨워 줄게요.\n지금 시작할까요? (오늘 '+left()+'회 남음)'))return;SENDING=true;
+    try{var row=await api.add({student_id:ME.id,student_name:ME.name,seat_no:SEAT,kind:'wake'});REQ.push(row);render();load()}
+    catch(er){var m=String(er&&er.message||'');alert(/WAKE_LIMIT/.test(m)?'오늘 깨우기 3회를 다 썼어요.':/WAKE_ACTIVE/.test(m)?'이미 깨우기가 진행 중이에요.':'보내지 못했어요. 인터넷을 확인해 주세요.');load()}
+    SENDING=false;return}
+  if(t.id==='dkAwake'||t.id==='dkUpBtn'){var w=activeWake();if(!w)return;try{await api.upd(w.id,{status:'done',self_woke:true,done_at:new Date(now()).toISOString(),done_by:'학생'});w.status='done';w.self_woke=true;render();load()}catch(er){alert('저장하지 못했어요. 다시 눌러 주세요.')}return}});
+
+window.addEventListener('hashchange',renderWake);
+setInterval(tickWake,1000);
+setInterval(function(){checkMe();if(ME)load()},15000);
+setInterval(syncClock,300000);
+window.addEventListener('focus',function(){checkMe();if(ME)load()});
+document.addEventListener('click',function(e){if(e.target.id==='logout')setTimeout(checkMe,50)},true);
+(async function(){await syncClock();checkMe();setInterval(checkMe,2000)})();
 })();
 </script>
 </body>

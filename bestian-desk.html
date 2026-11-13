@@ -1,0 +1,308 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex,nofollow">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#0072b5">
+<title>베스티안 데스크</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f5f7f9;--line:#d8dfe5;--ink:#1d2328;--mute:#6b737a;--blue:#0072b5;--blued:#004f80;--yellow:#f2c100;--green:#1f7a4d;--amber:#9a5b00;--red:#b02a37;--soft:#eef5fa}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:'Noto Sans KR','Apple SD Gothic Neo','Malgun Gothic',sans-serif;font-size:14.5px;line-height:1.5}
+button,input,select,textarea{font:inherit}
+.top{background:var(--blue);color:#fff;border-bottom:5px solid var(--yellow)}
+.top .in{padding:10px 18px;display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.top h1{margin:0;font-size:22px;font-weight:900}.top h1 small{display:block;font-size:11px;letter-spacing:.14em;color:#ffe680;font-weight:700}
+.top .sp{flex:1}
+.clock{font-size:24px;font-weight:900;font-variant-numeric:tabular-nums}
+.pill{border:1px solid rgba(255,255,255,.4);background:rgba(255,255,255,.12);color:#fff;border-radius:999px;padding:6px 14px;font-weight:700;cursor:pointer;white-space:nowrap}
+.pill.off{background:var(--yellow);color:#3a2e00;border-color:var(--yellow);animation:blink 1.2s infinite}
+.pill.bad{background:#e05a5a;border-color:#e05a5a}
+.who{display:flex;align-items:center;gap:6px;font-size:13px}.who input{width:110px;padding:5px 8px;border-radius:6px;border:0}
+@keyframes blink{50%{opacity:.55}}
+main{display:grid;grid-template-columns:360px minmax(0,1fr) 340px;gap:14px;padding:14px 18px;align-items:start}
+@media(max-width:1180px){main{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}.col3{grid-column:1/-1}}
+@media(max-width:760px){main{grid-template-columns:minmax(0,1fr)}}
+.panel{background:#fff;border:1px solid var(--line);border-radius:12px;padding:14px;min-width:0}
+.panel h2{margin:0 0 10px;font-size:16px;font-weight:900;color:var(--blued);display:flex;align-items:center;gap:8px}
+.panel h2 .n{background:var(--blue);color:#fff;border-radius:999px;font-size:12px;padding:0 9px}
+.hint{font-size:12.5px;color:var(--mute);margin:0}
+.empty{color:var(--mute);text-align:center;padding:18px 8px;font-size:13.5px}
+.btn{border:0;border-radius:8px;padding:8px 12px;font-weight:900;cursor:pointer;background:var(--blue);color:#fff;white-space:nowrap}
+.btn.g{background:var(--soft);color:var(--ink)}.btn.ok{background:var(--green)}.btn.red{background:var(--red)}.btn.sm{padding:5px 9px;font-size:12.5px}
+.inp{border:1px solid var(--line);border-radius:8px;padding:8px 10px;min-width:0;background:#fff}
+/* 깨우기 */
+.wake{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:4px 10px;align-items:center;border:1px solid var(--line);border-radius:10px;padding:10px 12px;margin-bottom:8px;background:#fff}
+.wake .nm{font-weight:900;font-size:15px}.wake .nm small{font-weight:500;color:var(--mute);margin-left:6px}
+.wake .cd{font-size:30px;font-weight:900;font-variant-numeric:tabular-nums;color:var(--blued);text-align:right;line-height:1.1}
+.wake .meta{font-size:12px;color:var(--mute)}
+.wake.soon{background:#fff8d6;border-color:#e8d27a}.wake.soon .cd{color:var(--amber)}
+.wake.due{background:#fde8ea;border-color:#e59aa3;animation:blink 1s infinite}.wake.due .cd{color:var(--red)}
+.wake .act{grid-column:1/-1;display:flex;gap:6px;justify-content:flex-end}
+/* 요청 */
+.tabs{display:flex;gap:4px;flex-wrap:wrap;margin-bottom:10px}
+.tabs button{border:1px solid var(--line);background:#fff;border-radius:999px;padding:4px 12px;font-weight:700;cursor:pointer;font-size:13px;color:var(--mute)}
+.tabs button.on{background:var(--blue);border-color:var(--blue);color:#fff}
+.req{border:1px solid var(--line);border-left:6px solid var(--mute);border-radius:10px;padding:10px 12px;margin-bottom:8px;display:grid;gap:6px;background:#fff}
+.req.k-question{border-left-color:#0072b5}.req.k-material{border-left-color:#2f8f5c}.req.k-call{border-left-color:#d4536b}.req.k-message{border-left-color:#8a5bd6}
+.req.new{box-shadow:0 0 0 2px rgba(242,193,0,.55)}
+.req .hd{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.tag{font-size:12px;font-weight:900;color:#fff;border-radius:999px;padding:1px 9px;background:var(--mute)}
+.k-question .tag{background:#0072b5}.k-material .tag{background:#2f8f5c}.k-call .tag{background:#d4536b}.k-message .tag{background:#8a5bd6}
+.req .st{font-size:12px;font-weight:900;border-radius:6px;padding:1px 7px}
+.st.new{background:#fff3c2;color:#6a5300}.st.doing{background:#dcecf8;color:var(--blued)}.st.done{background:#e3f6ec;color:var(--green)}.st.cancel{background:#eee;color:var(--mute)}
+.req .who2{font-weight:900;font-size:15px}.req .seat{color:var(--blued);font-weight:700}
+.req .ago{margin-left:auto;font-size:12px;color:var(--mute);font-variant-numeric:tabular-nums}
+.req .body{font-size:15px;white-space:pre-wrap;word-break:break-word}
+.req img{max-width:220px;max-height:160px;border-radius:8px;border:1px solid var(--line);cursor:zoom-in;display:block}
+.req .reply{background:var(--soft);border-radius:8px;padding:6px 10px;font-size:13.5px}
+.req .act{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.req .act .inp{flex:1;min-width:140px;padding:6px 9px}
+.req.done,.req.cancel{opacity:.6}
+/* 보내기 */
+.send{display:grid;gap:8px}
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.chip{border:1px solid var(--line);background:#fff;border-radius:999px;padding:4px 10px;font-size:12.5px;cursor:pointer}
+.sent{font-size:13px;border-top:1px dashed var(--line);padding:6px 0;display:flex;gap:6px;align-items:baseline}
+.sent .t{color:var(--mute);font-variant-numeric:tabular-nums;font-size:12px;white-space:nowrap}
+.sent .r{margin-left:auto;font-size:11.5px;white-space:nowrap}
+.cnt{font-size:12px;color:var(--mute)}
+/* 경보 */
+#alarm{position:fixed;inset:0;background:rgba(176,42,55,.93);color:#fff;display:none;z-index:50;align-items:center;justify-content:center;flex-direction:column;gap:18px;text-align:center;padding:20px}
+#alarm.on{display:flex}
+#alarm h3{font-size:44px;margin:0;font-weight:900}
+#alarm .list{display:grid;gap:10px;font-size:26px;font-weight:900}
+#alarm .list div{display:flex;gap:14px;align-items:center;justify-content:center}
+#alarm .btn{font-size:20px;padding:10px 20px;background:#fff;color:var(--red)}
+#zoom{position:fixed;inset:0;background:rgba(0,0,0,.8);display:none;z-index:60;align-items:center;justify-content:center;cursor:zoom-out}
+#zoom.on{display:flex}#zoom img{max-width:94vw;max-height:94vh;border-radius:8px}
+.toast{position:fixed;right:18px;bottom:18px;background:#1d2328;color:#fff;padding:10px 16px;border-radius:10px;z-index:70;opacity:0;transition:opacity .2s;pointer-events:none}
+.toast.on{opacity:1}
+details summary{cursor:pointer;font-weight:900;color:var(--blued)}
+</style>
+</head>
+<body>
+<div class="top"><div class="in">
+  <h1><small>BESTIAN STUDY CENTER</small>스터디센터 데스크</h1>
+  <span class="clock" id="clock">--:--:--</span>
+  <span class="sp"></span>
+  <label class="who">처리자 <input id="me" maxlength="10" placeholder="예: 최원T"></label>
+  <span class="pill" id="conn">연결 중…</span>
+  <button class="pill off" id="sound" type="button">🔇 소리 켜기 (클릭)</button>
+</div></div>
+
+<main>
+  <section class="panel">
+    <h2>😴 깨우기 <span class="n" id="wakeN">0</span></h2>
+    <div id="wakes"></div>
+    <p class="hint">학생이 누르면 10분 카운트다운이 학생 태블릿과 똑같이 흘러가요. 1분 남으면 노란색, 0분이 되면 빨간색으로 바뀌고 [깨웠음]을 누를 때까지 알람이 울려요. 1분이 더 지나면 화면 전체에 경고가 떠요.</p>
+  </section>
+
+  <section class="panel">
+    <h2>📥 요청 대기열 <span class="n" id="reqN">0</span></h2>
+    <div class="tabs" id="tabs"></div>
+    <div id="reqs"></div>
+    <details style="margin-top:10px"><summary>오늘 처리한 요청 <span id="doneN"></span></summary><div id="dones" style="margin-top:8px"></div></details>
+  </section>
+
+  <section class="panel col3">
+    <h2>📣 학생에게 보내기</h2>
+    <div class="send">
+      <select class="inp" id="to"><option value="">학생 선택 (입실 중)</option></select>
+      <div class="cnt" id="toInfo"></div>
+      <div class="chips">
+        <button class="chip" type="button" data-q="데스크로 와주세요">데스크로 와주세요</button>
+        <button class="chip" type="button" data-q="자리 정리해 주세요">자리 정리</button>
+        <button class="chip" type="button" data-q="휴대폰 제출해 주세요">휴대폰 제출</button>
+        <button class="chip" type="button" data-q="조용히 해 주세요">조용히</button>
+      </div>
+      <textarea class="inp" id="msg" rows="2" maxlength="200" placeholder="한 명에게 보낼 메시지"></textarea>
+      <div style="display:flex;gap:6px;flex-wrap:wrap">
+        <button class="btn" type="button" id="sendOne">보내기</button>
+        <button class="btn g" type="button" id="bonus">깨우기 +1회</button>
+      </div>
+      <hr style="border:0;border-top:1px solid var(--line);margin:4px 0">
+      <textarea class="inp" id="notice" rows="2" maxlength="200" placeholder="전체 공지 (입실한 모든 학생 태블릿에 떠요)"></textarea>
+      <button class="btn red" type="button" id="sendAll">전체 공지 보내기</button>
+      <div id="sents"></div>
+    </div>
+  </section>
+</main>
+
+<div id="alarm"><h3>⏰ 깨워야 할 학생</h3><div class="list" id="alarmList"></div><p style="margin:0;font-size:15px">깨운 뒤 [깨웠음]을 누르면 알람이 멈춰요.</p></div>
+<div id="zoom"><img alt=""></div>
+<div class="toast" id="toast"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<script>
+(function(){
+"use strict";
+var SUPABASE_URL='https://qtpftloyumtffvgurvqv.supabase.co';
+var SUPABASE_KEY='sb_publishable_XGP9n-2fuBQFuJlAA5MJ8w_R8JYIi9O';
+var MOCK=/[?&]mock=1/.test(location.search),FAST=/[?&]fast=1/.test(location.search);
+var WAKE_MS=(FAST?20:600)*1000,WAKE_MAX=3;
+var db=null;try{if(!MOCK&&window.supabase)db=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY,{auth:{persistSession:false,storageKey:'bdesk-desk'}})}catch(e){db=null}
+
+var $=function(s){return document.querySelector(s)};
+var pad=function(n){return n<10?'0'+n:''+n};
+var esc=function(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})};
+var LSg=function(k,d){try{var v=localStorage.getItem(k);return v?JSON.parse(v):d}catch(e){return d}},LSs=function(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}};
+function fmtD(d){return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate())}
+function bizToday(){var d=new Date(now());if(d.getHours()<1||(d.getHours()===1&&d.getMinutes()<10))d.setDate(d.getDate()-1);return fmtD(d)}
+function roomOf(n){n=+n;if(!n)return '';return n<=38?'1열람실':n<=75?'2열람실':n<=87?'3열람실':n<=99?'4열람실':''}
+function seatTxt(n){return n?roomOf(n)+' '+n+'번':'자리 미배정'}
+function hm(ts){var d=new Date(ts);return pad(d.getHours())+':'+pad(d.getMinutes())}
+function mmss(ms){var neg=ms<0;ms=Math.abs(ms);var s=Math.floor(ms/1000);return (neg?'+':'')+pad(Math.floor(s/60))+':'+pad(s%60)}
+function ago(ts){var m=Math.floor((now()-new Date(ts).getTime())/60000);return m<1?'방금':m<60?m+'분 전':Math.floor(m/60)+'시간 '+(m%60)+'분 전'}
+var KIND={question:'질문',material:'자료 요청',wake:'깨우기',call:'데스크 호출',message:'메시지'};
+var STAT={new:'새 요청',doing:'처리 중',done:'완료',cancel:'취소'};
+
+/* ===== 서버 시계 ===== */
+var OFF=0;function now(){return Date.now()+OFF}
+async function syncClock(){if(MOCK||!db)return;try{var t0=Date.now();var r=await db.rpc('bestian_now');var t1=Date.now();if(!r.error&&r.data)OFF=new Date(r.data).getTime()-(t0+t1)/2}catch(e){}}
+
+/* ===== 데이터 (MOCK = 이 브라우저 안에서만 도는 가짜 서버, 화면 확인용) ===== */
+var MK='bdesk_mock';
+function mget(){return LSg(MK,{req:[],msg:[],bonus:[],seq:1})}
+function mset(s){LSs(MK,s);setTimeout(onChange,0)}
+function mBiz(){return bizToday()}
+var api={
+  reqs:async function(date){if(MOCK)return mget().req.filter(function(r){return r.biz_date===date});
+    var r=await db.from('bestian_desk_requests').select('*').eq('biz_date',date).order('created_at',{ascending:true});if(r.error)throw r.error;return r.data||[]},
+  updReq:async function(id,p){if(MOCK){var s=mget();s.req.forEach(function(r){if(r.id===id)Object.assign(r,p)});mset(s);return}
+    var r=await db.from('bestian_desk_requests').update(p).eq('id',id);if(r.error)throw r.error},
+  msgs:async function(date){if(MOCK)return mget().msg.filter(function(r){return r.biz_date===date});
+    var r=await db.from('bestian_desk_messages').select('*').eq('biz_date',date).order('created_at',{ascending:true});if(r.error)throw r.error;return r.data||[]},
+  addMsg:async function(o){if(MOCK){var s=mget();o.id=s.seq++;o.created_at=new Date().toISOString();o.biz_date=mBiz();o.read_at=null;s.msg.push(o);mset(s);return}
+    var r=await db.from('bestian_desk_messages').insert(o);if(r.error)throw r.error},
+  bonus:async function(date){if(MOCK)return mget().bonus.filter(function(r){return r.biz_date===date});
+    var r=await db.from('bestian_desk_wake_bonus').select('*').eq('biz_date',date);if(r.error)throw r.error;return r.data||[]},
+  addBonus:async function(sid,date){var cur=(BONUS[sid]||0)+1;if(MOCK){var s=mget();s.bonus=s.bonus.filter(function(b){return !(b.biz_date===date&&b.student_id===sid)});s.bonus.push({biz_date:date,student_id:sid,extra:cur});mset(s);return}
+    var r=await db.from('bestian_desk_wake_bonus').upsert({biz_date:date,student_id:sid,extra:cur});if(r.error)throw r.error},
+  students:async function(date){
+    if(MOCK)return [{id:'u0',name:'김베스',seat:16},{id:'u1',name:'이하안',seat:21},{id:'u2',name:'박철산',seat:52},{id:'u3',name:'최개봉',seat:80},{id:'u4',name:'정청라',seat:93}];
+    var a=await db.from('reading_room_attendance').select('student_id,check_in_time,check_out_time').eq('attend_date',date);if(a.error)throw a.error;
+    var ids=(a.data||[]).filter(function(x){return x.check_in_time&&!x.check_out_time}).map(function(x){return x.student_id});if(!ids.length)return [];
+    var u=await db.from('users').select('id,name').in('id',ids);var s=await db.from('reading_room_seats').select('seat_no,student_id').in('student_id',ids);
+    var seat={};(s.data||[]).forEach(function(x){seat[x.student_id]=x.seat_no});
+    return (u.data||[]).map(function(x){return {id:x.id,name:x.name,seat:seat[x.id]||null}})}
+};
+
+/* ===== 상태 ===== */
+var REQ=[],MSG=[],BONUS={},STU=[],TAB='all',SEEN=null,first=true,lastWake={};
+$('#me').value=LSg('bdesk_me','');$('#me').addEventListener('input',function(){LSs('bdesk_me',$('#me').value.trim())});
+function meName(){return $('#me').value.trim()||'데스크'}
+
+async function load(){var d=bizToday();
+  try{var res=await Promise.all([api.reqs(d),api.msgs(d),api.bonus(d)]);REQ=res[0];MSG=res[1];BONUS={};res[2].forEach(function(b){BONUS[b.student_id]=b.extra});setConn(true)}
+  catch(e){setConn(false);return}
+  /* 새 요청 알림음 */
+  var ids={};REQ.forEach(function(r){ids[r.id]=1});
+  if(SEEN&&!first){var fresh=REQ.filter(function(r){return !SEEN[r.id]&&r.status==='new'});
+    if(fresh.length){var w=fresh.some(function(r){return r.kind==='wake'});beep(w?'wake':'req');notify(fresh[0])}}
+  SEEN=ids;first=false;render()}
+async function loadStu(){try{STU=await api.students(bizToday());STU.sort(function(a,b){return (a.seat||999)-(b.seat||999)});renderTo()}catch(e){}}
+var tmr=null;function onChange(){clearTimeout(tmr);tmr=setTimeout(load,250)}
+function setConn(ok){var c=$('#conn');c.textContent=MOCK?'연습 모드':ok?'● 실시간 연결됨':'연결 끊김 · 재시도 중';c.className='pill'+(ok||MOCK?'':' bad')}
+
+function live(){if(MOCK){window.addEventListener('storage',function(e){if(e.key===MK)onChange()});return}
+  if(!db)return;try{db.channel('bdesk-desk').on('postgres_changes',{event:'*',schema:'public',table:'bestian_desk_requests'},onChange)
+    .on('postgres_changes',{event:'*',schema:'public',table:'bestian_desk_messages'},onChange)
+    .on('postgres_changes',{event:'*',schema:'public',table:'bestian_desk_wake_bonus'},onChange)
+    .subscribe(function(st){if(st==='SUBSCRIBED')setConn(true);else if(st==='CHANNEL_ERROR'||st==='TIMED_OUT')setConn(false)})}catch(e){}}
+
+function used(sid){return REQ.filter(function(r){return r.student_id===sid&&r.kind==='wake'}).length}
+function limit(sid){return WAKE_MAX+(BONUS[sid]||0)}
+
+/* ===== 그리기 ===== */
+function render(){renderWakes();renderReqs();renderSents();renderTo()}
+function activeWakes(){return REQ.filter(function(r){return r.kind==='wake'&&(r.status==='new'||r.status==='doing')}).sort(function(a,b){return new Date(a.wake_until)-new Date(b.wake_until)})}
+function renderWakes(){var w=activeWakes(),n=now();$('#wakeN').textContent=w.length;
+  $('#wakes').innerHTML=w.length?w.map(function(r){var left=new Date(r.wake_until).getTime()-n;var cls=left<=0?'due':left<=60000?'soon':'';
+    return '<div class="wake '+cls+'"><div><div class="nm">'+esc(r.student_name)+'<small>'+used(r.student_id)+'/'+limit(r.student_id)+'회</small></div><div class="meta">'+esc(seatTxt(r.seat_no))+' · '+hm(r.created_at)+' 잠듦</div></div><div class="cd">'+(left<=0?'⏰ '+mmss(left):mmss(left))+'</div>'
+      +'<div class="act"><button class="btn sm ok" data-woke="'+r.id+'">깨웠음</button></div></div>'}).join(''):'<div class="empty">지금 자는 학생이 없어요</div>';
+  var over=w.filter(function(r){return new Date(r.wake_until).getTime()-n<-60000});
+  $('#alarm').classList.toggle('on',over.length>0);
+  $('#alarmList').innerHTML=over.map(function(r){return '<div>'+esc(seatTxt(r.seat_no))+' '+esc(r.student_name)+' <button class="btn" data-woke="'+r.id+'">깨웠음</button></div>'}).join('');
+  var due=w.filter(function(r){return new Date(r.wake_until).getTime()-n<=0});
+  document.title=due.length?'⏰ 깨우기 '+due.length+'명 · 베스티안 데스크':(REQ.some(function(r){return r.status==='new'&&r.kind!=='wake'})?'● 새 요청 · 베스티안 데스크':'베스티안 데스크')}
+
+function renderReqs(){var open=REQ.filter(function(r){return r.kind!=='wake'&&(r.status==='new'||r.status==='doing')});
+  var cnt={all:open.length};open.forEach(function(r){cnt[r.kind]=(cnt[r.kind]||0)+1});
+  $('#tabs').innerHTML=[['all','전체'],['question','질문'],['material','자료'],['call','호출'],['message','메시지']].map(function(t){return '<button type="button" class="'+(TAB===t[0]?'on':'')+'" data-tab="'+t[0]+'">'+t[1]+(cnt[t[0]]?' '+cnt[t[0]]:'')+'</button>'}).join('');
+  var list=open.filter(function(r){return TAB==='all'||r.kind===TAB});
+  $('#reqN').textContent=open.length;
+  $('#reqs').innerHTML=list.length?list.map(card).join(''):'<div class="empty">처리할 요청이 없어요</div>';
+  var done=REQ.filter(function(r){return r.status==='done'||r.status==='cancel'}).reverse();
+  $('#doneN').textContent='('+done.length+')';
+  $('#dones').innerHTML=done.length?done.map(card).join(''):'<div class="empty">아직 없어요</div>'}
+function card(r){var open=r.status==='new'||r.status==='doing';
+  var wakeInfo=r.kind==='wake'?(r.self_woke?'스스로 일어남':'깨움')+(r.done_at?' '+hm(r.done_at):''):'';
+  return '<div class="req k-'+r.kind+' '+r.status+'"><div class="hd"><span class="tag">'+KIND[r.kind]+(r.subject?' · '+esc(r.subject):'')+'</span><span class="who2">'+esc(r.student_name)+'</span><span class="seat">'+esc(seatTxt(r.seat_no))+'</span><span class="st '+r.status+'">'+STAT[r.status]+'</span><span class="ago">'+hm(r.created_at)+' · '+ago(r.created_at)+'</span></div>'
+    +(r.body?'<div class="body">'+esc(r.body)+'</div>':'')+(wakeInfo?'<div class="hint">'+wakeInfo+'</div>':'')
+    +(r.image_url?'<img src="'+esc(r.image_url)+'" alt="첨부 사진" data-zoom="1">':'')
+    +(r.reply?'<div class="reply">↩ 데스크 답장: '+esc(r.reply)+'</div>':'')
+    +(r.done_by&&!open?'<div class="hint">처리: '+esc(r.done_by)+(r.done_at?' · '+hm(r.done_at):'')+'</div>':'')
+    +(open?'<div class="act">'+(r.status==='new'?'<button class="btn sm" data-doing="'+r.id+'">확인</button>':'')+'<button class="btn sm ok" data-done="'+r.id+'">완료</button><input class="inp" data-rin="'+r.id+'" maxlength="120" placeholder="답장 (예: 프린트 갖다줄게요)"><button class="btn sm g" data-reply="'+r.id+'">답장</button><button class="btn sm g" data-cancel="'+r.id+'">취소</button></div>':'')+'</div>'}
+function renderTo(){var sel=$('#to'),v=sel.value;
+  sel.innerHTML='<option value="">학생 선택 (입실 중 '+STU.length+'명)</option>'+STU.map(function(s){return '<option value="'+esc(s.id)+'">'+esc(s.seat?s.seat+'번 ':'')+esc(s.name)+(s.seat?' · '+roomOf(s.seat):'')+'</option>'}).join('');
+  sel.value=v;var s=STU.filter(function(x){return x.id===sel.value})[0];
+  $('#toInfo').textContent=s?'오늘 깨우기 '+used(s.id)+' / '+limit(s.id)+'회 사용':''}
+function renderSents(){var stuName={};STU.forEach(function(s){stuName[s.id]=s.name});REQ.forEach(function(r){stuName[r.student_id]=r.student_name});
+  var m=MSG.slice().reverse().slice(0,30);
+  $('#sents').innerHTML=m.length?'<div class="hint" style="margin:6px 0 2px">오늘 보낸 메시지</div>'+m.map(function(x){return '<div class="sent"><span class="t">'+hm(x.created_at)+'</span><span><b>'+(x.student_id?esc(stuName[x.student_id]||'학생'):'전체')+'</b> '+esc(x.body)+'</span><span class="r" style="color:'+(x.read_at?'var(--green)':'var(--mute)')+'">'+(x.student_id?(x.read_at?'읽음 ✓':'안 읽음'):'공지')+'</span></div>'}).join(''):''}
+
+/* ===== 동작 ===== */
+function toast(t){var e=$('#toast');e.textContent=t;e.classList.add('on');clearTimeout(e._t);e._t=setTimeout(function(){e.classList.remove('on')},2200)}
+async function upd(id,p,msg){try{await api.updReq(+id,p);toast(msg);load()}catch(e){toast('저장 실패. 인터넷을 확인하세요.')}}
+document.addEventListener('click',function(e){var t=e.target,id;
+  if((id=t.getAttribute('data-woke'))){upd(id,{status:'done',done_at:new Date(now()).toISOString(),done_by:meName()},'깨움 처리했어요');return}
+  if((id=t.getAttribute('data-doing'))){upd(id,{status:'doing',done_by:meName()},'처리 중으로 바꿨어요');return}
+  if((id=t.getAttribute('data-done'))){upd(id,{status:'done',done_at:new Date(now()).toISOString(),done_by:meName()},'완료했어요');return}
+  if((id=t.getAttribute('data-cancel'))){if(!confirm('이 요청을 취소할까요?'))return;upd(id,{status:'cancel',done_at:new Date(now()).toISOString(),done_by:meName()},'취소했어요');return}
+  if((id=t.getAttribute('data-reply'))){var inp=document.querySelector('[data-rin="'+id+'"]');var v=inp.value.trim();if(!v){inp.focus();return}
+    var r=REQ.filter(function(x){return x.id===+id})[0];upd(id,{reply:v,replied_at:new Date(now()).toISOString(),status:r&&r.status==='new'?'doing':r.status,done_by:meName()},'답장을 보냈어요');return}
+  if(t.getAttribute('data-tab')){TAB=t.getAttribute('data-tab');renderReqs();return}
+  if(t.getAttribute('data-zoom')){$('#zoom img').src=t.src;$('#zoom').classList.add('on');return}
+  if(t.closest('#zoom')){$('#zoom').classList.remove('on');return}
+  if(t.getAttribute('data-q')){$('#msg').value=t.getAttribute('data-q');$('#msg').focus();return}});
+document.addEventListener('keydown',function(e){if(e.key==='Enter'&&e.target.getAttribute('data-rin')){var b=document.querySelector('[data-reply="'+e.target.getAttribute('data-rin')+'"]');if(b)b.click()}});
+$('#to').addEventListener('change',renderTo);
+$('#sendOne').addEventListener('click',async function(){var sid=$('#to').value,v=$('#msg').value.trim();if(!sid){toast('학생을 먼저 고르세요');return}if(!v){$('#msg').focus();return}
+  try{await api.addMsg({student_id:sid,body:v,kind:/데스크로 와/.test(v)?'call':'msg',sent_by:meName()});$('#msg').value='';toast('보냈어요');load()}catch(e){toast('보내기 실패')}});
+$('#sendAll').addEventListener('click',async function(){var v=$('#notice').value.trim();if(!v){$('#notice').focus();return}if(!confirm('입실한 모든 학생에게 공지를 보낼까요?\n\n'+v))return;
+  try{await api.addMsg({student_id:null,body:v,kind:'notice',sent_by:meName()});$('#notice').value='';toast('전체 공지를 보냈어요');load()}catch(e){toast('보내기 실패')}});
+$('#bonus').addEventListener('click',async function(){var sid=$('#to').value;if(!sid){toast('학생을 먼저 고르세요');return}var s=STU.filter(function(x){return x.id===sid})[0];
+  if(!confirm((s?s.name:'학생')+'에게 오늘 깨우기 1회를 더 줄까요?'))return;
+  try{await api.addBonus(sid,bizToday());toast('깨우기 1회를 더 줬어요');load()}catch(e){toast('저장 실패')}});
+
+/* ===== 소리·알림 ===== */
+var AC=null,SOUND=false;
+$('#sound').addEventListener('click',function(){try{AC=AC||new (window.AudioContext||window.webkitAudioContext)();AC.resume()}catch(e){}SOUND=true;var b=$('#sound');b.textContent='🔔 소리 켜짐';b.className='pill';beep('req');
+  try{if(window.Notification&&Notification.permission==='default')Notification.requestPermission()}catch(e){}});
+function tone(f,t0,d,vol){var o=AC.createOscillator(),g=AC.createGain();o.type='square';o.frequency.value=f;g.gain.setValueAtTime(0,AC.currentTime+t0);g.gain.linearRampToValueAtTime(vol,AC.currentTime+t0+.01);g.gain.linearRampToValueAtTime(0,AC.currentTime+t0+d);o.connect(g);g.connect(AC.destination);o.start(AC.currentTime+t0);o.stop(AC.currentTime+t0+d+.02)}
+function beep(kind){if(!SOUND||!AC)return;try{
+  if(kind==='req'){tone(880,0,.12,.15);tone(1175,.16,.16,.15)}
+  else if(kind==='soon'){tone(660,0,.2,.12)}
+  else if(kind==='wake'){tone(523,0,.12,.15);tone(659,.15,.12,.15);tone(784,.3,.18,.15)}
+  else if(kind==='due'){for(var i=0;i<3;i++){tone(988,i*.25,.18,.22)}}
+  else if(kind==='over'){for(var j=0;j<6;j++){tone(j%2?784:1319,j*.18,.15,.35)}}}catch(e){}}
+function notify(r){try{if(document.hidden&&window.Notification&&Notification.permission==='granted')new Notification('베스티안 데스크 · '+KIND[r.kind],{body:r.student_name+' ('+seatTxt(r.seat_no)+') '+(r.body||'')})}catch(e){}}
+
+/* ===== 1초마다: 시계·카운트다운·알람 ===== */
+var lastAlarm=0;
+setInterval(function(){var n=new Date(now());$('#clock').textContent=pad(n.getHours())+':'+pad(n.getMinutes())+':'+pad(n.getSeconds());
+  renderWakes();var w=activeWakes(),t=now();var due=false,over=false;
+  w.forEach(function(r){var left=new Date(r.wake_until).getTime()-t;if(left<=0)due=true;if(left<-60000)over=true;
+    if(left<=60000&&left>0&&!lastWake[r.id]){lastWake[r.id]=1;beep('soon')}});
+  if(due&&t-lastAlarm>(over?2000:4000)){lastAlarm=t;beep(over?'over':'due')}},1000);
+setInterval(load,20000);setInterval(loadStu,60000);setInterval(syncClock,300000);
+
+(async function(){await syncClock();live();load();loadStu()})();
+})();
+</script>
+</body>
+</html>
