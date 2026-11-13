@@ -7,6 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Gowun+Dodum&family=Jua&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="bestian-nick.js"></script>
 <style>
 /* 센터 TV·모니터용 방영 화면: 4개 열람실을 한 화면에, 출결 시스템 데이터로 캐릭터가 실시간으로 드나듦 */
 :root{
@@ -352,8 +353,8 @@ function rankList(from){
 function drawRank(el,list){
   if(!list.length){el.innerHTML='<li class="empty">아직 기록이 없어요</li>';return}
   var live={};for(var k in target)if(target[k].status==='study')live[target[k].name]=1;
-  el.innerHTML=list.map(function(r,i){var u=users[r.id]||{},nm=rankName(u.name||'');
-    return '<li'+(live[u.name]?' class="me"':'')+'><em>'+(i+1)+'</em><span><i>'+esc((u.school||'')+(u.grade?' '+u.grade+'학년':''))+'</i>'+esc(nm)+'</span><b>'+hm(r.ms)+'</b></li>'}).join('');
+  el.innerHTML=list.map(function(r,i){var u=users[r.id]||{},nm=window.BestianNick?BestianNick.name(r.id):rankName(u.name||'');
+    return '<li'+(live[u.name]?' class="me"':'')+'><em>'+(i+1)+'</em><span><i>'+esc(u.grade?u.grade+(/^\d+$/.test(String(u.grade))?'학년':''):'')+'</i>'+esc(nm)+'</span><b>'+hm(r.ms)+'</b></li>'}).join('');
 }
 function renderRanks(){
   var td=todayStr(),ws=dstr(weekStart()),ms=dstr(monthStart()),d=new Date();
@@ -475,10 +476,10 @@ function checkRankChange(lists){
   if(rankSig===null){rankSig=sig;return}
   if(sig===rankSig)return;
   var a=sig.split('|'),b=rankSig.split('|'),which=[],who='';
-  ['오늘','이번 주','이번 달'].forEach(function(nm,i){if(a[i]!==b[i]&&a[i]){which.push(nm);if(!who)who=rankName((users[a[i]]||{}).name||'')}});
+  ['오늘','이번 주','이번 달'].forEach(function(nm,i){if(a[i]!==b[i]&&a[i]){which.push(nm);if(!who)who=window.BestianNick?BestianNick.name(a[i]):rankName((users[a[i]]||{}).name||'')}});
   rankSig=sig;
   if(!which.length)return;
-  celebrate('🎉 '+which.join('·')+' 1등이 '+(who?who+' 학생으로 ':'')+'바뀌었어요! 모두 축하해 주세요');
+  celebrate('🎉 '+which.join('·')+' 1등이 '+(who?who+'(으)로 ':'')+'바뀌었어요! 모두 축하해 주세요');
 }
 function tick(){
   var d=new Date();$('#clock').textContent=pad(d.getHours())+':'+pad(d.getMinutes())+':'+pad(d.getSeconds());
@@ -500,5 +501,6 @@ else{
 }
 })();
 </script>
+<script>if(window.BestianNick){BestianNick.load(true);setInterval(function(){BestianNick.load(true)},60000)}</script>
 </body>
 </html>

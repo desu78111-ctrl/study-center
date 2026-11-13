@@ -73,11 +73,12 @@ body{background:#eaf4ec}
     <div class="mine" id="rmine" hidden></div>
     <ol class="rank" id="rlist"></ol>
     <p class="hint" id="rmsg" style="color:var(--red)"></p>
-    <p class="hint">센터 TV 순위와 같은 방식이에요. 입실부터 하원까지에서 외출한 시간을 뺀 순공시간으로 계산하고, 이름은 성만 보여요. 초록 점은 지금 공부 중이에요.</p>
+    <p class="hint">센터 TV 순위와 같은 방식이에요. 입실부터 하원까지에서 외출한 시간을 뺀 순공시간으로 계산하고, 이름 대신 닉네임으로 보여요. 초록 점은 지금 공부 중이에요.</p>
   </div>
-  <p class="hint" style="text-align:center">좌석도에는 이름이 없고 순위에는 성만 보여요 · 키오스크 입실·외출·하원이 바로 반영돼요 · <a href="bestian-student.html" style="color:var(--blue);font-weight:700">내 스케줄러로</a></p>
+  <p class="hint" style="text-align:center">좌석도에는 이름이 없고 순위에는 닉네임만 보여요 · 키오스크 입실·외출·하원이 바로 반영돼요 · <a href="bestian-student.html" style="color:var(--blue);font-weight:700">내 스케줄러로</a></p>
 </main>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<script src="bestian-nick.js"></script>
 <script>
 (function(){
 "use strict";
@@ -151,8 +152,8 @@ function renderRank(){
   if(!ME){box.hidden=false;box.innerHTML='학생 센터에서 번호를 입력하면 <b>내 순위</b>가 여기에 보여요. <a href="bestian-student.html" style="color:var(--blue);font-weight:800">학생 센터 열기</a>'}
   else if(mine>-1){box.hidden=false;box.innerHTML='내 순위 <b>'+(mine+1)+'위</b> · '+fmtM(Math.round(list[mine].ms/60000))+' <span class="hint">(전체 '+list.length+'명 중)</span>'}
   else{box.hidden=false;box.innerHTML='아직 이 기간의 내 기록이 없어요. 키오스크에서 입실하면 순위에 올라가요.'}
-  $('#rlist').innerHTML=top.length?top.map(function(r,k){var me=meId&&String(r.id)===meId,nm=RK.users[String(r.id)]||'';
-    return '<li class="'+(me?'me ':'')+(live[String(r.id)]?'live':'')+'"><em>'+(k+1)+'</em><span>'+esc(rankName(nm)||'○○○')+(me?'<u>나</u>':'')+(live[String(r.id)]?'<i class="dot" title="지금 공부 중"></i>':'')+'</span><b>'+fmtM(Math.round(r.ms/60000))+'</b></li>'}).join('')
+  $('#rlist').innerHTML=top.length?top.map(function(r,k){var me=meId&&String(r.id)===meId,nm=window.BestianNick?BestianNick.name(r.id):(RK.users[String(r.id)]||'');
+    return '<li class="'+(me?'me ':'')+(live[String(r.id)]?'live':'')+'"><em>'+(k+1)+'</em><span>'+esc((window.BestianNick?nm:rankName(nm))||'○○○')+(me?'<u>나</u>':'')+(live[String(r.id)]?'<i class="dot" title="지금 공부 중"></i>':'')+'</span><b>'+fmtM(Math.round(r.ms/60000))+'</b></li>'}).join('')
     :'<li style="display:block;text-align:center;color:var(--mute)">아직 기록이 없어요. 입실하면 여기에 올라가요.</li>'}
 function mockRank(){
   var names=['김베스','이티안','박하안','정광명','최소하','한지원','오서준','윤다은','장민재','서예린','강하늘','임도현'],td=bizToday(),base=bizDate();RK.users={};RK.rows=[];
@@ -172,6 +173,7 @@ async function loadRank(){if(rankBusy)return;rankBusy=true;
       var keys=Object.keys(ids),nm={};
       if(keys.length){var u=await db.from('users').select('id,name').in('id',keys);if(u.error)throw u.error;(u.data||[]).forEach(function(x){nm[String(x.id)]=x.name})}
       RK.users=nm}
+    try{if(window.BestianNick)await BestianNick.load(true)}catch(e){}
     $('#rmsg').textContent='';renderRank();
   }catch(e){$('#rmsg').textContent='순위를 불러오지 못했어요. 잠시 후 다시 시도해요.'}
   finally{rankBusy=false}}

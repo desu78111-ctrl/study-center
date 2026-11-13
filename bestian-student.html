@@ -107,7 +107,7 @@ main{max-width:1080px;margin:0 auto;padding:18px 16px}
   <div class="me"><div class="who" id="who" hidden></div><img src="logo.png" alt="BESTIAN"></div>
 </div></div>
 <nav aria-label="메뉴"><div class="in">
-  <a href="#planner">스케줄러</a><a href="#desk">🙋 데스크</a><a href="#history">한국사</a><a href="english-words.html">영단어</a><a href="#korean">매삼비 매삼문</a><a href="#rules">일과표·규칙</a><a href="bestian-live-seats.html">온라인 실시간</a><a href="bestian-live-seats.html#rank">순위</a>
+  <a href="#planner">스케줄러</a><a href="#desk">🙋 데스크</a><a href="#history">한국사</a><a href="english-words.html">영단어</a><a href="#korean">매삼비 매삼문</a><a href="#rules">일과표·규칙</a><a href="bestian-live-seats.html">온라인 실시간</a><a href="bestian-live-seats.html#rank">순위</a><a href="#league">🏃 순공 마라톤</a>
 </div></nav>
 
 <main>
@@ -176,6 +176,11 @@ main{max-width:1080px;margin:0 auto;padding:18px 16px}
   <div class="panel"><h3>이렇게 해요</h3><ul><li>기출 문제 저작권 때문에 매삼비 매삼문은 센터 전용 페이지에서 풀어요. 자기 학년 과정을 열면 등록 없이 바로 <b>내 학습표</b>가 나와요. Day 1은 처음부터 열려 있어요</li><li>채점 화면의 <b>결과 복사</b>를 눌러 카톡으로 멘토 선생님께 보내요</li><li>Day 1을 제출해야 Day 2가 열려요. 제출하면 자동 채점되고 틀린 문항 해설이 바로 열려요</li></ul></div>
 </div></section>
 
+<section class="view" id="v-league" hidden><div class="wrap">
+  <div class="title"><h2>순공 마라톤</h2><span>스터디카페에서 공부한 시간만큼 달려요 · 1분 = 10m · 순위에는 닉네임만 나와요</span></div>
+  <iframe id="lgFrame" title="순공 마라톤" style="width:100%;border:0;min-height:600px;display:block;background:transparent"></iframe>
+</div></section>
+
 <section class="view" id="v-rules" hidden><div class="wrap">
   <div class="title"><h2>하루 일과표 · 규칙</h2><span>겨울방학 운영 09:00 ~ 24:00 · 의무 학습 주 50시간</span></div>
   <div class="g2"><div class="panel"><img src="timetable.png" alt="겨울방학 하루 일과표"></div><div class="panel" style="display:grid;gap:12px"><img src="agreement1.png" alt="규칙 동의서 1쪽"><img src="agreement2.png" alt="규칙 동의서 2쪽"></div></div>
@@ -183,6 +188,7 @@ main{max-width:1080px;margin:0 auto;padding:18px 16px}
 </main>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<script src="bestian-nick.js"></script>
 <script>
 (function(){
 "use strict";
@@ -225,11 +231,12 @@ function minutesOf(row,isToday){if(!row||!row.check_in_time)return 0;var ci=tMin
 
 /* ===== 상태 ===== */
 var ME=LSg('bs_student',null),SEAT=null,ROWS=[],TODAY=null,chan=null;
-var views=['planner','desk','history','korean','rules'];
+var views=['planner','desk','history','korean','rules','league'];
 function route(){var h=(location.hash||'').replace('#','');var cur=views.indexOf(h)>-1?h:'planner';
   $('#v-login').hidden=!!ME;views.forEach(function(v){$('#v-'+v).hidden=!ME||v!==cur});
   document.querySelectorAll('nav a').forEach(function(a){if(a.getAttribute('href')==='#'+cur)a.setAttribute('aria-current','page');else a.removeAttribute('aria-current')});
-  if(ME&&cur==='history')renderH();if(ME&&cur==='planner')plTick()}
+  if(ME&&cur==='league'){$('#lgFrame').src='bestian-league.html?embed=1'+(MOCK?'&mock=1':'')+'&t='+Date.now()}if(ME&&cur==='history')renderH();if(ME&&cur==='planner')plTick()}
+window.addEventListener('message',function(e){if(e.data&&e.data.bsLeagueH){var f=document.getElementById('lgFrame');if(f)f.style.height=Math.max(600,e.data.bsLeagueH+20)+'px'}});
 window.addEventListener('hashchange',function(){route();window.scrollTo({top:0})});
 function renderWho(){var w=$('#who');if(!ME){w.hidden=true;return}w.hidden=false;w.innerHTML=esc(ME.name)+' 학생<i>'+(SEAT?'자리 '+esc(SEAT)+'번':'자리 미배정')+'</i><button type="button" id="logout">다른 학생</button>';
   $('#logout').onclick=function(){if(!confirm('다른 학생으로 바꿀까요? (이 기기의 기억을 지웁니다)'))return;ME=null;SEAT=null;LSs('bs_student',null);stopLive();route();renderWho()}}
@@ -471,6 +478,64 @@ setInterval(syncClock,300000);
 window.addEventListener('focus',function(){checkMe();if(ME)load()});
 document.addEventListener('click',function(e){if(e.target.id==='logout')setTimeout(checkMe,50)},true);
 (async function(){await syncClock();checkMe();setInterval(checkMe,2000)})();
+})();
+</script>
+
+<!-- ===== 닉네임: 처음 들어온 학생은 닉네임을 정해야 시작 (순위·순공 리그에 이 닉네임만 나옴) ===== -->
+<style>
+#nkGate{position:fixed;inset:0;z-index:9999;background:rgba(10,24,44,.72);display:flex;align-items:center;justify-content:center;padding:18px}
+#nkGate[hidden]{display:none}
+#nkGate .box{background:#fff;border-radius:16px;max-width:420px;width:100%;padding:24px 22px;border-top:6px solid var(--yellow,#f2c100);box-shadow:0 20px 50px rgba(0,0,0,.3)}
+#nkGate h3{margin:0 0 6px;font-size:21px;font-weight:900;color:var(--ink,#1d2328)}
+#nkGate p{margin:0 0 12px;color:var(--mute,#6b737a);font-size:14px;line-height:1.55}
+#nkGate input{width:100%;font:inherit;font-size:20px;font-weight:700;padding:12px 14px;border:2px solid var(--line,#d8dfe5);border-radius:10px;text-align:center}
+#nkGate input:focus{outline:none;border-color:var(--blue,#0072b5)}
+#nkGate .err{min-height:20px;color:var(--red,#b02a37);font-size:13.5px;font-weight:700;margin:8px 0}
+#nkGate .row{display:flex;gap:8px}
+#nkGate button{flex:1;font:inherit;font-weight:800;font-size:16px;border:0;border-radius:10px;padding:13px;cursor:pointer;background:var(--blue,#0072b5);color:#fff}
+#nkGate button.ghost{background:#eef2f6;color:var(--ink,#1d2328);flex:0 0 auto;padding:13px 16px}
+#nkGate .rule{font-size:12.5px;color:var(--mute,#6b737a);margin-top:12px;line-height:1.6}
+.nkChip{display:inline-block;margin-left:6px;background:var(--yellow,#f2c100);color:#14284b;border-radius:99px;padding:1px 9px;font-size:12px;font-weight:900;font-style:normal;cursor:pointer;vertical-align:middle}
+</style>
+<div id="nkGate" hidden><div class="box">
+  <h3 id="nkTitle">닉네임을 정해 주세요</h3>
+  <p id="nkDesc">순위표와 <b>순공 마라톤</b>에는 이름 대신 <b>닉네임</b>만 나와요.<br>한 번 정하면 계속 이 닉네임으로 달려요.</p>
+  <input id="nkIn" maxlength="10" placeholder="예: 새벽세시" autocomplete="off">
+  <div class="err" id="nkErr"></div>
+  <div class="row"><button type="button" class="ghost" id="nkCancel" hidden>취소</button><button type="button" id="nkSave">이 닉네임으로 시작</button></div>
+  <div class="rule">2~10자 · 한글/영어/숫자 · <b>실명·욕설 금지</b> · 다른 학생과 겹치면 안 돼요</div>
+</div></div>
+<script>
+(function(){
+"use strict";
+if(!window.BestianNick)return;
+var N=window.BestianNick,cur=null,busy=false;
+function me(){try{var v=JSON.parse(localStorage.getItem('bs_student')||'null');return v&&v.id?v:null}catch(e){return null}}
+var g=document.getElementById('nkGate'),inp=document.getElementById('nkIn'),err=document.getElementById('nkErr'),cancel=document.getElementById('nkCancel');
+function open(change){var m=me();if(!m)return;
+  document.getElementById('nkTitle').textContent=change?'닉네임 바꾸기':'닉네임을 정해 주세요';
+  cancel.hidden=!change;inp.value=change?N.get(m.id):'';err.textContent='';g.hidden=false;setTimeout(function(){inp.focus()},50)}
+cancel.onclick=function(){g.hidden=true};
+async function save(){var m=me();if(!m||busy)return;var v=inp.value.trim();
+  await N.load(true);var e=N.check(v,m.name,m.id);if(e){err.textContent=e;return}
+  busy=true;err.textContent='저장 중…';var r=await N.save(m.id,v,'student');busy=false;
+  if(!r.ok){err.textContent=r.msg||'저장 오류';return}
+  g.hidden=true;chip()}
+document.getElementById('nkSave').onclick=save;inp.addEventListener('keydown',function(e){if(e.key==='Enter')save()});
+// 머리 부분 이름 옆에 닉네임 표시 (누르면 변경)
+function chip(){var w=document.getElementById('who'),m=me();if(!w||!m||w.hidden)return;var nk=N.get(m.id);if(!nk)return;
+  var c=w.querySelector('.nkChip');if(c&&c.dataset.v===nk)return;if(c)c.remove();
+  c=document.createElement('i');c.className='nkChip';c.dataset.v=nk;c.title='닉네임 바꾸기';c.textContent='🏃 '+nk;c.onclick=function(){open(true)};
+  var lo=w.querySelector('#logout');lo?w.insertBefore(c,lo):w.appendChild(c)}
+var who=document.getElementById('who');if(who&&window.MutationObserver)new MutationObserver(function(){chip()}).observe(who,{childList:true,subtree:false,attributes:true});
+// 로그인한 학생이 바뀌면 닉네임 확인 → 없으면 정하기 창
+var failAt=0;
+async function tick(){var m=me(),id=m?String(m.id):null;if(id===cur)return;if(Date.now()-failAt<30000)return;cur=id;if(!id){g.hidden=true;return}
+  try{await N.load(true)}catch(e){return}
+  if(String(cur)!==id)return;
+  if(!N.ok()){cur=null;failAt=Date.now();return}            // 닉네임 표가 아직 없거나 연결 실패 → 막지 않고 다음에 다시 확인
+  if(!N.get(id))open(false);else chip()}
+tick();setInterval(tick,1000);
 })();
 </script>
 </body>
