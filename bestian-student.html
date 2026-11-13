@@ -320,7 +320,10 @@ var SUPABASE_URL='https://qtpftloyumtffvgurvqv.supabase.co';
 var SUPABASE_KEY='sb_publishable_XGP9n-2fuBQFuJlAA5MJ8w_R8JYIi9O';
 var MOCK=/[?&]mock=1/.test(location.search),FAST=/[?&]fast=1/.test(location.search);
 var WAKE_MS=(FAST?20:600)*1000,WAKE_MAX=3;
-var db=null;try{if(!MOCK&&window.supabase)db=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY,{auth:{persistSession:false,storageKey:'bdesk-stu'}})}catch(e){db=null}
+/* 학생·출결·좌석은 원래 서버(db), 데스크 기록은 데스크 전용 서버(ddb) */
+var DESK_URL='https://eftroiiexkpnladkiypu.supabase.co';
+var DESK_KEY='sb_publishable_XEif-nOPOZRLjPK8KQRLJg_p-KJN9n8';
+var db=null,ddb=null;try{if(!MOCK&&window.supabase){db=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY,{auth:{persistSession:false,storageKey:'bdesk-stu'}});ddb=window.supabase.createClient(DESK_URL,DESK_KEY,{auth:{persistSession:false,storageKey:'bdesk-stu-d'}})}}catch(e){db=null;ddb=null}
 
 var $=function(s){return document.querySelector(s)};
 var pad=function(n){return n<10?'0'+n:''+n};
@@ -333,7 +336,7 @@ function hm(ts){var d=new Date(ts);return pad(d.getHours())+':'+pad(d.getMinutes
 function mmss(ms){ms=Math.abs(ms);var s=Math.floor(ms/1000);return pad(Math.floor(s/60))+':'+pad(s%60)}
 var KIND={question:'질문',material:'자료 요청',wake:'깨우기',call:'데스크 호출',message:'메시지'};
 var STAT={new:'보냄',doing:'데스크 확인',done:'완료',cancel:'취소됨'};
-async function syncClock(){if(MOCK||!db)return;try{var t0=Date.now();var r=await db.rpc('bestian_now');var t1=Date.now();if(!r.error&&r.data)OFF=new Date(r.data).getTime()-(t0+t1)/2}catch(e){}}
+async function syncClock(){if(MOCK||!ddb)return;try{var t0=Date.now();var r=await ddb.rpc('bestian_now');var t1=Date.now();if(!r.error&&r.data)OFF=new Date(r.data).getTime()-(t0+t1)/2}catch(e){}}
 
 /* ===== 데이터 (MOCK = 이 브라우저 안의 가짜 서버, bestian-desk.html?mock=1 과 함께 연습) ===== */
 var MK='bdesk_mock';
@@ -342,11 +345,11 @@ function mset(s){LSs(MK,s);setTimeout(onChange,0)}
 var api={
   seat:async function(sid){if(MOCK)return 16;var r=await db.from('reading_room_seats').select('seat_no').eq('student_id',sid).limit(1);if(r.error||!r.data||!r.data.length)return null;return r.data[0].seat_no},
   reqs:async function(sid,date){if(MOCK)return mget().req.filter(function(r){return r.student_id===sid&&r.biz_date===date});
-    var r=await db.from('bestian_desk_requests').select('*').eq('student_id',sid).eq('biz_date',date).order('created_at',{ascending:true});if(r.error)throw r.error;return r.data||[]},
+    var r=await ddb.from('bestian_desk_requests').select('*').eq('student_id',sid).eq('biz_date',date).order('created_at',{ascending:true});if(r.error)throw r.error;return r.data||[]},
   msgs:async function(sid,date){if(MOCK)return mget().msg.filter(function(m){return m.biz_date===date&&(!m.student_id||m.student_id===sid)});
-    var r=await db.from('bestian_desk_messages').select('*').eq('biz_date',date).or('student_id.is.null,student_id.eq.'+sid).order('created_at',{ascending:true});if(r.error)throw r.error;return r.data||[]},
+    var r=await ddb.from('bestian_desk_messages').select('*').eq('biz_date',date).or('student_id.is.null,student_id.eq.'+sid).order('created_at',{ascending:true});if(r.error)throw r.error;return r.data||[]},
   bonus:async function(sid,date){if(MOCK){var b=mget().bonus.filter(function(x){return x.student_id===sid&&x.biz_date===date})[0];return b?b.extra:0}
-    var r=await db.from('bestian_desk_wake_bonus').select('extra').eq('student_id',sid).eq('biz_date',date);if(r.error)return 0;return r.data&&r.data[0]?r.data[0].extra:0},
+    var r=await ddb.from('bestian_desk_wake_bonus').select('extra').eq('student_id',sid).eq('biz_date',date);if(r.error)return 0;return r.data&&r.data[0]?r.data[0].extra:0},
   add:async function(o){
     if(MOCK){var s=mget(),d=bizToday();
       if(o.kind==='wake'){var mine=s.req.filter(function(r){return r.student_id===o.student_id&&r.kind==='wake'});
@@ -355,14 +358,14 @@ var api={
         if(mine.filter(function(r){return r.biz_date===d}).length>=WAKE_MAX+(b?b.extra:0))throw new Error('WAKE_LIMIT')}
       var row=Object.assign({id:s.seq++,created_at:new Date().toISOString(),biz_date:d,status:'new',reply:null,done_at:null,self_woke:false,wake_until:o.kind==='wake'?new Date(Date.now()+WAKE_MS).toISOString():null},o);
       s.req.push(row);mset(s);return row}
-    var r=await db.from('bestian_desk_requests').insert(o).select().single();if(r.error)throw r.error;return r.data},
+    var r=await ddb.from('bestian_desk_requests').insert(o).select().single();if(r.error)throw r.error;return r.data},
   upd:async function(id,p){if(MOCK){var s=mget();s.req.forEach(function(r){if(r.id===id)Object.assign(r,p)});mset(s);return}
-    var r=await db.from('bestian_desk_requests').update(p).eq('id',id);if(r.error)throw r.error},
+    var r=await ddb.from('bestian_desk_requests').update(p).eq('id',id);if(r.error)throw r.error},
   readMsg:async function(id){if(MOCK){var s=mget();s.msg.forEach(function(m){if(m.id===id)m.read_at=new Date().toISOString()});mset(s);return}
-    await db.from('bestian_desk_messages').update({read_at:new Date(now()).toISOString()}).eq('id',id)},
+    await ddb.from('bestian_desk_messages').update({read_at:new Date(now()).toISOString()}).eq('id',id)},
   photo:async function(blob,sid){if(MOCK)return await new Promise(function(res){var fr=new FileReader();fr.onload=function(){res(fr.result)};fr.readAsDataURL(blob)});
-    var path=bizToday()+'/'+sid+'-'+Date.now()+'.jpg';var r=await db.storage.from('bestian-desk').upload(path,blob,{contentType:'image/jpeg',cacheControl:'86400',upsert:false});if(r.error)throw r.error;
-    return db.storage.from('bestian-desk').getPublicUrl(path).data.publicUrl}
+    var path=bizToday()+'/'+sid+'-'+Date.now()+'.jpg';var r=await ddb.storage.from('bestian-desk').upload(path,blob,{contentType:'image/jpeg',cacheControl:'86400',upsert:false});if(r.error)throw r.error;
+    return ddb.storage.from('bestian-desk').getPublicUrl(path).data.publicUrl}
 };
 
 /* ===== 상태 ===== */
@@ -373,11 +376,11 @@ function meNow(){var m=LSg('bs_student',null);return m&&m.id?m:null}
 async function checkMe(){var m=meNow();if((m&&m.id)!==(ME&&ME.id)){ME=m;REQ=[];MSG=[];BONUS=0;SEAT=null;stopLive();if(ME){try{SEAT=await api.seat(ME.id)}catch(e){}startLive()}render()}}
 async function load(){if(!ME)return;var d=bizToday();try{var r=await Promise.all([api.reqs(ME.id,d),api.msgs(ME.id,d),api.bonus(ME.id,d)]);REQ=r[0];MSG=r[1];BONUS=r[2]}catch(e){}render()}
 var tmr=null;function onChange(){clearTimeout(tmr);tmr=setTimeout(load,200)}
-function startLive(){load();if(MOCK||!db||!ME)return;
-  try{chan=db.channel('bdesk-'+ME.id).on('postgres_changes',{event:'*',schema:'public',table:'bestian_desk_requests',filter:'student_id=eq.'+ME.id},onChange)
+function startLive(){load();if(MOCK||!ddb||!ME)return;
+  try{chan=ddb.channel('bdesk-'+ME.id).on('postgres_changes',{event:'*',schema:'public',table:'bestian_desk_requests',filter:'student_id=eq.'+ME.id},onChange)
     .on('postgres_changes',{event:'*',schema:'public',table:'bestian_desk_messages'},onChange)
     .on('postgres_changes',{event:'*',schema:'public',table:'bestian_desk_wake_bonus',filter:'student_id=eq.'+ME.id},onChange).subscribe()}catch(e){}}
-function stopLive(){try{if(chan&&db)db.removeChannel(chan)}catch(e){}chan=null}
+function stopLive(){try{if(chan&&ddb)ddb.removeChannel(chan)}catch(e){}chan=null}
 if(MOCK)window.addEventListener('storage',function(e){if(e.key===MK)onChange();if(e.key==='bs_student')checkMe()});
 
 function wakesToday(){return REQ.filter(function(r){return r.kind==='wake'})}
