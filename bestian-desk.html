@@ -82,6 +82,21 @@ main{display:grid;grid-template-columns:360px minmax(0,1fr) 340px;gap:14px;paddi
 .toast{position:fixed;right:18px;bottom:18px;background:#1d2328;color:#fff;padding:10px 16px;border-radius:10px;z-index:70;opacity:0;transition:opacity .2s;pointer-events:none}
 .toast.on{opacity:1}
 details summary{cursor:pointer;font-weight:900;color:var(--blued)}
+/* 영단어 */
+.vocab{grid-column:1/-1}
+.vsum{display:flex;gap:6px 14px;flex-wrap:wrap;font-size:13.5px;margin-bottom:8px}
+.vsum b{font-size:18px;font-variant-numeric:tabular-nums}
+.vgrid{display:grid;grid-template-columns:minmax(0,2fr) minmax(0,1fr);gap:14px}
+@media(max-width:900px){.vgrid{grid-template-columns:minmax(0,1fr)}}
+.vt{width:100%;border-collapse:collapse;font-size:13.5px}
+.vt th{background:var(--soft);color:var(--blued);text-align:left;padding:6px 8px;font-weight:900;white-space:nowrap}
+.vt td{padding:6px 8px;border-bottom:1px solid var(--line);white-space:nowrap}
+.vt td.sc{font-weight:900;font-variant-numeric:tabular-nums}
+.vb{font-size:12px;font-weight:900;border-radius:6px;padding:1px 7px}
+.vb.ok{background:#e3f6ec;color:var(--green)}.vb.no{background:#fde8ea;color:var(--red)}.vb.re{background:#eee;color:var(--mute)}
+.vwrap{max-height:340px;overflow:auto}
+.vnot{display:flex;flex-wrap:wrap;gap:6px}
+.vnot span{border:1px solid var(--line);border-radius:999px;padding:3px 10px;font-size:13px;background:#fff}
 </style>
 </head>
 <body>
@@ -89,6 +104,7 @@ details summary{cursor:pointer;font-weight:900;color:var(--blued)}
   <h1><small>BESTIAN STUDY CENTER</small>스터디센터 데스크</h1>
   <span class="clock" id="clock">--:--:--</span>
   <span class="sp"></span>
+  <a class="pill" href="bestian-mentor.html" target="_blank" rel="noopener" style="text-decoration:none">멘토 센터 ↗</a>
   <a class="pill" href="https://claude.ai/artifact/8f8EJASpzNJv32X2BbhsRR" target="_blank" rel="noopener" style="text-decoration:none">멘토링 운영 계획 ↗</a>
   <label class="who">처리자 <input id="me" maxlength="10" placeholder="예: 최원T"></label>
   <span class="pill" id="conn">연결 중…</span>
@@ -130,6 +146,16 @@ details summary{cursor:pointer;font-weight:900;color:var(--blued)}
       <button class="btn red" type="button" id="sendAll">전체 공지 보내기</button>
       <div id="sents"></div>
     </div>
+  </section>
+
+  <section class="panel vocab">
+    <h2>📝 오늘 영단어 시험 <span class="n" id="vN">0</span></h2>
+    <div class="vsum" id="vSum"></div>
+    <div class="vgrid">
+      <div class="vwrap"><table class="vt"><thead><tr><th>시각</th><th>학생</th><th>단어장 · 회</th><th>구분</th><th>점수</th><th>결과</th></tr></thead><tbody id="vRows"></tbody></table></div>
+      <div><p class="hint" style="margin:0 0 6px;font-weight:900;color:var(--blued)">입실했는데 오늘 아직 안 본 학생</p><div class="vnot" id="vNot"></div></div>
+    </div>
+    <p class="hint" style="margin-top:8px">학생이 영단어 화면에서 시험을 내면 20초 안에 여기 들어와요. 본시험 첫 점수가 공식 점수예요.</p>
   </section>
 </main>
 
@@ -208,7 +234,7 @@ async function load(){var d=bizToday();
   if(SEEN&&!first){var fresh=REQ.filter(function(r){return !SEEN[r.id]&&r.status==='new'});
     if(fresh.length){var w=fresh.some(function(r){return r.kind==='wake'});beep(w?'wake':'req');notify(fresh[0])}}
   SEEN=ids;first=false;render()}
-async function loadStu(){try{STU=await api.students(bizToday());STU.sort(function(a,b){return (a.seat||999)-(b.seat||999)});renderTo()}catch(e){}}
+async function loadStu(){try{STU=await api.students(bizToday());STU.sort(function(a,b){return (a.seat||999)-(b.seat||999)});renderTo();if(typeof renderVocab==='function'&&VOC)renderVocab()}catch(e){}}
 var tmr=null;function onChange(){clearTimeout(tmr);tmr=setTimeout(load,250)}
 function setConn(ok){var c=$('#conn');c.textContent=MOCK?'연습 모드':ok?'● 실시간 연결됨':'연결 끊김 · 재시도 중';c.className='pill'+(ok||MOCK?'':' bad')}
 
@@ -283,6 +309,22 @@ $('#bonus').addEventListener('click',async function(){var sid=$('#to').value;if(
   if(!confirm((s?s.name:'학생')+'에게 오늘 깨우기 1회를 더 줄까요?'))return;
   try{await api.addBonus(sid,bizToday());toast('깨우기 1회를 더 줬어요');load()}catch(e){toast('저장 실패')}});
 
+/* ===== 영단어 시험 (데스크 서버의 bestian_vocab_today) ===== */
+var VOC=[];
+async function loadVocab(){try{
+  if(MOCK){VOC=[{id:1,created_at:new Date(now()-600000).toISOString(),student_id:'u0',student_name:'김베스',book_name:'워드마스터 수능 2000',unit_label:'Day 3',kind:'main',correct:19,total:20,passed:true,first_try:true,wrong_count:1},
+    {id:2,created_at:new Date(now()-300000).toISOString(),student_id:'u2',student_name:'박철산',book_name:'해커스 보카',unit_label:'Day 1',kind:'main',correct:14,total:20,passed:false,first_try:true,wrong_count:6}]}
+  else{if(!ddb)return;var r=await ddb.rpc('bestian_vocab_today');if(r.error)throw r.error;VOC=r.data||[]}
+  renderVocab()}catch(e){$('#vSum').textContent='영단어 기록을 불러오지 못했어요 (서버 설정 전이면 정상).'}}
+function renderVocab(){var main=VOC.filter(function(v){return v.kind==='main'});var who={};VOC.forEach(function(v){who[v.student_id]=1});
+  var pass=main.filter(function(v){return v.passed}).length;
+  $('#vN').textContent=Object.keys(who).length;
+  $('#vSum').innerHTML='<span>응시 <b>'+Object.keys(who).length+'</b>명</span><span>본시험 <b>'+main.length+'</b>번</span><span style="color:var(--green)">통과 <b>'+pass+'</b></span><span style="color:var(--red)">미통과 <b>'+(main.length-pass)+'</b></span><span>재시험 <b>'+(VOC.length-main.length)+'</b>번</span>';
+  $('#vRows').innerHTML=VOC.length?VOC.map(function(v){return '<tr><td>'+hm(v.created_at)+'</td><td><b>'+esc(v.student_name)+'</b></td><td>'+esc(v.book_name)+' · '+esc(v.unit_label)+'</td><td>'+(v.kind==='main'?'본시험':'재시험')+'</td><td class="sc">'+v.correct+'/'+v.total+'</td><td>'+(v.passed?'<span class="vb ok">통과</span>':'<span class="vb no">미통과</span>')+(v.kind==='main'&&!v.first_try?' <span class="vb re">다시 봄</span>':'')+'</td></tr>'}).join(''):'<tr><td colspan="6" class="empty">아직 오늘 본 시험이 없어요</td></tr>';
+  var not=STU.filter(function(s){return !who[s.id]});
+  $('#vNot').innerHTML=not.length?not.map(function(s){return '<span>'+(s.seat?esc(s.seat)+'번 ':'')+esc(s.name)+'</span>'}).join(''):'<span style="border:0;color:var(--mute)">'+(STU.length?'모두 봤어요 👍':'입실한 학생이 없어요')+'</span>'}
+setInterval(loadVocab,20000);
+
 /* ===== 소리·알림 ===== */
 var AC=null,SOUND=false;
 $('#sound').addEventListener('click',function(){try{AC=AC||new (window.AudioContext||window.webkitAudioContext)();AC.resume()}catch(e){}SOUND=true;var b=$('#sound');b.textContent='🔔 소리 켜짐';b.className='pill';beep('req');
@@ -305,7 +347,7 @@ setInterval(function(){var n=new Date(now());$('#clock').textContent=pad(n.getHo
   if(due&&t-lastAlarm>(over?2000:4000)){lastAlarm=t;beep(over?'over':'due')}},1000);
 setInterval(load,20000);setInterval(loadStu,60000);setInterval(syncClock,300000);
 
-(async function(){await syncClock();live();load();loadStu()})();
+(async function(){await syncClock();live();load();await loadStu();loadVocab()})();
 })();
 </script>
 </body>

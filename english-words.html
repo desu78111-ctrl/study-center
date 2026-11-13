@@ -1,0 +1,848 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex,nofollow">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>베스티안 영단어</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f5f7f9;--surface:#fff;--surface2:#eef5fa;--fg:#1d2328;--muted:#5f676e;--line:#d8dfe5;--blue:#0072b5;--navy:#004f80;--yellow:#f2c100;--good:#1f7a4d;--good-soft:#dcf1e6;--warn:#9a5b00;--warn-soft:#fdecc8;--bad:#b02a37;--bad-soft:#f9e0e3;color-scheme:light}
+@media (prefers-color-scheme:dark){:root{--bg:#12171c;--surface:#1b2229;--surface2:#22303b;--fg:#e8edf1;--muted:#a7b1ba;--line:#33404b;--good-soft:#173a2a;--warn-soft:#3a2d12;--bad-soft:#3d1d22;color-scheme:dark}}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.55 'Noto Sans KR','Apple SD Gothic Neo','Malgun Gothic',sans-serif}
+[hidden]{display:none!important}
+button,input{font:inherit;color:inherit}
+header{background:var(--blue);color:#fff;border-bottom:5px solid var(--yellow)}
+.wrap{max-width:860px;margin:0 auto;padding:0 16px}
+.top{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:14px 0 10px;flex-wrap:wrap}
+.brand{font-weight:900;font-size:20px;letter-spacing:-.01em;margin:0}
+.brand small{display:block;font-weight:500;font-size:12.5px;color:#d6e1ea;letter-spacing:0}
+#home-link{border:0;background:rgba(255,255,255,.16);color:#fff;border-radius:999px;padding:7px 14px;font-weight:700;font-size:14px;cursor:pointer}
+#modeLabel{display:inline-block;background:var(--yellow);color:#004f80;border-radius:6px;padding:2px 8px;font-size:12.5px;font-weight:700;margin-top:4px}
+#books{display:flex;gap:6px;overflow-x:auto;padding:0 0 10px;scrollbar-width:none}
+#books button{flex:none;border:0;border-radius:10px 10px 0 0;padding:9px 14px;background:rgba(255,255,255,.14);color:#e7f0f7;font-weight:700;font-size:14.5px;cursor:pointer}
+#books button[aria-selected="true"]{background:var(--bg);color:var(--navy)}
+#storeWarn{background:var(--warn-soft);color:var(--warn);border:1px solid var(--yellow);border-radius:10px;padding:10px 12px;margin:14px 0 0;font-size:14px}
+main{padding:16px 0 120px}
+h2{font-size:19px;margin:0 0 4px;color:var(--navy)}
+@media (prefers-color-scheme:dark){h2{color:#8fc8ec}}
+.hint{color:var(--muted);font-size:14px;margin:0}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:14px}
+#summary{margin:10px 0 14px}
+#units{display:grid;grid-template-columns:repeat(auto-fill,minmax(92px,1fr));gap:8px}
+.unit{border:1.5px solid var(--line);background:var(--surface);border-radius:12px;padding:10px 6px;min-height:68px;cursor:pointer;display:grid;gap:2px;align-content:center;justify-items:center;text-align:center}
+.unit b{font-size:15px}
+.unit span{font-size:13px;color:var(--muted)}
+.unit.locked{background:var(--surface2);border-style:dashed;cursor:not-allowed;opacity:.7}
+.unit.passed{border-color:var(--good);background:var(--good-soft)}
+.unit.passed span{color:var(--good);font-weight:700}
+.unit.done:not(.passed){border-color:var(--bad);background:var(--bad-soft)}
+.unit.done:not(.passed) span{color:var(--bad);font-weight:700}
+.unit:focus-visible,.choice:focus-visible,.btn:focus-visible{outline:3px solid var(--yellow);outline-offset:2px}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:14px}
+.btn{border:0;border-radius:10px;padding:11px 16px;font-weight:700;cursor:pointer;background:var(--blue);color:#fff;min-height:44px}
+.btn.ghost{background:var(--surface2);color:var(--fg)}
+.btn.yellow{background:var(--yellow);color:#004f80}
+.btn.armed{background:var(--bad);color:#fff}
+.sec{font-size:14px;font-weight:700;color:var(--muted);margin:18px 0 8px}
+ol.qs{list-style:none;margin:0;padding:0;display:grid;gap:10px}
+.q{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:12px}
+.q-head{display:flex;gap:10px;align-items:baseline}
+.q-no{flex:none;font-weight:700;color:var(--muted);font-size:14px;min-width:24px}
+.q-word{font-size:20px;font-weight:700}
+.q-meaning{font-size:16px;font-weight:500}
+.choices{display:grid;gap:6px;margin-top:10px}
+.choice{text-align:left;border:1.5px solid var(--line);background:var(--surface);border-radius:10px;padding:10px 12px;min-height:44px;cursor:pointer}
+.choice[aria-pressed="true"]{border-color:var(--blue);background:var(--surface2);font-weight:700}
+.q-hint{font-family:ui-monospace,Menlo,Consolas,monospace;color:var(--muted);margin:8px 0 6px;letter-spacing:.04em}
+.q input{width:100%;border:1.5px solid var(--line);border-radius:10px;padding:10px 12px;background:var(--surface);font-size:17px;min-height:44px}
+.q input:focus{outline:none;border-color:var(--blue)}
+.bar{position:fixed;left:0;right:0;bottom:0;background:var(--surface);border-top:1px solid var(--line);padding:10px 0 calc(10px + env(safe-area-inset-bottom,0px))}
+.bar .wrap{display:flex;align-items:center;justify-content:space-between;gap:10px}
+ol.study{list-style:none;margin:12px 0 0;padding:0;display:grid;gap:6px}
+.study-word{display:grid;grid-template-columns:2.2em minmax(0,1fr);gap:2px 10px;align-items:baseline;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:10px 12px}
+.study-word .no{color:var(--muted);font-size:13px;grid-row:span 2}
+.study-word b{font-size:18px}
+.study-word span:last-child{color:var(--fg)}
+#timer{display:block;font-size:17px;color:var(--navy);font-variant-numeric:tabular-nums}
+#timer.warn{color:var(--bad)}
+@media (prefers-color-scheme:dark){#timer{color:#8fc8ec}}
+#progress{display:block;font-size:13px;color:var(--muted)}
+#rScore{font-size:40px;font-weight:900;color:var(--navy);line-height:1.1}
+@media (prefers-color-scheme:dark){#rScore{color:#8fc8ec}}
+#rStatus{margin-top:10px;padding:10px 12px;border-radius:10px;font-weight:700}
+#rStatus.pass{background:var(--good-soft);color:var(--good)}
+#rStatus.fail{background:var(--bad-soft);color:var(--bad)}
+#rStatus.practice{background:var(--surface2)}
+ul.words{margin:8px 0 0;padding-left:18px}
+ul.words li{margin:3px 0}
+.namebox{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+#name{flex:1 1 160px;border:1.5px solid var(--line);border-radius:10px;padding:10px 12px;background:var(--surface);min-height:44px}
+#copyMsg{font-size:14px;margin-top:8px}
+#copyBox{width:100%;min-height:90px;margin-top:8px;border-radius:10px;border:1.5px solid var(--line);padding:8px;font:14px/1.5 ui-monospace,Menlo,Consolas,monospace;background:var(--surface)}
+.wrong-unit{margin-top:12px}
+.wrong-unit h3{margin:0;font-size:16px}
+footer{color:var(--muted);font-size:12.5px;text-align:center;padding:24px 16px}
+</style>
+</head>
+<body>
+<header>
+  <div class="wrap">
+    <div class="top">
+      <div><p class="brand">베스티안 영단어<small>회마다 단어를 외우고 시험 · 90% 이상이면 다음 회가 열려요</small></p><span id="modeLabel" hidden>선생님용 · 모든 회 열림</span></div>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><div id="vWho" hidden></div><button type="button" id="home-link">내 학습표</button></div>
+    </div>
+    <nav id="books" role="tablist" aria-label="단어장"></nav>
+  </div>
+</header>
+<main class="wrap">
+  <div id="storeWarn" hidden><b>이 화면에서는 기록이 저장되지 않아요.</b> 시험과 결과 복사는 그대로 되지만, 창을 닫으면 진도가 사라져요. 크롬이나 사파리로 다시 열어 주세요.</div>
+
+  <section id="vGate" hidden></section>
+  <section id="home" hidden>
+    <h2 id="homeTitle"></h2>
+    <p class="hint" id="summary"></p>
+    <div id="units"></div>
+    <p class="hint" id="lockMsg" role="status" style="margin-top:8px"></p>
+    <div class="row"><button type="button" class="btn ghost" id="toWrong">오답 단어장</button></div>
+  </section>
+
+  <section id="study" hidden>
+    <div class="row" style="margin:0 0 10px"><button type="button" class="btn ghost back">← 목록으로</button></div>
+    <h2 id="studyTitle"></h2>
+    <p class="hint" id="studyInfo"></p>
+    <ol class="study" id="studyList"></ol>
+  </section>
+
+  <section id="test" hidden>
+    <div class="row" style="margin:0 0 10px"><button type="button" class="btn ghost back">← 목록으로</button></div>
+    <h2 id="testTitle"></h2>
+    <p class="hint" id="testNote"></p>
+    <div id="qs"></div>
+  </section>
+
+  <section id="result" hidden>
+    <div class="row" style="margin:0 0 10px"><button type="button" class="btn ghost back">← 목록으로</button></div>
+    <div class="panel">
+      <h2 id="rTitle"></h2>
+      <div id="rScore"></div>
+      <p class="hint" id="rDetail"></p>
+      <div id="rStatus"></div>
+      <div class="row"><button type="button" class="btn ghost" id="restudy">단어 다시 보기</button><button type="button" class="btn" id="retake">재시험 시작</button></div>
+    </div>
+    <div class="panel" id="sendBox" style="margin-top:12px">
+      <h2>결과는 자동으로 전달돼요</h2>
+      <p class="hint">시험을 내면 점수가 데스크와 담당 선생님 화면에 바로 들어가요. 점수는 처음 푼 점수가 공식 점수예요. 선생님이 카톡으로도 달라고 하면 아래 [결과 복사]를 쓰세요.</p>
+      <div class="namebox" style="margin-top:10px"><input id="name" type="text" placeholder="이름 (실명)" autocomplete="name" maxlength="20"><button type="button" class="btn yellow" id="copy">결과 복사</button></div>
+      <div id="copyMsg" role="status"></div>
+      <textarea id="copyBox" readonly hidden></textarea>
+    </div>
+    <div class="panel" id="rWrongBox" style="margin-top:12px">
+      <h2 id="rWrongTitle">틀린 단어</h2>
+      <ul class="words" id="rWrong"></ul>
+    </div>
+  </section>
+
+  <section id="wrong" hidden>
+    <div class="row" style="margin:0 0 10px"><button type="button" class="btn ghost back">← 목록으로</button></div>
+    <h2 id="wrongTitle">오답 단어장</h2>
+    <p class="hint">회마다 가장 최근 시험에서 틀린 단어예요. 다시 풀어 맞히면 빠져요. 연습은 점수와 통과에 들어가지 않아요.</p>
+    <div id="wrongList"></div>
+  </section>
+</main>
+<div class="bar" id="studyBar" hidden><div class="wrap"><span class="hint" id="studyBarNote">다 외웠으면 시험을 시작하세요</span><button type="button" class="btn" id="startTest">시험 시작</button></div></div>
+<div class="bar" id="testBar" hidden><div class="wrap"><span><span id="progress"></span><b id="timer" hidden></b></span><button type="button" class="btn" id="submit">제출하기</button></div></div>
+<footer>워드마스터·해커스 등 시중 단어장은 센터 학생만 쓰고 링크를 외부에 공유하지 마세요.</footer>
+<script>/* 베스티안 영단어 핵심 로직 — 화면 없이 동작 (브라우저: window.VocabCore, Node: module.exports) */
+(function (root, factory) {
+  const api = factory();
+  if (typeof module === 'object' && module.exports) module.exports = api;
+  else root.VocabCore = api;
+})(typeof self !== 'undefined' ? self : this, function () {
+  'use strict';
+  const PASS_RATE = 0.9;
+  const HEAD = '[베스티안 영단어]';
+
+  function passMark(total) { return Math.ceil(total * PASS_RATE - 1e-9); }
+
+  function normalizeAnswer(s) {
+    return String(s == null ? '' : s).normalize('NFKC').toLowerCase()
+      .replace(/[‐-―−﹣－]/g, '-')
+      .replace(/[‘’ʼ]/g, "'")
+      .replace(/\s+/g, ' ').trim().replace(/\.$/, '');
+  }
+
+  function variants(word) { return String(word).split(',').map((v) => v.trim()).filter(Boolean); }
+  function senses(meaning) { return String(meaning).split(',').map((v) => v.trim()).filter(Boolean); }
+
+  function isCorrectSpelling(input, word) {
+    const a = normalizeAnswer(input);
+    return !!a && variants(word).some((v) => normalizeAnswer(v) === a);
+  }
+
+  function spellHint(word) {
+    const w = variants(word)[0] || '';
+    return [...w].map((ch, i) => (i === 0 ? ch : ch === '-' ? '-' : ch === ' ' ? '/' : '_')).join(' ');
+  }
+
+  function cleanName(s) {
+    return String(s == null ? '' : s).replace(/[·•\[\]]/g, '').replace(/\s+/g, ' ').trim().slice(0, 20);
+  }
+
+  function unitLabel(book, n) { return book.unit === 'lesson' ? `${n}강` : `Day ${n}`; }
+
+  function shuffle(arr, rng) {
+    const a = arr.slice();
+    for (let i = a.length - 1; i > 0; i--) {
+      const j = Math.floor(rng() * (i + 1));
+      [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
+  }
+
+  // 본시험 20문제 10분, 재시험 무작위 10문제 5분
+  const PLANS = { main: { count: 20, minutes: 10 }, retake: { count: 10, minutes: 5 } };
+  function testPlan(kind) {
+    const p = PLANS[kind === 'retake' ? 'retake' : 'main'];
+    return { count: p.count, minutes: p.minutes };
+  }
+
+  // pool: 틀린 보기를 고를 단어들 (연습처럼 단어가 적을 때 그 회 전체를 넘긴다)
+  // count: 이 중 무작위로 몇 문제를 낼지 (기본은 전부)
+  function buildTest(words, rng = Math.random, pool = words, count = words.length) {
+    const order = shuffle(words.map((_, i) => i), rng).slice(0, Math.min(count, words.length));
+    const half = Math.floor(order.length / 2);
+    const meanings = [...new Set(words.concat(pool).map((w) => w[1]))];
+    return order.map((idx, k) => {
+      const [word, meaning] = words[idx];
+      if (k >= half) return { type: 'spell', word, meaning, hint: spellHint(word) };
+      const mine = senses(meaning);
+      // 정답과 뜻이 하나라도 겹치는 보기는 빼서 정답이 둘이 되지 않게 한다 (예: 환경 / 환경, 상황, 형편)
+      const fair = meanings.filter((m) => m !== meaning && !senses(m).some((s) => mine.includes(s)));
+      const wrong = shuffle(fair, rng).slice(0, 3);
+      const choices = shuffle([meaning, ...wrong], rng);
+      return { type: 'mc', word, meaning, choices, answer: choices.indexOf(meaning) };
+    });
+  }
+
+  function gradeTest(questions, answers) {
+    const mc = [0, 0], sp = [0, 0], wrong = [];
+    questions.forEach((q, i) => {
+      const a = answers[i];
+      const ok = q.type === 'mc' ? a === q.answer : isCorrectSpelling(a, q.word);
+      const box = q.type === 'mc' ? mc : sp;
+      box[1]++;
+      if (ok) box[0]++; else wrong.push(q.word);
+    });
+    return { correct: mc[0] + sp[0], total: questions.length, mc, sp, wrong };
+  }
+
+  function recordAttempt(unitState, grade, atISO) {
+    const s = unitState
+      ? { ...unitState }
+      : { first: null, attempts: 0, passedAt: null, lastWrong: [] };
+    s.attempts += 1;
+    if (!s.first) {
+      s.first = { correct: grade.correct, total: grade.total, mc: grade.mc.slice(), sp: grade.sp.slice(), wrong: grade.wrong.slice(), at: atISO };
+    }
+    if (s.passedAt == null && grade.correct >= passMark(grade.total)) s.passedAt = s.attempts;
+    s.lastWrong = grade.wrong.slice();
+    return s;
+  }
+
+  function isUnlocked(bookState, n, mode) {
+    if (mode === 'teacher' || n === 1) return true;
+    const prev = bookState && bookState.units && bookState.units[n - 1];
+    return !!(prev && prev.passedAt != null);
+  }
+
+  function formatResultLine(book, n, name, unitState) {
+    const f = unitState.first;
+    const status = unitState.passedAt != null ? `통과(${unitState.passedAt}회째)` : '미통과';
+    const wrong = f.wrong.length ? '오답 ' + f.wrong.map((w) => variants(w)[0]).join(', ') : '오답 없음';
+    return `${HEAD} ${book.short} · ${cleanName(name)} · ${unitLabel(book, n)} · ${f.correct}/${f.total} · 고르기 ${f.mc[0]}/${f.mc[1]} · 쓰기 ${f.sp[0]}/${f.sp[1]} · ${status} · ${wrong}`;
+  }
+
+  const LINE = /\[베스티안 영단어\]\s*(.+?)\s*·\s*(.+?)\s*·\s*(?:Day\s*(\d+)|(\d+)\s*강)\s*·\s*(\d+)\s*\/\s*(\d+)\s*·\s*고르기\s*(\d+)\s*\/\s*(\d+)\s*·\s*쓰기\s*(\d+)\s*\/\s*(\d+)\s*·\s*(?:통과\((\d+)회째\)|미통과)\s*·\s*(?:오답 없음|오답\s+(.+?))\s*$/;
+
+  function parseResultLine(line) {
+    const m = LINE.exec(String(line == null ? '' : line));
+    if (!m) return null;
+    const num = (i) => Number(m[i]);
+    const p = {
+      book: m[1].trim(),
+      name: cleanName(m[2]),
+      n: m[3] ? num(3) : num(4),
+      unit: m[3] ? 'day' : 'lesson',
+      correct: num(5), total: num(6),
+      mc: [num(7), num(8)], sp: [num(9), num(10)],
+      passedAt: m[11] ? num(11) : null,
+      wrong: m[12] ? m[12].split(',').map((w) => w.trim()).filter(Boolean) : [],
+    };
+    const fits = p.name && p.n > 0 && p.total > 0 && p.correct <= p.total &&
+      p.mc[0] <= p.mc[1] && p.sp[0] <= p.sp[1] &&
+      p.mc[0] + p.sp[0] === p.correct && p.mc[1] + p.sp[1] === p.total;
+    return fits ? p : null;
+  }
+
+  // 53비트 해시(cyrb53): 한 시즌 결과 수만 건에서도 다른 학생 결과를 덮어쓰지 않게
+  function hash53(str) {
+    let h1 = 0xdeadbeef, h2 = 0x41c6ce57;
+    for (let i = 0; i < str.length; i++) {
+      const ch = str.charCodeAt(i);
+      h1 = Math.imul(h1 ^ ch, 2654435761);
+      h2 = Math.imul(h2 ^ ch, 1597334677);
+    }
+    h1 = Math.imul(h1 ^ (h1 >>> 16), 2246822507) ^ Math.imul(h2 ^ (h2 >>> 13), 3266489909);
+    h2 = Math.imul(h2 ^ (h2 >>> 16), 2246822507) ^ Math.imul(h1 ^ (h1 >>> 13), 3266489909);
+    return 4294967296 * (2097151 & h2) + (h1 >>> 0);
+  }
+  function resultId(p) { return 'v' + hash53(`${p.book}|${p.name}|${p.n}`).toString(36); }
+
+  // 같은 학생·단어장·회 결과를 다시 붙여넣을 때: 처음 점수와 처음 넣은 시각은 그대로, 통과는 한 번 되면 유지
+  function mergeResult(existing, incoming) {
+    if (!existing) return { rec: incoming, firstChanged: false };
+    const same = existing.correct === incoming.correct && existing.total === incoming.total &&
+      String(existing.mc) === String(incoming.mc) && String(existing.sp) === String(incoming.sp);
+    const rec = {
+      ...incoming,
+      correct: existing.correct, total: existing.total, mc: existing.mc.slice(), sp: existing.sp.slice(), wrong: existing.wrong.slice(),
+      addedAt: existing.addedAt || incoming.addedAt,
+      passedAt: existing.passedAt != null ? existing.passedAt : incoming.passedAt,
+    };
+    return { rec, firstChanged: !same };
+  }
+
+  return {
+    PASS_RATE, HEAD, passMark, normalizeAnswer, isCorrectSpelling, spellHint, cleanName, unitLabel,
+    testPlan, buildTest, gradeTest, recordAttempt, isUnlocked, formatResultLine, parseResultLine, resultId, mergeResult,
+  };
+});
+</script>
+<script>window.VOCAB_MODE='student';</script>
+<script>/* 베스티안 영단어 — 화면 (window.VocabCore, window.VOCAB_BOOKS, window.VOCAB_MODE 사용)
+   흐름: 단어 보기 → [시험 시작] 두 번 → 잠긴 시험(본시험 20문제 10분 / 재시험 무작위 10문제 5분) → 성적표
+   claude.ai 화면은 확인 창(confirm)을 막으므로 확인이 필요한 버튼은 두 번 누르기로 한다. */
+window.__vocabStart = function () {
+  'use strict';
+  const C = window.VocabCore;
+  const BOOKS = window.VOCAB_BOOKS || [];
+  const MODE = window.VOCAB_MODE === 'teacher' ? 'teacher' : 'student';
+  const KEY = 'bestian-vocab-v1:' + ((window.VOCAB_STUDENT && window.VOCAB_STUDENT.id) || 'guest');
+  const $ = (s) => document.querySelector(s);
+  const esc = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+
+  /* ---------- 이 기기에 저장 ---------- */
+  let canSave = true;
+  try { localStorage.setItem(KEY + ':t', '1'); localStorage.removeItem(KEY + ':t'); } catch (e) { canSave = false; }
+  function readStored() {
+    try {
+      const s = JSON.parse(localStorage.getItem(KEY) || 'null');
+      if (s && typeof s === 'object') {
+        return {
+          name: typeof s.name === 'string' ? s.name : '',
+          books: s.books && typeof s.books === 'object' ? s.books : {},
+          active: s.active && typeof s.active === 'object' ? s.active : null,
+        };
+      }
+    } catch (e) { /* 읽을 수 없는 기록은 새로 시작 */ }
+    return null;
+  }
+  let S = readStored() || { name: '', books: {}, active: null };
+  // 고칠 때마다 저장된 최신 기록을 다시 읽어 그 위에 고친다 → 오래 열어 둔 다른 창이 새 기록을 덮어쓰지 못함
+  function mutate(fn) {
+    if (canSave) { const fresh = readStored(); if (fresh) S = fresh; }
+    fn(S);
+    if (!canSave) return;
+    try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) { canSave = false; $('#storeWarn').hidden = false; }
+  }
+  const unitsOf = (s, id) => ((s.books[id] = s.books[id] || { units: {} }).units);
+  const unitState = (n) => unitsOf(S, book.id)[n];
+
+  /* ---------- 두 번 누르기 ---------- */
+  function setLabel(btn, label) { btn.dataset.label = label; disarm(btn); btn.textContent = label; }
+  function disarm(btn) {
+    clearTimeout(btn._t);
+    if (btn.dataset.armed === '1') { btn.dataset.armed = ''; btn.classList.remove('armed'); btn.textContent = btn.dataset.label || btn.textContent; }
+  }
+  function twoTap(btn, armedText, action) {
+    if (btn.dataset.armed === '1') { disarm(btn); action(); return; }
+    if (!btn.dataset.label) btn.dataset.label = btn.textContent;
+    btn.dataset.armed = '1';
+    btn.classList.add('armed');
+    btn.textContent = armedText;
+    clearTimeout(btn._t);
+    btn._t = setTimeout(() => disarm(btn), 4000);
+  }
+
+  /* ---------- 화면 전환 ---------- */
+  let book = BOOKS[0];
+  let run = null;   // 푸는 중 {id, bookId, n, kind:'main'|'retake'|'practice', questions, answers, startedAt, endsAt, from}
+  let shown = null; // 결과 화면 {n, practice, from}
+  let studyN = null;
+  let tick = null;
+  const VIEWS = ['home', 'study', 'test', 'result', 'wrong'];
+  const unitTitle = (n) => C.unitLabel(book, n);
+  const current = () => VIEWS.find((v) => !$('#' + v).hidden);
+  const lockedNow = () => !!(run && run.kind !== 'practice');
+  function show(v) {
+    VIEWS.forEach((x) => { $('#' + x).hidden = x !== v; });
+    $('#testBar').hidden = v !== 'test';
+    $('#studyBar').hidden = v !== 'study';
+    const lock = v === 'test' && lockedNow(); // 시험 중에는 뒤로·단어장 탭·내 학습표가 없다
+    $('#books').hidden = lock;
+    $('#home-link').hidden = lock;
+    $('#test .back').hidden = lock;
+    window.scrollTo(0, 0);
+  }
+  function open(v) {
+    if (v === 'wrong') { renderWrong(); show('wrong'); } else { renderHome(); show('home'); }
+  }
+  const answered = () => (run ? run.answers.filter((a) => a !== null && String(a).trim() !== '').length : 0);
+
+  /* ---------- 단어장 탭 ---------- */
+  function renderTabs() {
+    $('#books').innerHTML = BOOKS.map((b) => `<button type="button" role="tab" data-book="${esc(b.id)}" aria-selected="${b === book}">${esc(b.name)}</button>`).join('');
+  }
+  function pickFromHash() {
+    if (lockedNow()) return; // 시험 중에는 바꾸지 않음
+    const id = decodeURIComponent((location.hash || '').slice(1));
+    book = BOOKS.find((b) => b.id === id) || BOOKS[0];
+    run = null;
+    stopTimer();
+    renderTabs();
+    open('home');
+  }
+  $('#books').addEventListener('click', (e) => {
+    const b = e.target.closest('[data-book]');
+    if (!b || lockedNow()) return;
+    if (location.hash.slice(1) === b.dataset.book) pickFromHash(); else location.hash = b.dataset.book;
+  });
+  window.addEventListener('hashchange', pickFromHash);
+
+  /* ---------- 내 학습표 ---------- */
+  function renderHome() {
+    const units = unitsOf(S, book.id);
+    const bs = { units };
+    const per = book.units[0].words.length;
+    const main = Math.min(C.testPlan('main').count, per);
+    const done = book.units.filter((u) => units[u.n] && units[u.n].first);
+    const passed = done.filter((u) => units[u.n].passedAt != null).length;
+    const avg = done.length ? Math.round(done.reduce((s, u) => s + units[u.n].first.correct / units[u.n].first.total, 0) / done.length * 100) : 0;
+    $('#homeTitle').textContent = `${book.name} · 내 학습표`;
+    $('#summary').textContent = (done.length ? `푼 회 ${done.length} · 통과 ${passed} · 평균 ${avg}% (처음 점수)` : '아직 푼 회가 없어요') +
+      ` · 회마다 단어 ${per}개를 보고 ${main}문제 시험 · 90% 이상 통과`;
+    $('#lockMsg').textContent = '';
+    $('#units').innerHTML = book.units.map((u) => {
+      const st = units[u.n];
+      const isOpen = C.isUnlocked(bs, u.n, MODE);
+      const cls = ['unit', !isOpen && 'locked', st && st.first && 'done', st && st.passedAt != null && 'passed'].filter(Boolean).join(' ');
+      const sub = !isOpen ? '잠김' : st && st.first ? `${st.first.correct}/${st.first.total} · ${st.passedAt != null ? '통과' : '재시험'}` : '단어 보기';
+      return `<button type="button" class="${cls}" data-n="${u.n}"${isOpen ? '' : ' aria-disabled="true"'}><b>${esc(unitTitle(u.n))}</b><span>${esc(sub)}</span></button>`;
+    }).join('');
+  }
+  $('#units').addEventListener('click', (e) => {
+    const b = e.target.closest('.unit');
+    if (!b) return;
+    const n = +b.dataset.n;
+    if (b.classList.contains('locked')) { $('#lockMsg').textContent = `${unitTitle(n)} · 앞 회(${unitTitle(n - 1)})를 90% 이상으로 통과하면 열려요.`; return; }
+    const st = unitState(n);
+    if (st && st.first) showSummary(n); else showStudy(n);
+  });
+
+  /* ---------- 단어 보기 ---------- */
+  const nextKind = (st) => (st && st.first ? 'retake' : 'main');
+  function showStudy(n) {
+    studyN = n;
+    const unit = book.units[n - 1];
+    const st = unitState(n);
+    const passed = !!(st && st.passedAt != null);
+    const kind = nextKind(st);
+    const plan = C.testPlan(kind);
+    const count = Math.min(plan.count, unit.words.length);
+    $('#studyTitle').textContent = `${unitTitle(n)} 단어 ${unit.words.length}개`;
+    $('#studyInfo').textContent = passed
+      ? '통과한 회예요. 단어를 복습하세요.'
+      : `${kind === 'main' ? '본시험' : '재시험'}: 이 중 무작위 ${count}문제 · ${plan.minutes}분 · ${C.passMark(count)}개 이상(90%) 맞히면 통과. 시험을 시작하면 끝날 때까지 단어를 다시 볼 수 없어요.`;
+    $('#studyList').innerHTML = unit.words.map(([w, m], i) => `<li class="study-word" data-word="${esc(w)}"><span class="no">${i + 1}</span><b lang="en">${esc(w)}</b><span>${esc(m)}</span></li>`).join('');
+    const btn = $('#startTest');
+    setLabel(btn, kind === 'main' ? '시험 시작' : '재시험 시작');
+    btn.hidden = passed;
+    $('#studyBarNote').textContent = passed ? '통과한 회예요' : '다 외웠으면 시험을 시작하세요';
+    show('study');
+  }
+  $('#startTest').addEventListener('click', (e) => twoTap(e.currentTarget, '한 번 더 누르면 시작 · 시작하면 단어를 다시 볼 수 없어요', () => beginTest(studyN)));
+
+  /* ---------- 시험 ---------- */
+  function beginTest(n) {
+    const unit = book.units[n - 1];
+    mutate((s) => {
+      const kind = nextKind(unitsOf(s, book.id)[n]);
+      const plan = C.testPlan(kind);
+      const now = Date.now();
+      const questions = C.buildTest(unit.words, Math.random, unit.words, plan.count);
+      s.active = { id: now.toString(36) + Math.random().toString(36).slice(2, 7), bookId: book.id, n, kind, questions, answers: questions.map(() => null), startedAt: now, endsAt: now + plan.minutes * 60000 };
+    });
+    run = { ...S.active, answers: S.active.answers.slice(), from: 'home' };
+    renderTest();
+  }
+  function startPractice(n) {
+    const unit = book.units[n - 1];
+    const st = unitState(n);
+    const words = unit.words.filter(([w]) => ((st && st.lastWrong) || []).includes(w));
+    if (!words.length) return;
+    const questions = C.buildTest(words, Math.random, unit.words);
+    run = { id: 'practice', bookId: book.id, n, kind: 'practice', questions, answers: questions.map(() => null), startedAt: Date.now(), endsAt: null, from: 'wrong' };
+    renderTest();
+  }
+  function renderTest() {
+    const r = run;
+    const label = r.kind === 'practice' ? '틀린 단어 연습' : r.kind === 'main' ? '본시험' : '재시험';
+    $('#testTitle').textContent = `${unitTitle(r.n)} ${label} · ${r.questions.length}문제`;
+    $('#testNote').textContent = r.kind === 'practice'
+      ? '연습은 시간 제한이 없고 점수와 통과에 들어가지 않아요.'
+      : `${C.passMark(r.questions.length)}개 이상(90%) 맞히면 통과예요. 시간이 다 되면 자동으로 제출돼요.`;
+    let html = '';
+    r.questions.forEach((q, i) => {
+      const prev = r.questions[i - 1];
+      if (!prev || prev.type !== q.type) {
+        html += (prev ? '</ol>' : '') + (q.type === 'mc'
+          ? '<p class="sec">고르기 · 영어를 보고 뜻 고르기</p><ol class="qs">'
+          : '<p class="sec">쓰기 · 뜻을 보고 영어 쓰기 (첫 글자와 글자 수 힌트)</p><ol class="qs">');
+      }
+      const a = r.answers[i];
+      html += q.type === 'mc'
+        ? `<li class="q" data-type="mc" data-i="${i}"><div class="q-head"><span class="q-no">${i + 1}</span><span class="q-word" lang="en">${esc(q.word)}</span></div>` +
+          `<div class="choices">${q.choices.map((c, k) => `<button type="button" class="choice" data-c="${k}" aria-pressed="${a === k}">${esc(c)}</button>`).join('')}</div></li>`
+        : `<li class="q" data-type="spell" data-i="${i}"><div class="q-head"><span class="q-no">${i + 1}</span><span class="q-meaning">${esc(q.meaning)}</span></div>` +
+          `<div class="q-hint" lang="en">${esc(q.hint)}</div>` +
+          `<input type="text" lang="en" autocapitalize="off" autocorrect="off" spellcheck="false" autocomplete="off" enterkeyhint="next" aria-label="${i + 1}번 영어로 쓰기" value="${esc(a == null ? '' : a)}"></li>`;
+    });
+    $('#qs').innerHTML = html + '</ol>';
+    setLabel($('#submit'), '제출하기');
+    progress();
+    show('test');
+    if (r.kind === 'practice') stopTimer(); else startTimer();
+  }
+  function progress() { $('#progress').textContent = `답한 문제 ${answered()}/${run.questions.length}`; }
+  function keepAnswers() {
+    if (!run || run.kind === 'practice') return;
+    const r = run;
+    mutate((s) => { if (s.active && s.active.id === r.id) s.active.answers = r.answers.slice(); });
+  }
+  function answerChanged() { disarm($('#submit')); progress(); keepAnswers(); }
+  $('#qs').addEventListener('click', (e) => {
+    const c = e.target.closest('.choice');
+    if (!c || !run) return;
+    const li = c.closest('.q');
+    run.answers[+li.dataset.i] = +c.dataset.c;
+    li.querySelectorAll('.choice').forEach((x) => x.setAttribute('aria-pressed', String(x === c)));
+    answerChanged();
+  });
+  $('#qs').addEventListener('input', (e) => {
+    if (!run || !e.target.matches('input')) return;
+    run.answers[+e.target.closest('.q').dataset.i] = e.target.value;
+    answerChanged();
+  });
+  $('#qs').addEventListener('keydown', (e) => {
+    if (e.key !== 'Enter' || !e.target.matches('input')) return;
+    e.preventDefault();
+    const all = [...document.querySelectorAll('#qs input')];
+    const next = all[all.indexOf(e.target) + 1];
+    if (next) next.focus(); else e.target.blur();
+  });
+  $('#submit').addEventListener('click', (e) => {
+    if (!run) return;
+    const left = run.questions.length - answered();
+    if (left) twoTap(e.currentTarget, `안 푼 문제 ${left}개 · 한 번 더 누르면 제출`, () => submit(false));
+    else submit(false);
+  });
+
+  /* ---------- 시간 ---------- */
+  function stopTimer() { clearInterval(tick); tick = null; $('#timer').hidden = true; }
+  function startTimer() { stopTimer(); $('#timer').hidden = false; updateTimer(); tick = setInterval(updateTimer, 1000); }
+  function updateTimer() {
+    if (!run || run.kind === 'practice') { stopTimer(); return; }
+    const left = run.endsAt - Date.now();
+    if (left <= 0) { submit(true); return; }
+    const sec = Math.ceil(left / 1000);
+    const el = $('#timer');
+    el.textContent = `남은 시간 ${String(Math.floor(sec / 60)).padStart(2, '0')}:${String(sec % 60).padStart(2, '0')}`;
+    el.classList.toggle('warn', sec <= 60);
+  }
+
+  /* ---------- 제출 · 성적표 ---------- */
+  function submit(timeUp) {
+    if (!run) return;
+    stopTimer();
+    const r = run;
+    run = null;
+    const grade = C.gradeTest(r.questions, r.answers);
+    const took = Math.max(0, Math.min(Date.now(), r.endsAt || Date.now()) - r.startedAt);
+    if (r.kind !== 'practice') {
+      mutate((s) => {
+        const units = unitsOf(s, r.bookId);
+        units[r.n] = C.recordAttempt(units[r.n], grade, new Date().toISOString());
+        if (s.active && s.active.id === r.id) s.active = null;
+      });
+    }
+    if (r.kind !== 'practice' && window.__vocabReport) {
+      try { window.__vocabReport({ bookId: r.bookId, n: r.n, kind: r.kind, grade, took, state: unitsOf(S, r.bookId)[r.n] }); } catch (e) { /* 보내기 실패는 다음에 다시 */ }
+    }
+    showResult(r.n, r.kind === 'practice', grade, r.from, { took, timeUp });
+  }
+  const fmtDur = (ms) => { const s = Math.round(ms / 1000); return `${Math.floor(s / 60)}분 ${s % 60}초`; };
+  function setStatus(n, practice, st, grade) {
+    const el = $('#rStatus');
+    if (practice) { el.className = 'practice'; el.textContent = '연습이라 점수와 통과에는 들어가지 않아요.'; return; }
+    if (st.passedAt != null) {
+      el.className = 'pass';
+      el.textContent = `통과! (${st.passedAt}번째 시험에서 통과) ` + (book.units[n] ? `다음 회(${unitTitle(n + 1)})가 열렸어요.` : '마지막 회까지 마쳤어요.');
+      return;
+    }
+    const re = C.testPlan('retake');
+    el.className = 'fail';
+    el.textContent = (grade ? `이번 시험 ${grade.correct}/${grade.total} · 90%(${C.passMark(grade.total)}개) 이상이어야 통과예요. ` : '아직 통과하지 못했어요. ') +
+      `[단어 다시 보기]로 외운 뒤 재시험(무작위 ${re.count}문제 · ${re.minutes}분, ${C.passMark(re.count)}개 이상 통과)을 보세요.`;
+  }
+  function listWrong(n, wrong, title) {
+    const meaning = new Map(book.units[n - 1].words);
+    $('#rWrongTitle').textContent = wrong.length ? `${title} ${wrong.length}개` : '틀린 단어가 없어요';
+    $('#rWrong').innerHTML = wrong.map((w) => `<li><b lang="en">${esc(w)}</b> — ${esc(meaning.get(w) || '')}</li>`).join('');
+  }
+  function resetSend(practice, st) {
+    $('#restudy').hidden = practice;
+    const rt = $('#retake');
+    setLabel(rt, '재시험 시작');
+    rt.hidden = practice || !st || st.passedAt != null;
+    $('#sendBox').hidden = practice;
+    $('#name').value = S.name || '';
+    $('#copyMsg').textContent = '';
+    $('#copyBox').hidden = true;
+  }
+  function showResult(n, practice, grade, from, extra) {
+    shown = { n, practice, from };
+    const st = unitState(n);
+    $('#rTitle').textContent = `${unitTitle(n)} ${practice ? '연습 결과' : '성적표'}`;
+    $('#rScore').textContent = `${grade.correct}/${grade.total}`;
+    let detail = `정답률 ${Math.round((grade.correct / grade.total) * 100)}% · 고르기 ${grade.mc[0]}/${grade.mc[1]} · 쓰기 ${grade.sp[0]}/${grade.sp[1]}`;
+    if (!practice) {
+      detail += ` · 걸린 시간 ${fmtDur(extra.took)}` + (extra.timeUp ? ' · 시간 종료로 자동 제출' : '');
+      if (st.attempts > 1) detail += ` · 공식 점수(처음) ${st.first.correct}/${st.first.total}`;
+    }
+    $('#rDetail').textContent = detail;
+    setStatus(n, practice, st, grade);
+    listWrong(n, grade.wrong, '이번에 틀린 단어');
+    resetSend(practice, st);
+    show('result');
+  }
+  function showSummary(n) {
+    const st = unitState(n);
+    shown = { n, practice: false, from: 'home' };
+    $('#rTitle').textContent = `${unitTitle(n)} 성적표`;
+    $('#rScore').textContent = `${st.first.correct}/${st.first.total}`;
+    $('#rDetail').textContent = `처음 점수 · 고르기 ${st.first.mc[0]}/${st.first.mc[1]} · 쓰기 ${st.first.sp[0]}/${st.first.sp[1]} · 시험 ${st.attempts}번`;
+    setStatus(n, false, st, null);
+    listWrong(n, st.lastWrong || [], '가장 최근 시험에서 틀린 단어');
+    resetSend(false, st);
+    show('result');
+  }
+  $('#restudy').addEventListener('click', () => { if (shown) showStudy(shown.n); });
+  $('#retake').addEventListener('click', (e) => {
+    if (!shown) return;
+    const n = shown.n;
+    twoTap(e.currentTarget, '한 번 더 누르면 재시험 시작 · 단어를 다시 볼 수 없어요', () => beginTest(n));
+  });
+
+  async function copyText(t) {
+    try {
+      if (navigator.clipboard && navigator.clipboard.writeText) { await navigator.clipboard.writeText(t); return true; }
+    } catch (e) { /* 아래 방법으로 */ }
+    try {
+      const ta = document.createElement('textarea');
+      ta.value = t; ta.setAttribute('readonly', ''); ta.style.position = 'fixed'; ta.style.opacity = '0';
+      document.body.appendChild(ta); ta.select();
+      const done = document.execCommand('copy');
+      ta.remove();
+      return done;
+    } catch (e) { return false; }
+  }
+  $('#copy').addEventListener('click', async () => {
+    if (!shown || shown.practice) return;
+    const name = C.cleanName($('#name').value);
+    if (!name) { $('#copyMsg').textContent = '이름을 먼저 넣어 주세요.'; $('#name').focus(); return; }
+    mutate((s) => { s.name = name; });
+    const line = C.formatResultLine(book, shown.n, name, unitState(shown.n));
+    if (await copyText(line)) {
+      $('#copyMsg').textContent = '복사했어요. 담당 선생님 카톡에 붙여넣어 보내 주세요.';
+      $('#copyBox').hidden = true;
+    } else {
+      const box = $('#copyBox');
+      box.value = line; box.hidden = false; box.focus(); box.select();
+      $('#copyMsg').textContent = '자동 복사가 안 돼요. 아래 글을 길게 눌러 복사해 주세요.';
+    }
+  });
+
+  /* ---------- 오답 단어장 ---------- */
+  function renderWrong() {
+    const units = unitsOf(S, book.id);
+    $('#wrongTitle').textContent = `${book.name} · 오답 단어장`;
+    const list = book.units.filter((u) => units[u.n] && (units[u.n].lastWrong || []).length);
+    $('#wrongList').innerHTML = list.length ? list.map((u) => {
+      const meaning = new Map(u.words);
+      const ws = units[u.n].lastWrong;
+      return `<section class="panel wrong-unit" data-n="${u.n}"><h3>${esc(unitTitle(u.n))} · ${ws.length}개</h3>` +
+        `<ul class="words">${ws.map((w) => `<li class="wrong-word" data-word="${esc(w)}"><b lang="en">${esc(w)}</b> — ${esc(meaning.get(w) || '')}</li>`).join('')}</ul>` +
+        `<div class="row"><button type="button" class="btn ghost" data-practice="${u.n}">틀린 단어만 연습</button></div></section>`;
+    }).join('') : '<p class="panel">아직 틀린 단어가 없어요.</p>';
+  }
+  $('#toWrong').addEventListener('click', () => open('wrong'));
+  $('#wrongList').addEventListener('click', (e) => {
+    const b = e.target.closest('[data-practice]');
+    if (b) startPractice(+b.dataset.practice);
+  });
+
+  /* ---------- 뒤로 · 처음 ---------- */
+  document.querySelectorAll('.back').forEach((b) => b.addEventListener('click', () => {
+    const v = current();
+    if (v === 'test') {
+      if (lockedNow()) return;
+      const from = run ? run.from : 'home';
+      run = null;
+      stopTimer();
+      open(from);
+    } else if (v === 'result') {
+      open(shown ? shown.from : 'home');
+    } else {
+      open('home');
+    }
+  }));
+  $('#home-link').addEventListener('click', () => {
+    if (lockedNow()) return;
+    run = null;
+    stopTimer();
+    open('home');
+  });
+
+  /* ---------- 시작 · 이어 하기 · 다른 창과 맞추기 ---------- */
+  function resume() {
+    const a = S.active;
+    if (!a || !Array.isArray(a.questions) || !Array.isArray(a.answers)) return false;
+    const b = BOOKS.find((x) => x.id === a.bookId);
+    if (!b) { mutate((s) => { s.active = null; }); return false; }
+    book = b;
+    renderTabs();
+    run = { ...a, answers: a.answers.slice(), from: 'home' };
+    if (Date.now() >= a.endsAt) submit(true); else renderTest();
+    return true;
+  }
+  function refresh() {
+    if (!canSave || run) return;
+    const fresh = readStored();
+    if (!fresh) return;
+    S = fresh;
+    if (S.active && resume()) return; // 다른 창에서 시작한 시험이면 여기서도 이어서(잠긴 채로) 보여 준다
+    const v = current();
+    if (v === 'home') renderHome(); else if (v === 'wrong') renderWrong();
+  }
+  window.addEventListener('storage', (e) => { if (e.key === KEY) refresh(); });
+  document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') refresh(); });
+
+  if (!canSave) $('#storeWarn').hidden = false;
+  if (MODE === 'teacher') { $('#modeLabel').hidden = false; document.title = '베스티안 영단어 · 선생님용'; }
+  if (!resume()) pickFromHash();
+};
+</script>
+<style>
+#vGate{max-width:440px;margin:40px auto;display:grid;gap:12px;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:20px}
+#vGate h2{margin:0}
+#vGate .code{font-size:30px;letter-spacing:.3em;text-align:center;padding:10px;font-weight:900;font-variant-numeric:tabular-nums;border:1.5px solid var(--line);border-radius:10px;background:var(--surface);min-width:0}
+#vGate .err{color:var(--bad);font-weight:700;min-height:20px;font-size:14px;margin:0}
+#vWho{display:flex;align-items:center;gap:8px;font-size:13px;color:#d6e1ea;flex-wrap:wrap}
+#vWho b{color:#fff}
+#vWho button{border:0;background:rgba(255,255,255,.16);color:#fff;border-radius:999px;padding:4px 10px;font-weight:700;font-size:12.5px;cursor:pointer}
+#vSync{font-size:12.5px}
+</style>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<script>
+/* 깃허브판 영단어: 학생 확인(학생 센터와 같은 네 자리 번호) → 센터 코드 → 서버에서 단어장·진도 받기 → 화면 시작.
+   시험 결과는 서버로 보내 데스크·멘토 센터에서 바로 봅니다. ?mock=1 은 서버 없이 화면만 확인하는 연습 모드. */
+(function(){
+'use strict';
+var ATT={url:'https://qtpftloyumtffvgurvqv.supabase.co',key:'sb_publishable_XGP9n-2fuBQFuJlAA5MJ8w_R8JYIi9O'};
+var DESK={url:'https://eftroiiexkpnladkiypu.supabase.co',key:'sb_publishable_XEif-nOPOZRLjPK8KQRLJg_p-KJN9n8'};
+var MOCK=/[?&]mock=1/.test(location.search);
+var att=null,desk=null;
+try{if(!MOCK&&window.supabase){att=window.supabase.createClient(ATT.url,ATT.key,{auth:{persistSession:false,storageKey:'bv-att'}});desk=window.supabase.createClient(DESK.url,DESK.key,{auth:{persistSession:false,storageKey:'bv-desk'}})}}catch(e){}
+var LSg=function(k,d){try{var v=localStorage.getItem(k);return v?JSON.parse(v):d}catch(e){return d}},LSs=function(k,v){try{if(v==null)localStorage.removeItem(k);else localStorage.setItem(k,JSON.stringify(v))}catch(e){}};
+var $=function(s){return document.querySelector(s)};
+var ME=LSg('bs_student',null);               /* 학생 센터와 같은 기억 (같은 주소라 공유됨) */
+var CODE=LSg('bv_code','');
+var PENDING='bv_pending';
+
+function gate(html){var g=$('#vGate');g.innerHTML=html;g.hidden=false;$('#home').hidden=true}
+function askStudent(msg){
+  gate('<h2>내 번호 확인</h2><p class="hint">독서실 키오스크에서 쓰는 <b>네 자리 번호(핸드폰 뒷자리)</b>를 넣으세요. 학생 센터에서 이미 넣었다면 이 화면은 나오지 않아요.</p>'+
+    '<input class="code" id="vNo" inputmode="numeric" maxlength="6" placeholder="0000" autocomplete="off"><button class="btn" type="button" id="vNoBtn">확인</button><p class="err" id="vErr">'+(msg||'')+'</p>');
+  var go=async function(){var c=$('#vNo').value.replace(/\D/g,'');if(c.length<4){$('#vErr').textContent='네 자리 번호를 넣으세요';return}
+    $('#vErr').textContent='확인 중…';
+    try{var s;if(MOCK)s={id:'u1',name:'김베스',school:'하안고',grade:'2'};else{var r=await att.from('users').select('id,name,school,grade,status,deleted_at').eq('reading_room_code',c).eq('reading_room_yn',true);if(r.error)throw r.error;
+      var rows=(r.data||[]).filter(function(u){return u.status!=='inactive'&&!u.deleted_at});s=rows.length===1?rows[0]:null}
+      if(!s){$('#vErr').textContent='해당 번호의 학생을 찾을 수 없어요. 데스크에 문의하세요.';return}
+      ME={id:String(s.id),name:s.name,school:s.school||'',grade:s.grade||'',code:c};LSs('bs_student',ME);boot()}
+    catch(e){$('#vErr').textContent='조회 오류. 인터넷을 확인하고 다시 시도하세요.'}};
+  $('#vNoBtn').onclick=go;$('#vNo').onkeydown=function(e){if(e.key==='Enter')go()};$('#vNo').focus()}
+function askCode(msg){
+  gate('<h2>센터 코드</h2><p class="hint">'+esc(ME.name)+' 학생, 단어장은 센터 학생만 볼 수 있어요. 데스크에서 알려 준 <b>센터 코드</b>를 넣으세요. 한 번 넣으면 이 기기에서는 기억돼요.</p>'+
+    '<input class="code" id="vCode" inputmode="numeric" maxlength="12" autocomplete="off"><button class="btn" type="button" id="vCodeBtn">확인</button><p class="err" id="vErr">'+(msg||'')+'</p>');
+  var go=function(){var c=$('#vCode').value.trim();if(c.length<4){$('#vErr').textContent='코드를 넣으세요';return}CODE=c;LSs('bv_code',c);boot()};
+  $('#vCodeBtn').onclick=go;$('#vCode').onkeydown=function(e){if(e.key==='Enter')go()};$('#vCode').focus()}
+function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+function renderWho(){var w=$('#vWho');w.hidden=false;w.innerHTML='<span><b>'+esc(ME.name)+'</b> 학생</span><span id="vSync"></span><button type="button" id="vSwitch">다른 학생</button>';
+  $('#vSwitch').onclick=function(){if(!confirm('다른 학생으로 바꿀까요? (이 기기의 번호 기억을 지웁니다)'))return;LSs('bs_student',null);location.reload()}}
+function syncNote(t){var e=$('#vSync');if(e)e.textContent=t}
+
+/* 서버 진도를 이 기기 기록에 합치기: 시험 횟수가 더 많은 쪽을 남김 (다른 태블릿에서 본 시험도 이어짐) */
+function mergeStates(states){var KEY='bestian-vocab-v1:'+ME.id;var S=LSg(KEY,null)||{name:'',books:{},active:null};
+  if(!S.name)S.name=ME.name;S.books=S.books||{};
+  (states||[]).forEach(function(x){var b=S.books[x.book]=S.books[x.book]||{units:{}};b.units=b.units||{};var loc=b.units[x.n];
+    if(!loc||(x.state&&(x.state.attempts||0)>=(loc.attempts||0)))b.units[x.n]=x.state});
+  LSs(KEY,S)}
+
+async function load(){
+  if(MOCK)return {books:window.VOCAB_MOCK_BOOKS||[],states:[]};
+  var r=await desk.rpc('bestian_vocab_load',{p_code:CODE,p_student:ME.id});
+  if(r.error){if(/BAD_CODE/.test(r.error.message)){var e=new Error('BAD_CODE');e.bad=true;throw e}throw r.error}
+  return r.data}
+
+/* 시험을 낼 때마다 서버로. 인터넷이 끊겨도 이 기기에 모아 뒀다가 다음에 보냄 */
+async function flush(){if(MOCK||!desk)return;var q=LSg(PENDING,[]);if(!q.length){syncNote('');return}
+  var left=[];for(var i=0;i<q.length;i++){try{var r=await desk.rpc('bestian_vocab_submit',q[i]);if(r.error&&!/BAD_INPUT/.test(r.error.message))left.push(q[i])}catch(e){left.push(q[i])}}
+  LSs(PENDING,left);syncNote(left.length?'선생님께 아직 못 보낸 결과 '+left.length+'개 (인터넷 연결되면 자동 전송)':'결과 전송됨 ✓')}
+window.__vocabReport=function(x){
+  var book=(window.VOCAB_BOOKS||[]).find(function(b){return b.id===x.bookId})||{name:x.bookId,unit:'day'};
+  var q=LSg(PENDING,[]);q.push({p_code:CODE,p_student:ME.id,p_name:ME.name,p_book:x.bookId,p_book_name:book.name,p_n:x.n,
+    p_unit_label:book.unit==='lesson'?x.n+'강':'Day '+x.n,p_kind:x.kind==='retake'?'retake':'main',p_grade:x.grade,p_state:x.state,
+    p_took_sec:Math.round((x.took||0)/1000),p_at:new Date().toISOString()});
+  LSs(PENDING,q);flush()};
+window.addEventListener('online',flush);setInterval(flush,60000);
+
+async function boot(){
+  if(!ME||!ME.id){askStudent();return}
+  if(!CODE){askCode();return}
+  gate('<h2>단어장 불러오는 중…</h2><p class="hint">잠시만 기다려 주세요.</p>');
+  try{var d=await load()}catch(e){if(e.bad){CODE='';LSs('bv_code',null);askCode('센터 코드가 맞지 않아요. 데스크에 다시 물어보세요.');return}
+    gate('<h2>불러오지 못했어요</h2><p class="hint">인터넷을 확인한 뒤 다시 눌러 주세요.</p><button class="btn" type="button" onclick="location.reload()">다시 시도</button>');return}
+  if(!d.books||!d.books.length){gate('<h2>단어장이 아직 없어요</h2><p class="hint">데스크에 알려 주세요.</p>');return}
+  window.VOCAB_BOOKS=d.books;window.VOCAB_STUDENT=ME;mergeStates(d.states);
+  $('#vGate').hidden=true;$('#home').hidden=false;renderWho();window.__vocabStart();flush()}
+window.__vocabBoot=boot;
+})();
+</script>
+
+<script>window.__vocabBoot();</script>
+</body>
+</html>
