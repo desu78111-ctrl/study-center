@@ -119,6 +119,8 @@ body.zoomed{overflow-y:auto;overflow-x:hidden}
 @keyframes nod{0%,86%,100%{transform:rotate(0)}89%{transform:rotate(-7deg)}93%{transform:rotate(5deg)}97%{transform:rotate(-2deg)}}
 .eye{transform-box:fill-box;transform-origin:center;animation:blink 5s steps(1) infinite;animation-delay:var(--d,0s)}
 @keyframes blink{0%,94%,100%{transform:scaleY(1)}95%,98%{transform:scaleY(.1)}}
+.star{transform-box:fill-box;transform-origin:center;animation:twinkle 2.4s ease-in-out infinite;animation-delay:var(--d,0s)}
+@keyframes twinkle{0%,100%{transform:scale(1) rotate(0);filter:brightness(1)}50%{transform:scale(1.15) rotate(8deg);filter:brightness(1.35)}}
 .pen{position:absolute;left:60%;top:33%;width:3px;height:11px;border-radius:2px;background:linear-gradient(#f2b24c 70%,#3b2518 70%);transform:rotate(32deg);z-index:2;animation:write .7s ease-in-out infinite;animation-delay:var(--d,0s)}
 @keyframes write{0%,100%{transform:translate(0,0) rotate(32deg)}30%{transform:translate(-4px,1px) rotate(26deg)}60%{transform:translate(-7px,0) rotate(30deg)}}
 .seat.turn .pen{display:none}
@@ -134,6 +136,19 @@ body.party .seat.study .chr{animation:jump .45s ease-in-out infinite;animation-d
 .cf{position:absolute;display:block;border-radius:1px;pointer-events:none;z-index:7}
 .walker svg{display:block;width:100%;height:auto;animation:step .42s ease-in-out infinite;transform-origin:50% 90%}
 @keyframes step{0%,100%{transform:translateY(0) rotate(-5deg)}50%{transform:translateY(-5px) rotate(5deg)}}
+/* 관리 선생님(강아지): 10분마다 열람실을 돌며 학생을 한 명씩 깨움 */
+.walker.teacher{z-index:8}
+.walker.teacher .body{transition:transform .2s}
+.walker.teacher .body.flip{transform:scaleX(-1)}
+.walker.teacher em{display:block;text-align:center;font-style:normal;font-family:var(--display);font-size:11px;color:#1c1510;background:#f2b24c;border-radius:8px;padding:0 5px;margin:-4px auto 0;width:max-content;max-width:100%;line-height:1.5}
+.walker.teacher .say{position:absolute;left:50%;bottom:calc(100% - 2px);transform:translateX(-50%);background:#fff8e8;color:#2b1d14;border:2px solid #8d6340;border-radius:10px;padding:2px 8px;font-size:12px;font-family:var(--display);white-space:nowrap;box-shadow:0 2px 0 #5a3a24;animation:pop .25s ease-out}
+.walker.teacher .say::after{content:"";position:absolute;left:50%;bottom:-7px;transform:translateX(-50%);border:5px solid transparent;border-top-color:#8d6340;border-bottom:0}
+.seat.poked .pen{display:none}
+.seat.poked .chr{animation:wake .5s ease-out}
+.seat.poked .chr svg{animation:none}
+@keyframes wake{0%{transform:translateY(0) scaleX(.3)}40%{transform:translateY(-7px) scaleX(1)}100%{transform:translateY(0) scaleX(1)}}
+.wake{position:absolute;left:50%;top:-6%;transform:translateX(-50%);z-index:5;font-family:var(--display);font-size:18px;color:#fff;background:#e94e4e;border-radius:50%;width:22px;height:22px;line-height:22px;text-align:center;box-shadow:0 2px 4px rgba(0,0,0,.5);animation:wakepop .3s ease-out;pointer-events:none}
+@keyframes wakepop{0%{transform:translateX(-50%) scale(.3);opacity:0}100%{transform:translateX(-50%) scale(1);opacity:1}}
 .lounge{display:flex;align-items:flex-end;gap:10px;flex-wrap:wrap;margin-top:8px;padding:6px 8px 0;border-top:1px dashed #6b4a30}
 .lounge small{width:100%;color:var(--mute);font-size:11.5px}
 .lg{width:40px;text-align:center;font-size:10.5px;color:#e9d3b0;line-height:1.2}
@@ -142,7 +157,52 @@ body.party .seat.study .chr{animation:jump .45s ease-in-out infinite;animation-d
 footer{margin-top:8px;font-size:12px;color:var(--mute);display:flex;gap:14px}
 footer .dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--jade);margin-right:5px;vertical-align:middle}
 footer .dot.off{background:var(--rose)}
-@media(prefers-reduced-motion:reduce){.seat.study .chr,.seat.study .chr svg,.eye,.pen,.walker svg,.lg svg{animation:none}}
+@media(prefers-reduced-motion:reduce){.seat.study .chr,.seat.study .chr svg,.eye,.pen,.walker svg,.lg svg,.star{animation:none}}
+
+/* ===================== 밝은 테마 (갈색 → 하늘·크림·민트) ===================== */
+:root{--bg:#eaf4fb;--panel:#fff;--line:#d3e3f0;--paper:#1f3550;--ink:#1f3550;--mute:#6f86a0;--lantern:#ff9f1c;--jade:#22b07d;--rose:#ef6b6b}
+html,body{background:radial-gradient(1200px 500px at 50% -10%,#ffffff 0,#eaf4fb 55%,#dcecf8 100%) fixed;color:var(--ink)}
+h1{color:#1f3550}h1 small{color:#ff9f1c}
+.stat b{color:#ff8a00}.stat span{color:var(--mute)}
+.clock{color:#1f3550;background:#fff;border-radius:12px;padding:2px 14px;box-shadow:0 3px 10px rgba(60,110,160,.15)}
+.banner{background:#fff6dd;border-color:#ffd27a;color:#7a5200}
+/* 열람실: 밝은 원목 바닥 + 민트 벽 */
+.hall{background:
+    radial-gradient(70% 45% at 50% 0%,rgba(255,236,170,.55),transparent 70%),
+    repeating-linear-gradient(90deg,rgba(176,124,64,.10) 0 2px,transparent 2px 46px),
+    linear-gradient(#fffaf0 0,#f8ead0 35%,#f1dcb6 100%);
+  border:3px solid #fff;box-shadow:0 8px 20px rgba(60,110,160,.16),inset 0 0 0 1px #ecd9b6}
+.wall{background:linear-gradient(#c9eee4,#ade0d2);border-bottom:5px solid #86cbb9}
+.wall::before,.wall::after{border-color:#fff;background:repeating-linear-gradient(90deg,transparent 0 9px,#fff 9px 11px),repeating-linear-gradient(0deg,transparent 0 9px,#fff 9px 11px),linear-gradient(#bfe6ff,#e6f6ff);box-shadow:0 0 0 2px #9fd3c5,inset 0 0 10px rgba(255,255,255,.8)}
+.lamp{background:#c9a46b}.lamp::after{background:#ffd76a;box-shadow:0 0 22px 8px rgba(255,215,106,.55)}
+.hallname{background:#fff;border:2px solid #ff9f1c;color:#1f3550;box-shadow:0 2px 0 #f2c27a}
+.hallname em{color:#ef6b6b}.hallname span{color:var(--mute)}
+/* 칠판: 더 밝은 초록 + 연한 원목 테두리 */
+.board{background:radial-gradient(120% 80% at 30% 20%,rgba(255,255,255,.12),transparent 60%),repeating-linear-gradient(115deg,rgba(255,255,255,.03) 0 3px,transparent 3px 9px),#3f9469;
+  border-color:#e8bf86;box-shadow:inset 0 0 18px rgba(0,0,0,.22),0 4px 0 #d3a165,0 8px 10px rgba(60,110,160,.18)}
+.board::after{background:linear-gradient(#f0cf9c,#d3a165)}
+.cell.block{background:repeating-linear-gradient(45deg,#e9dcc4 0 5px,#e2d2b6 5px 10px);opacity:.8}
+.cell.door{border-color:#9fb4c8;color:#6f86a0;background:repeating-linear-gradient(45deg,rgba(120,160,200,.10) 0 6px,transparent 6px 12px)}
+/* 의자: 주황 */
+.seat::before{background:linear-gradient(#ffbd7a,#f59342);border-color:#e7802e}
+/* 책상: 밝은 메이플 */
+.desk{background:linear-gradient(#ffe6b8,#f6cc8a);border-color:#efb565;box-shadow:0 6px 0 #dda05a,0 7px 0 #c98a43,0 11px 8px rgba(90,70,30,.2)}
+.desk b{color:#9a6a2e}
+.desk i{color:#3b2a17}
+.desk u{color:#e0661a}
+.seat.free .desk{background:linear-gradient(#fffaf0,#f4e6cb);border-color:#ead8b6;box-shadow:0 6px 0 #e3cfa8,0 7px 0 #d6c095,0 11px 8px rgba(90,70,30,.12)}
+.seat.free .desk i{color:#a8936f}
+.seat.assigned .desk,.seat.away .desk{background:linear-gradient(#fbf1df,#f1e0c2);border-color:#e5cfa6}
+.seat.assigned .desk i,.seat.away .desk i{color:#a08a68}
+.seat.away .desk u{color:#ef6b6b}
+.lounge{border-top-color:#e2cda6}.lounge small{color:var(--mute)}.lg{color:#6b5436}
+.zoomhint{background:#fff;border-color:#ff9f1c;color:#1f3550}
+.walker{filter:drop-shadow(0 4px 4px rgba(60,80,110,.25))}
+.walker.teacher em{background:#ff9f1c;color:#fff}
+.walker.teacher .say{background:#fff;color:#1f3550;border-color:#ff9f1c;box-shadow:0 2px 0 #f2c27a}
+.walker.teacher .say::after{border-top-color:#ff9f1c}
+#toast{background:#fff;color:#1f3550;border-color:#ff9f1c;box-shadow:0 10px 24px rgba(60,110,160,.25)}
+footer{color:var(--mute)}
 </style>
 </head>
 <body>
@@ -155,7 +215,7 @@ footer .dot.off{background:var(--rose)}
 </header>
 <div class="banner" id="banner" hidden></div>
 <div class="rooms" id="rooms"></div>
-<footer><span><i class="dot" id="dot"></i><span id="conn">연결 중</span></span><span id="upd"></span><span>출결 시스템(BMAPS)의 입실·외출·퇴실 기록을 그대로 보여줍니다. 순위의 초록 시간은 지금 공부 중인 학생이에요.</span></footer>
+<footer><span><i class="dot" id="dot"></i><span id="conn">연결 중</span></span><span id="upd"></span><span>출결 시스템(BMAPS)의 입실·외출·퇴실 기록을 그대로 보여줍니다. 순위의 초록 시간은 지금 공부 중인 학생이에요. 관리쌤 강아지는 10분마다 열람실을 한 바퀴 돌아요.</span></footer>
 </div>
 
 <script>
@@ -178,16 +238,43 @@ function roomOf(n){for(var i=0;i<ROOMS.length;i++){for(var r=0;r<ROOMS[i].rows.l
 /* 캐릭터 */
 var KINDS=['bear','bunny','cat','dog','fox','panda','hamster','chick'];
 /* 특정 학생 전용 캐릭터 (이름 → 종류). 펭귄은 랜덤 배정에서 빠지고 여기서만 씀 */
-var SPECIAL={'이승현':'penguin','전수현':'sleepy','강성연':'emperor'};
+var PUPPY_OWNER='김나운';   /* 강아지 캐릭터는 이 학생만 사용 가능 */
+var SPECIAL={'이승현':'penguin','전수현':'sleepy','강성연':'emperor'};SPECIAL[PUPPY_OWNER]='puppy';
 /* 머리에 왕관을 쓰는 학생 */
 var CROWN={'이도윤':1,'강성연':1};
+/* 머리 위에 노란 별을 띄우는 학생 */
+var STAR={'권별':1};
+function starOf(name){return STAR[name]?'<g class="star"><polygon points="40,2 42.5,9.6 49.5,9.9 44,14.3 45.9,21.1 40,17.2 34.1,21.1 36,14.3 30.5,9.9 37.5,9.6" fill="#ffd75e" stroke="#e0a020" stroke-width="1.5" stroke-linejoin="round"/><polygon points="40,6 41.2,9.8 45,10 42,12.3 43,16 40,13.8 37,16 38,12.3 35,10 38.8,9.8" fill="#fff4c2" opacity=".85"/><path d="M27 5 l0 4 M25 7 l4 0 M54 3 l0 3 M52.5 4.5 l3 0" stroke="#ffe3a6" stroke-width="1.4" stroke-linecap="round"/></g>':''}
 function crownOf(name){return CROWN[name]?'<path d="M22 22 L28 6 L36 18 L40 2 L44 18 L52 6 L58 22 Z" fill="#f2b24c" stroke="#b8761c" stroke-width="1.5" stroke-linejoin="round"/><rect x="22" y="20" width="36" height="6" rx="2" fill="#f2b24c" stroke="#b8761c" stroke-width="1.5"/><circle cx="28" cy="9" r="2" fill="#e94e4e"/><circle cx="40" cy="5" r="2.2" fill="#6cc2a3"/><circle cx="52" cy="9" r="2" fill="#7aa7e0"/>':''}
 var PAL={bear:{f:'#b98a5e',i:'#ecd0ae',d:'#8a6240'},bunny:{f:'#f3ece4',i:'#f4b6c0',d:'#d9cfc2'},cat:{f:'#e2a55a',i:'#f4b6c0',d:'#b9772f'},dog:{f:'#dcc3a0',i:'#f3e6d0',d:'#8a6040'},fox:{f:'#e07a3f',i:'#fff4e6',d:'#8a3f1a'},panda:{f:'#f7f7f4',i:'#ffffff',d:'#2f2a27'},hamster:{f:'#e8c07d',i:'#fff3dc',d:'#b88a44'},chick:{f:'#ffd75e',i:'#fff0b0',d:'#f08a3c'},penguin:{f:'#2b3340',i:'#f7f7f4',d:'#f2b24c'},sleepy:{f:'#2f7fae',i:'#ffffff',d:'#1f5a80'}};
 var SHIRT=['#5fb59a','#e98f8f','#f2b24c','#7aa7e0','#b58ad6','#8bc27a','#f08a6a','#6fc1c9'];
 function kindOf(name){if(SPECIAL[name])return SPECIAL[name];var h=7,i;for(i=0;i<name.length;i++)h=(h*31+name.charCodeAt(i))>>>0;return KINDS[h%KINDS.length]}
 function chr(kind,state,name){
-  var crown=crownOf(name||''),emp=kind==='emperor';if(emp)kind='penguin';
-  var p=PAL[kind]||PAL.bear,k=KINDS.indexOf(kind),sh=kind==='penguin'?'#e94e4e':kind==='sleepy'?'#2f7fae':SHIRT[k<0?0:k],ear='',face='';if(emp)sh='#7a3fb0';
+  var crown=crownOf(name||'')+starOf(name||''),emp=kind==='emperor';if(emp)kind='penguin';
+  /* 관리 선생님: 강아지 + 동그란 안경 + 넥타이, 남색 조끼 */
+  var tch=kind==='teacher';if(tch)kind='dog';
+  /* 흰 강아지(선화 느낌): 하얀 몸에 검은 외곽선, 축 늘어진 귀, 점 눈 */
+  /* 이 강아지는 김나운 학생 전용. 다른 이름으로 들어오면 기본 랜덤 캐릭터로 돌림 */
+  if(kind==='puppy'&&name!==PUPPY_OWNER){kind=KINDS[(name||'').length%KINDS.length]}
+  if(kind==='puppy'){
+    var L='fill="#fff" stroke="#1c1510" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"';
+    var K='fill="none" stroke="#1c1510" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"';
+    /* 몸: 다리 선 없이 통통한 덩어리, 바닥에 작은 발 두 개, 왼쪽 아래 잎사귀 꼬리 */
+    var pTail='<path d="M16 76 Q4 72 6 60 Q13 68 19 70" '+L+'/>';
+    var pBody='<path d="M26 58 Q12 62 12 76 Q12 84 24 84 L56 84 Q68 84 68 76 Q68 62 54 58Z" '+L+'/>';
+    var pPaws='<path d="M27 84 Q28 77 36 77 Q42 77 42 84" '+L+'/><path d="M40 84 Q40 77 46 77 Q54 77 55 84" '+L+'/><path d="M34 84 v-3 M48 84 v-3" '+K+'/>';
+    /* 머리: 둥근 네모에 가까운 넓은 얼굴. 귀는 머리 위로 살짝 솟았다가 뺨 옆으로 짧게 처짐 */
+    var pHead='<path d="M10 24 C10 13 24 11 40 11 C56 11 70 13 70 24 L70 30 Q70 35 65 35 Q66 42 63 51 Q61 61 52 64 Q40 67 28 64 Q19 61 17 51 Q14 42 15 35 Q10 35 10 30Z" '+L+'/>';
+    var pEars='';
+    if(state==='back'){
+      return '<svg viewBox="0 0 80 80" aria-hidden="true">'+pTail+pBody+pHead+pEars+crown+'</svg>';
+    }
+    var pEyes=state==='rest'?'<path d="M27 34 q3.5 3 7 0 M46 34 q3.5 3 7 0" '+K+'/>':'<g class="eye"><circle cx="30" cy="34" r="2.1" fill="#1c1510"/></g><g class="eye"><circle cx="50" cy="34" r="2.1" fill="#1c1510"/></g>';
+    var pFace='<circle cx="40" cy="52" r="1.9" fill="#1c1510"/><path d="M37 55 q1.5 2 3 0 q1.5 2 3 0" '+K+'/>';
+    return '<svg viewBox="0 0 80 80" aria-hidden="true">'+pTail+pBody+pPaws+pHead+pEars+pEyes+pFace+crown+'</svg>';
+  }
+  var p=PAL[kind]||PAL.bear,k=KINDS.indexOf(kind),sh=kind==='penguin'?'#e94e4e':kind==='sleepy'?'#2f7fae':SHIRT[k<0?0:k],ear='',face='';if(emp)sh='#7a3fb0';if(tch)sh='#2f4a7a';
+  if(tch)crown+='<g fill="none" stroke="#2b1d14" stroke-width="2.2"><circle cx="30" cy="45" r="7.5"/><circle cx="50" cy="45" r="7.5"/><path d="M37.5 45h5"/><path d="M22.5 44l-6-2M57.5 44l6-2"/></g><polygon points="35,63 45,63 40,69" fill="#e94e4e"/><rect x="38" y="68" width="4" height="9" rx="1" fill="#e94e4e"/>';
   /* 잠만보 느낌(원작 모방 아님): 청록 큰 몸, 크림색 얼굴·배, 늘 감은 눈, 작은 뾰족 귀 */
   if(kind==='sleepy')ear='<polygon points="18,32 20,8 36,22" fill="'+p.f+'"/><polygon points="62,32 60,8 44,22" fill="'+p.f+'"/>';
   if(kind==='bear')ear='<circle cx="20" cy="22" r="9" fill="'+p.f+'"/><circle cx="20" cy="22" r="5" fill="'+p.i+'"/><circle cx="60" cy="22" r="9" fill="'+p.f+'"/><circle cx="60" cy="22" r="5" fill="'+p.i+'"/>';
@@ -417,13 +504,77 @@ function turnAround(){
   if(partying)return;
   var sec=Math.floor(Date.now()/1000),seats=document.querySelectorAll('.seat.study');
   for(var i=0;i<seats.length;i++){
-    var s=seats[i],n=Number(s.getAttribute('data-seat')),v=vis[n];if(!v)continue;
+    var s=seats[i],n=Number(s.getAttribute('data-seat')),v=vis[n];if(!v||s.classList.contains('poked'))continue;
     var turned=((sec+n*37)%60)<3,was=s.classList.contains('turn');
     if(turned===was)continue;
     s.classList.toggle('turn',turned);
     var c=s.querySelector('.chr');if(c)c.innerHTML=chr(v.kind,turned?'study':'back',v.name);
   }
 }
+/* ── 관리 선생님 순회: 10분마다(매시 00·10·20·30·40·50분) 1→2→3→4열람실 순서로 돌며 공부 중인 학생을 한 명씩 깨움 ── */
+var PATROL_EVERY=600,patrolling=false,lastPatrolSlot=Math.floor(Date.now()/1000/PATROL_EVERY);
+var SAY=['졸지 마~','집중!','화이팅!','허리 펴고~','잘하고 있어','조금만 더!','눈 떠요~','물 한 잔 마시고'];
+function teacherEl(w){
+  var el=document.createElement('div');el.className='walker teacher';el.style.width=w+'px';
+  el.innerHTML='<div class="body">'+chr('teacher','study','')+'</div><em>관리쌤</em>';
+  return el;
+}
+function moveTo(el,from,to,cb){
+  var cw=parseFloat(el.style.width),tr=function(p){return 'translate('+(p.x-cw/2)+'px,'+(p.y-cw/2)+'px)'};
+  var body=el.querySelector('.body');if(body)body.classList.toggle('flip',to.x<from.x-1);
+  var d1=Math.abs(from.x-to.x),d2=Math.abs(from.y-to.y),dist=d1+d2;
+  if(dist<1||!el.animate){el.style.transform=tr(to);setTimeout(cb,0);return}
+  /* 세로(통로)로 먼저 가고 가로로 책상에 다가감 */
+  var mid={x:from.x,y:to.y},frames=d1>0&&d2>0?[{transform:tr(from)},{transform:tr(mid),offset:d2/dist},{transform:tr(to)}]:[{transform:tr(from)},{transform:tr(to)}];
+  el.animate(frames,{duration:Math.max(260,dist*5),easing:'linear',fill:'forwards'}).onfinish=cb;
+}
+function say(el,t){var s=el.querySelector('.say');if(s)s.remove();if(!t)return;s=document.createElement('span');s.className='say';s.textContent=t;el.appendChild(s)}
+/* 학생 깨우기: 뒤돌아보며 "!" 하고 다시 공부 */
+function poke(n){
+  var s=document.querySelector('.seat.study[data-seat="'+n+'"]'),v=vis[n];if(!s||!v)return;
+  s.classList.add('poked','turn');var c=s.querySelector('.chr');if(c)c.innerHTML=chr(v.kind,'study',v.name);
+  var w=document.createElement('b');w.className='wake';w.textContent='!';s.appendChild(w);
+  setTimeout(function(){
+    w.remove();if(!s.isConnected)return;
+    s.classList.remove('poked','turn');var v2=vis[n],c2=s.querySelector('.chr');if(c2&&v2)c2.innerHTML=chr(v2.kind,'back',v2.name);
+  },1500);
+}
+function patrolRoom(r,done){
+  var hall=document.querySelector('.hall[data-room="'+r.id+'"]');
+  if(!hall||!hall.offsetWidth){done();return}   /* 확대 중이라 안 보이는 방은 건너뜀 */
+  var seats=[];
+  r.rows.forEach(function(row,i){var rw=row.slice();if(i%2)rw.reverse();rw.forEach(function(n){if(typeof n==='number'&&n>0&&vis[n]&&vis[n].status==='study')seats.push(n)})});
+  var door=cellPos(hall,'.cell.door');
+  if(!door||!seats.length){done();return}
+  var el=teacherEl(door.w*0.8),start={x:door.x,y:door.y+door.w*0.9};
+  el.style.transform='translate('+(start.x-door.w*0.4)+'px,'+(start.y-door.w*0.4)+'px)';
+  hall.appendChild(el);
+  var pos=start,k=0;
+  var step=function(i){
+    if(!el.isConnected){done();return}
+    if(i>=seats.length){say(el,'');moveTo(el,pos,start,function(){el.remove();done()});return}
+    var n=seats[i],p=cellPos(hall,'[data-seat="'+n+'"]');
+    if(!p||!vis[n]||vis[n].status!=='study'){step(i+1);return}
+    var tgt={x:p.x+p.w*0.42,y:p.y+p.w*0.46};   /* 학생 뒤쪽 오른편에 서서 */
+    moveTo(el,pos,tgt,function(){
+      pos=tgt;poke(n);say(el,SAY[(k++)%SAY.length]);
+      setTimeout(function(){step(i+1)},1200);
+    });
+  };
+  moveTo(el,start,{x:door.x,y:door.y},function(){pos={x:door.x,y:door.y};step(0)});
+}
+function patrol(){
+  if(patrolling||reduced)return;
+  patrolling=true;
+  var i=0,next=function(){
+    if(i>=ROOMS.length){patrolling=false;return}
+    patrolRoom(ROOMS[i++],function(){setTimeout(next,500)});
+  };
+  next();
+}
+window.__patrol=patrol;   /* 콘솔에서 __patrol() 로 바로 확인 */
+/* 콘솔 테스트용: __demo([1,2,16,52,76,88]) 처럼 좌석 번호를 주면 가짜 학생을 앉혀 봄 (실데이터 갱신되면 사라짐) */
+window.__demo=function(seats){var nm=['김민준','이서연','박지호','최수아','정도윤','강하은','이승현','전수현','이도윤','윤지우'];seats.forEach(function(n,i){var name=nm[i%nm.length];target[n]={seat:n,name:name,kind:kindOf(name),status:'study',since:Date.now()-3600000*(1+i%3),out:0,outAt:0}});reconcile()};
 /* 15분에 한 번, 특정 학생 자리에 꽃가루 */
 var CONFETTI={'이도윤':1},lastBurst={};
 var CF_COLORS=['#f2b24c','#e94e4e','#6cc2a3','#7aa7e0','#b58ad6','#fff4e6','#f08a6a'];
@@ -484,6 +635,8 @@ function checkRankChange(lists){
 function tick(){
   var d=new Date();$('#clock').textContent=pad(d.getHours())+':'+pad(d.getMinutes())+':'+pad(d.getSeconds());
   turnAround();confetti();
+  var sec=Math.floor(Date.now()/1000),slot=Math.floor(sec/PATROL_EVERY);
+  if(slot!==lastPatrolSlot&&sec%PATROL_EVERY<5){lastPatrolSlot=slot;patrol()}
   var els=document.querySelectorAll('[data-since]');
   for(var i=0;i<els.length;i++){var v=vis[els[i].getAttribute('data-since')];if(v)els[i].textContent=since(v)}
 }
