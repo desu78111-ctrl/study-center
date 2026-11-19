@@ -381,7 +381,10 @@ var SEENK='bdesk_seen';function seen(){return LSg(SEENK,{})}function markSeen(k)
 
 function meNow(){var m=LSg('bs_student',null);return m&&m.id?m:null}
 async function checkMe(){var m=meNow();if((m&&m.id)!==(ME&&ME.id)){ME=m;REQ=[];MSG=[];BONUS=0;SEAT=null;stopLive();if(ME){try{SEAT=await api.seat(ME.id)}catch(e){}startLive()}render()}}
-async function load(){if(!ME)return;var d=bizToday();try{var r=await Promise.all([api.reqs(ME.id,d),api.msgs(ME.id,d),api.bonus(ME.id,d)]);REQ=r[0];MSG=r[1];BONUS=r[2]}catch(e){}render()}
+/* 전날 닫히지 않은 내 깨우기는 자동으로 닫는다 (남아 있으면 오늘 깨우기가 '진행 중'으로 막힘) */
+var staleKey='';
+async function closeStale(d){if(MOCK||!ddb||!ME||staleKey===ME.id+d)return;try{var r=await ddb.from('bestian_desk_requests').update({status:'done',done_at:new Date(now()).toISOString(),done_by:'자동 마감'}).eq('student_id',ME.id).eq('kind','wake').in('status',['new','doing']).lt('biz_date',d);if(!r.error)staleKey=ME.id+d}catch(e){}}
+async function load(){if(!ME)return;var d=bizToday();await closeStale(d);try{var r=await Promise.all([api.reqs(ME.id,d),api.msgs(ME.id,d),api.bonus(ME.id,d)]);REQ=r[0];MSG=r[1];BONUS=r[2]}catch(e){}render()}
 var tmr=null;function onChange(){clearTimeout(tmr);tmr=setTimeout(load,200)}
 function startLive(){load();if(MOCK||!ddb||!ME)return;
   try{chan=ddb.channel('bdesk-'+ME.id).on('postgres_changes',{event:'*',schema:'public',table:'bestian_desk_requests',filter:'student_id=eq.'+ME.id},onChange)

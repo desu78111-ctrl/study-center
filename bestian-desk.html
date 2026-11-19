@@ -226,7 +226,10 @@ var REQ=[],MSG=[],BONUS={},STU=[],TAB='all',SEEN=null,first=true,lastWake={};
 $('#me').value=LSg('bdesk_me','');$('#me').addEventListener('input',function(){LSs('bdesk_me',$('#me').value.trim())});
 function meName(){return $('#me').value.trim()||'데스크'}
 
-async function load(){var d=bizToday();
+/* 전날 [깨웠음]을 안 누르고 남은 깨우기는 자동으로 닫는다 (안 닫으면 그 학생이 다음 날 깨우기를 못 누름) */
+var staleDay='';
+async function closeStale(d){if(MOCK||!ddb||staleDay===d)return;try{var r=await ddb.from('bestian_desk_requests').update({status:'done',done_at:new Date(now()).toISOString(),done_by:'자동 마감'}).eq('kind','wake').in('status',['new','doing']).lt('biz_date',d);if(!r.error)staleDay=d}catch(e){}}
+async function load(){var d=bizToday();await closeStale(d);
   try{var res=await Promise.all([api.reqs(d),api.msgs(d),api.bonus(d)]);REQ=res[0];MSG=res[1];BONUS={};res[2].forEach(function(b){BONUS[b.student_id]=b.extra});setConn(true)}
   catch(e){setConn(false);return}
   /* 새 요청 알림음 */
