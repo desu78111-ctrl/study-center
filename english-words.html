@@ -779,7 +779,8 @@ var att=null,desk=null;
 try{if(!MOCK&&window.supabase){att=window.supabase.createClient(ATT.url,ATT.key,{auth:{persistSession:false,storageKey:'bv-att'}});desk=window.supabase.createClient(DESK.url,DESK.key,{auth:{persistSession:false,storageKey:'bv-desk'}})}}catch(e){}
 var LSg=function(k,d){try{var v=localStorage.getItem(k);return v?JSON.parse(v):d}catch(e){return d}},LSs=function(k,v){try{if(v==null)localStorage.removeItem(k);else localStorage.setItem(k,JSON.stringify(v))}catch(e){}};
 var $=function(s){return document.querySelector(s)};
-var ME=LSg('bs_student',null);               /* 학생 센터와 같은 기억 (같은 주소라 공유됨) */
+var SK=MOCK?'bs_student_mock':'bs_student',ME=LSg(SK,null);   /* 학생 센터와 같은 기억 (같은 주소라 공유됨 · 연습 모드의 예시 학생은 따로) */
+if(!MOCK&&ME&&/^u\d+$/.test(String(ME.id))){ME=null;LSs(SK,null)} /* 예시 데이터로 로그인했던 기기 정리 */
 var CODE=LSg('bv_code','');
 var PENDING='bv_pending';
 
@@ -792,7 +793,7 @@ function askStudent(msg){
     try{var s;if(MOCK)s={id:'u1',name:'김베스',school:'하안고',grade:'2'};else{var r=await att.from('users').select('id,name,school,grade,status,deleted_at').eq('reading_room_code',c).eq('reading_room_yn',true);if(r.error)throw r.error;
       var rows=(r.data||[]).filter(function(u){return u.status!=='inactive'&&!u.deleted_at});s=rows.length===1?rows[0]:null}
       if(!s){$('#vErr').textContent='해당 번호의 학생을 찾을 수 없어요. 데스크에 문의하세요.';return}
-      ME={id:String(s.id),name:s.name,school:s.school||'',grade:s.grade||'',code:c};LSs('bs_student',ME);boot()}
+      ME={id:String(s.id),name:s.name,school:s.school||'',grade:s.grade||'',code:c};LSs(SK,ME);boot()}
     catch(e){$('#vErr').textContent='조회 오류. 인터넷을 확인하고 다시 시도하세요.'}};
   $('#vNoBtn').onclick=go;$('#vNo').onkeydown=function(e){if(e.key==='Enter')go()};$('#vNo').focus()}
 function askCode(msg){
@@ -802,7 +803,7 @@ function askCode(msg){
   $('#vCodeBtn').onclick=go;$('#vCode').onkeydown=function(e){if(e.key==='Enter')go()};$('#vCode').focus()}
 function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
 function renderWho(){var w=$('#vWho');w.hidden=false;w.innerHTML='<span><b>'+esc(ME.name)+'</b> 학생</span><span id="vSync"></span><button type="button" id="vSwitch">다른 학생</button>';
-  $('#vSwitch').onclick=function(){if(!confirm('다른 학생으로 바꿀까요? (이 기기의 번호 기억을 지웁니다)'))return;LSs('bs_student',null);location.reload()}}
+  $('#vSwitch').onclick=function(){if(!confirm('다른 학생으로 바꿀까요? (이 기기의 번호 기억을 지웁니다)'))return;LSs(SK,null);location.reload()}}
 function syncNote(t){var e=$('#vSync');if(e)e.textContent=t}
 
 /* 서버 진도를 이 기기 기록에 합치기: 시험 횟수가 더 많은 쪽을 남김 (다른 태블릿에서 본 시험도 이어짐) */

@@ -508,7 +508,7 @@ async function tvStart(){
    ================================================================= */
 var ME=LSg('bl_me');
 // 학생 센터(bestian-student.html)에서 이미 로그인했다면 그 학생으로 바로 들어감
-(function(){var bs=LSg('bs_student');if(bs&&bs.id&&(!ME||ME.id!==bs.id))ME={id:bs.id,fromCenter:true}})();
+(function(){var bs=LSg(MOCK?'bs_student_mock':'bs_student');if(bs&&bs.id&&(!ME||ME.id!==bs.id))ME={id:bs.id,fromCenter:true}})();   // 연습 모드(?mock=1)의 예시 학생은 따로 기억됨
 function meLogin(){
   $('#main').innerHTML='<div class="panel" style="max-width:420px;margin:30px auto;text-align:center"><h2 style="font-size:20px">내 리그 기록 보기</h2><p class="hint">독서실 키오스크에서 쓰는 <b>번호 4자리</b>를 입력하세요.</p>'+
    '<input class="tx" id="code" inputmode="numeric" maxlength="8" placeholder="0000" style="text-align:center;font-size:22px;letter-spacing:.3em;margin:8px 0 10px">'+
