@@ -581,7 +581,7 @@ html.sk-lock #toast{top:calc(16px + env(safe-area-inset-top,0px));bottom:auto}
         <li><b>멘토</b>: 월·수·금 오전부터 개별 호출 상담 (멘토링반, 하루 10~15명)</li>
         <li><b>토요일</b>: 주간 모의고사와 오답 정리로 한 주 점검 (시험 시간은 센터에서 따로 안내)</li>
               </ul>
-      <p class="hint" style="margin:10px 0 0">의무 학습 주 50시간</p>
+      <p class="hint" style="margin:10px 0 0">의무 학습 주 68시간</p>
     </div>
     <div class="panel">
       <h3>규칙 동의서 구성</h3>
@@ -1037,7 +1037,7 @@ html.sk-lock #toast{top:calc(16px + env(safe-area-inset-top,0px));bottom:auto}
     <div class="panel">
       <h3>출석부 · 점검표 <span class="hint" style="font-weight:500">(바꾸면 자동 저장)</span></h3>
       <div class="tbl-wrap"><table class="sc-table wk-table" id="wkTable"></table></div>
-      <div class="hint" style="margin:8px 0 0;display:flex;flex-wrap:wrap;gap:12px"><span><b>출결</b> 출 출석 · 지 지각 · 결 결석 · 외 외출/조퇴 · - 해당 없음</span><span><b>공부시간</b> 그 주 센터 공부시간(시간, 0.5 단위) · 목표 50</span><span><b>플래너</b> 달성 / 일부 / 미달</span><span><b>N제</b> 원생만</span><span><b>점수</b> 예: 18/20, 92점, 3단원 21/26</span></div>
+      <div class="hint" style="margin:8px 0 0;display:flex;flex-wrap:wrap;gap:12px"><span><b>출결</b> 출 출석 · 지 지각 · 결 결석 · 외 외출/조퇴 · - 해당 없음</span><span><b>공부시간</b> 그 주 센터 공부시간(시간, 0.5 단위) · 목표 68</span><span><b>플래너</b> 달성 / 일부 / 미달</span><span><b>N제</b> 원생만</span><span><b>점수</b> 예: 18/20, 92점, 3단원 21/26</span></div>
     </div>
   </div>
 
@@ -1364,6 +1364,7 @@ html.sk-lock #toast{top:calc(16px + env(safe-area-inset-top,0px));bottom:auto}
     $('#wkKpi').innerHTML=[['학생',ST.length+'명'],['멘토',MT.length+'명'],['이번 주 출석률',t?Math.round(p/t*100)+'%':'-'],['점검 입력',recs.length+'/'+ST.length+'명']].map(([l,v])=>`<div class="kpi"><div class="l">${l}</div><div class="v num">${v}</div></div>`).join('')}
 
   /* report */
+  const GOAL_H=68; /* 의무 학습 시간(주): 리포트의 목표와 달성률 기준 */
   function summary(s,r){const att={출:0,지:0,결:0,외:0};DAYS.forEach((d,i)=>{const v=(r.att||{})[i];if(att[v]!==undefined)att[v]++});
     const items=[{k:'플래너 목표',ok:r.planner==='달성'?1:r.planner==='일부'?2:r.planner?0:-1,v:r.planner||'미입력'}];
     if(s.member)items.push({k:'일일N제 (수학)',ok:r.nje?1:0,v:r.nje?'완료':'미완료'});
@@ -1372,7 +1373,7 @@ html.sk-lock #toast{top:calc(16px + env(safe-area-inset-top,0px));bottom:auto}
     items.push({k:'한국사',ok:r.hist?1:0,v:(r.hist?'완료':'미완료')+(r.histS?' · '+r.histS:'')});
     return {att,items}}
   function reportText(s,r){const {att,items}=summary(s,r);
-    return `[베스티안 스터디센터 주간 학습 리포트]\n${s.name} 학생 · ${weekLabel(wkKey)}\n${s.mentorId?'담당 멘토: '+mentorName(s.mentorId)+'\n':''}\n■ 출결: 출석 ${att.출}일 · 지각 ${att.지}일 · 결석 ${att.결}일${att.외?' · 외출 '+att.외+'일':''}\n`+(r.hours!=null?`■ 공부시간: ${r.hours}시간 (목표 50시간, ${Math.round(r.hours/50*100)}%)\n`:'')+items.map(i=>`■ ${i.k}: ${i.v}`).join('\n')+(r.cmt?`\n\n멘토 한마디\n${r.cmt}`:'')+`\n\n다음 주도 끝까지 관리하겠습니다.\n베스티안 스터디센터 02-6959-9498`}
+    return `[베스티안 스터디센터 주간 학습 리포트]\n${s.name} 학생 · ${weekLabel(wkKey)}\n${s.mentorId?'담당 멘토: '+mentorName(s.mentorId)+'\n':''}\n■ 출결: 출석 ${att.출}일 · 지각 ${att.지}일 · 결석 ${att.결}일${att.외?' · 외출 '+att.외+'일':''}\n`+(r.hours!=null?`■ 공부시간: ${r.hours}시간 (목표 ${GOAL_H}시간, ${Math.round(r.hours/GOAL_H*100)}%)\n`:'')+items.map(i=>`■ ${i.k}: ${i.v}`).join('\n')+(r.cmt?`\n\n멘토 한마디\n${r.cmt}`:'')+`\n\n다음 주도 끝까지 관리하겠습니다.\n베스티안 스터디센터 02-6959-9498`}
   let logoImg=null;function loadLogo(){return new Promise(res=>{if(logoImg)return res(logoImg);const im=new Image();im.onload=()=>{logoImg=im;res(im)};im.onerror=()=>res(null);im.src=LOGO_SRC})}
   function rr(ctx,x,y,w,h,r){ctx.beginPath();ctx.moveTo(x+r,y);ctx.arcTo(x+w,y,x+w,y+h,r);ctx.arcTo(x+w,y+h,x,y+h,r);ctx.arcTo(x,y+h,x,y,r);ctx.arcTo(x,y,x+w,y,r);ctx.closePath()}
   function wrap(ctx,text,maxW){const out=[];String(text||'').split('\n').forEach(par=>{let line='';for(const ch of par){const t=line+ch;if(ctx.measureText(t).width>maxW&&line){out.push(line);line=ch}else line=t}out.push(line)});return out}
@@ -1412,8 +1413,8 @@ html.sk-lock #toast{top:calc(16px + env(safe-area-inset-top,0px));bottom:auto}
     y+=rh+vh+34;ctx.fillStyle=INK;ctx.font=F(700,24);ctx.fillText(`출석 ${att.출}일   ·   지각 ${att.지}일   ·   결석 ${att.결}일${att.외?'   ·   외출 '+att.외+'일':''}`,P,y);
     y+=28;
     /* hours */
-    if(r.hours!=null){y+=22;const hh=112,pct=Math.max(0,Math.min(1,r.hours/50));ctx.strokeStyle=LINE;ctx.lineWidth=2;ctx.strokeRect(P,y,W-P*2,hh);ctx.fillStyle=YEL;ctx.fillRect(P,y,10,hh);
-      ctx.fillStyle=INK;ctx.font=F(700,24);ctx.fillText('이번 주 공부시간',P+34,y+40);ctx.fillStyle=GRAY;ctx.font=F(400,19);ctx.fillText('목표 주 50시간 · '+Math.round(pct*100)+'% 달성',P+34+ctx.measureText('이번 주 공부시간').width*1.35,y+40);
+    if(r.hours!=null){y+=22;const hh=112,pct=Math.max(0,Math.min(1,r.hours/GOAL_H));ctx.strokeStyle=LINE;ctx.lineWidth=2;ctx.strokeRect(P,y,W-P*2,hh);ctx.fillStyle=YEL;ctx.fillRect(P,y,10,hh);
+      ctx.fillStyle=INK;ctx.font=F(700,24);ctx.fillText('이번 주 공부시간',P+34,y+40);ctx.fillStyle=GRAY;ctx.font=F(400,19);ctx.fillText('목표 주 '+GOAL_H+'시간 · '+Math.round(pct*100)+'% 달성',P+34+ctx.measureText('이번 주 공부시간').width*1.35,y+40);
       const bx=P+34,bw=W-P*2-34-250,by=y+62;ctx.fillStyle='#fff';ctx.fillRect(bx,by,bw,22);ctx.fillStyle=pct>=1?'#6fb43a':pct>=0.8?YEL:'#b02a37';ctx.fillRect(bx,by,bw*pct,22);ctx.strokeStyle=LINE;ctx.lineWidth=1.5;ctx.strokeRect(bx,by,bw,22);ctx.beginPath();for(let i=1;i<10;i++){ctx.moveTo(bx+bw*i/10,by);ctx.lineTo(bx+bw*i/10,by+22)}ctx.stroke();
       ctx.textAlign='right';ctx.fillStyle=BLUED;ctx.font=F(900,40);ctx.fillText(r.hours+'시간',W-P-28,y+78);ctx.textAlign='left';y+=hh+16}
     /* checklist table */
