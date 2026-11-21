@@ -194,7 +194,7 @@ function LSs(k,v){try{v==null?localStorage.removeItem(k):localStorage.setItem(k,
 var DOW=['월','화','수','목','금','토','일'];
 
 /* ===== 하루 순공 (출결 화면과 같은 규칙 + 리그용 안전장치) =====
-   - 입실~퇴실 − 외출
+   - 입실~퇴실 − 외출 (3번째부터의 외출은 extra_out_minutes 분으로만 뺌 · 출결 화면·센터 TV와 같음)
    - 오늘이 아닌 날에 퇴실 기록이 없으면 0분 (퇴실을 꼭 찍게 하려는 규칙, 관리자 화면에 '퇴실 누락'으로 표시)
    - 자정 넘은 시각(01:10 전)은 다음 날로 이어서 계산
    - 하루 최대 14시간 */
@@ -209,7 +209,6 @@ function dayInfo(r,isToday){
   else{res.missing=true;return res}
   var m=end-ci,o=[];
   [['out_1_start','out_1_end'],['out_2_start','out_2_end']].forEach(function(p){if(r[p[0]])o.push({s:fix(tMin(r[p[0]])),e:r[p[1]]?fix(tMin(r[p[1]])):null})});
-  (Array.isArray(r.extra_outs)?r.extra_outs:[]).forEach(function(x){if(x&&x.start)o.push({s:fix(tMin(x.start)),e:x.end?fix(tMin(x.end)):null})});
   if(r.pending_out_start){o.push({s:fix(tMin(r.pending_out_start)),e:null});if(isToday&&!r.check_out_time)res.live=false}
   o.forEach(function(x){if(x.s==null)return;var e=x.e==null?end:x.e;m-=Math.max(0,Math.min(e,end)-x.s)});
   m-=Number(r.extra_out_minutes)||0;
