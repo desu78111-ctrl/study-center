@@ -780,7 +780,7 @@ try{if(!MOCK&&window.supabase){att=window.supabase.createClient(ATT.url,ATT.key,
 var LSg=function(k,d){try{var v=localStorage.getItem(k);return v?JSON.parse(v):d}catch(e){return d}},LSs=function(k,v){try{if(v==null)localStorage.removeItem(k);else localStorage.setItem(k,JSON.stringify(v))}catch(e){}};
 var $=function(s){return document.querySelector(s)};
 var SK=MOCK?'bs_student_mock':'bs_student',ME=LSg(SK,null);   /* 학생 센터와 같은 기억 (같은 주소라 공유됨 · 연습 모드의 예시 학생은 따로) */
-if(!MOCK&&ME&&/^u\d+$/.test(String(ME.id))){ME=null;LSs(SK,null)} /* 예시 데이터로 로그인했던 기기 정리 */
+if(!MOCK&&ME&&String(ME.id)==='u1'&&ME.name==='김베스'){ME=null;LSs(SK,null)} /* 예전 연습 모드가 실제 기억에 남긴 예시 학생(u1 김베스) 정리 */
 var CODE=LSg('bv_code','');
 var PENDING='bv_pending';
 
