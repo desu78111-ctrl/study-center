@@ -308,7 +308,7 @@ try{reduced=window.matchMedia('(prefers-reduced-motion: reduce)').matches}catch(
 function pad(n){return n<10?'0'+n:''+n}
 function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
 function show(name){if(!MASK||!name||name.length<2)return name;return name.charAt(0)+'○'+name.slice(2)}
-/* 순위에는 항상 성만 남기고 가림: 신호빈 → 신○○ */
+/* 순위에는 항상 성만 남기고 가림: 홍길동 → 홍○○ */
 function rankName(name){if(!name)return '';return name.charAt(0)+Array(name.length).join('○')}
 /* 좌석에는 가운데 글자만 가림: 홍길동 → 홍○동, 두 글자 이름은 홍○ */
 function seatLabel(name){if(!name)return '';if(name.length<=2)return name.charAt(0)+'○';return name.charAt(0)+'○'+name.slice(2)}
