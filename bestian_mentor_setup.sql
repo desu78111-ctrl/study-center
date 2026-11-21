@@ -41,6 +41,53 @@ grant execute on function public.bestian_is_staff() to authenticated;
 grant execute on function public.bestian_is_admin() to authenticated;
 grant execute on function public.bestian_me() to authenticated;
 
+-- 가입 승인: 선생님이 멘토 센터에서 가입하면 '승인 대기'(pending)로 올라오고, 원장님이 계정 관리에서 승인해야 active가 됩니다.
+alter table public.bestian_staff add column if not exists status text not null default 'approved';
+alter table public.bestian_staff add column if not exists requested_at timestamptz;
+alter table public.bestian_staff drop constraint if exists bestian_staff_status_check;
+alter table public.bestian_staff add constraint bestian_staff_status_check check (status in ('pending','approved','rejected'));
+
+-- 로그인한 사람이 자기 이메일로 승인 요청을 올립니다. 이미 명단에 있으면 아무것도 바꾸지 않고 지금 상태만 알려 줍니다.
+-- 돌려주는 status: pending(대기) · approved(승인) · rejected(거절) · off(원장님이 끔) · none(로그인 안 함)
+create or replace function public.bestian_request_access(p_name text) returns json
+language plpgsql security definer set search_path = public as $$
+declare v_email text := public.bestian_my_email(); v_row public.bestian_staff;
+begin
+  if v_email = '' then return json_build_object('status', 'none'); end if;
+  insert into public.bestian_staff (email, name, role, active, status, requested_at)
+    values (v_email, left(btrim(coalesce(p_name, '')), 40), 'mentor', false, 'pending', now())
+    on conflict (email) do nothing;
+  select * into v_row from public.bestian_staff where email = v_email;
+  return json_build_object('status', case when v_row.active then 'approved' when v_row.status = 'approved' then 'off' else v_row.status end);
+end $$;
+
+-- 원장 코드로 첫 원장을 등록합니다. 코드는 bestian_settings의 owner_code_hash에 지문(SHA-256)만 들어 있고,
+-- 한 번 쓰면 지워집니다. 5번 틀리면 잠깁니다 (원장 코드 줄을 다시 실행하면 풀립니다).
+create or replace function public.bestian_claim_admin(p_code text) returns json
+language plpgsql security definer set search_path = public as $$
+declare v_email text := public.bestian_my_email(); v_hash text; v_tries int;
+begin
+  if v_email = '' then return json_build_object('ok', false, 'error', 'login'); end if;
+  select value into v_hash from public.bestian_settings where key = 'owner_code_hash';
+  if v_hash is null then return json_build_object('ok', false, 'error', 'code'); end if;
+  select coalesce(max(value::int), 0) into v_tries from public.bestian_settings where key = 'owner_code_tries';
+  if v_tries >= 5 then return json_build_object('ok', false, 'error', 'locked'); end if;
+  if encode(sha256(convert_to(upper(btrim(coalesce(p_code, ''))), 'UTF8')), 'hex') <> v_hash then
+    insert into public.bestian_settings (key, value) values ('owner_code_tries', '1')
+      on conflict (key) do update set value = (public.bestian_settings.value::int + 1)::text;
+    return json_build_object('ok', false, 'error', 'code');
+  end if;
+  insert into public.bestian_staff (email, name, role, active, status) values (v_email, '원장', 'admin', true, 'approved')
+    on conflict (email) do update set role = 'admin', active = true, status = 'approved';
+  delete from public.bestian_settings where key in ('owner_code_hash', 'owner_code_tries');
+  return json_build_object('ok', true);
+end $$;
+
+revoke all on function public.bestian_request_access(text) from public, anon;
+revoke all on function public.bestian_claim_admin(text) from public, anon;
+grant execute on function public.bestian_request_access(text) to authenticated;
+grant execute on function public.bestian_claim_admin(text) to authenticated;
+
 alter table public.bestian_staff enable row level security;
 drop policy if exists bestian_staff_read on public.bestian_staff;
 create policy bestian_staff_read on public.bestian_staff for select to authenticated using (public.bestian_is_staff());
