@@ -14,6 +14,11 @@
 #mcAuth button.g{background:var(--surface2,#eef5fa);color:var(--fg,#1d2328)}
 #mcAuth .msg{min-height:20px;font-size:14px;font-weight:700;color:#b02a37}
 #mcAuth .msg.ok{color:#1f7a4d}
+#mcAuth button.lnk{padding:4px 8px;font-size:13px;font-weight:700}
+#mcPending{display:grid;gap:6px}
+#mcPending .pd{display:flex;gap:8px;align-items:center;flex-wrap:wrap;padding:8px 10px;border:1px solid #e0b94a;background:#fff8e1;color:#1d2328;border-radius:8px}
+#mcPending .pd span{flex:1;min-width:140px;overflow-wrap:anywhere}
+#mcStaff button.no{background:#b02a37}
 #mcBar{position:fixed;right:max(12px,env(safe-area-inset-right,0px));bottom:calc(12px + env(safe-area-inset-bottom,0px));z-index:25;display:flex;gap:6px;align-items:center;background:var(--surface,#fff);border:1px solid var(--line,#d8dfe5);border-radius:999px;padding:5px 6px 5px 12px;box-shadow:0 4px 14px rgba(0,0,0,.12);font-size:13px}
 #mcBar[hidden]{display:none!important}
 #mcBar b{color:var(--navy,#004f80)}
@@ -34,19 +39,25 @@
 <div id="mcAuth" hidden>
   <div class="box">
     <h2>베스티안 멘토 센터</h2>
-    <p id="mcAuthLead">멘토 선생님·원장님·부원장님 전용입니다. 원장님이 등록해 준 이메일로 들어오세요.</p>
-    <label>이메일<input id="mcEmail" type="email" autocomplete="username" inputmode="email" placeholder="예: mentor@gmail.com"></label>
+    <p id="mcAuthLead">멘토 선생님·원장님·부원장님 전용입니다. 처음이면 이름·이메일·비밀번호를 넣고 [처음이면 가입]을 누르세요. 원장님이 승인하면 들어올 수 있어요.</p>
+    <p id="mcKnown" hidden><b id="mcKnownEmail"></b> 계정으로 들어갑니다. 비밀번호만 넣으세요. <button type="button" class="g lnk" id="mcOther">다른 계정</button></p>
+    <label id="mcNameL"><span>이름 <span style="font-weight:500">(처음 가입할 때만)</span></span><input id="mcName" type="text" autocomplete="name" maxlength="40" placeholder="예: 김멘토"></label>
+    <label id="mcEmailL">이메일<input id="mcEmail" type="email" autocomplete="username" inputmode="email" placeholder="예: mentor@gmail.com"></label>
     <label>비밀번호<input id="mcPw" type="password" autocomplete="current-password" placeholder="6자 이상"></label>
     <div class="row2"><button type="button" id="mcLogin">로그인</button><button type="button" class="g" id="mcSignup">처음이면 가입</button><button type="button" class="g" id="mcReset">비밀번호를 잊었어요</button></div>
     <div class="msg" id="mcMsg" role="status"></div>
-    <p>가입은 처음 한 번만 합니다. 가입해도 원장님 명단에 이메일이 없으면 자료가 보이지 않아요.</p>
+    <p>가입은 처음 한 번만 합니다. 가입한 뒤 원장님이 승인해야 자료가 보여요.</p>
+    <p><button type="button" class="g lnk" id="mcOwnerOpen">원장님이세요? 원장 코드 넣기</button></p>
+    <div id="mcOwnerBox" class="row2" hidden><input id="mcOwnerCode" type="text" autocomplete="off" autocapitalize="characters" placeholder="원장 코드" style="flex:1"><button type="button" id="mcOwnerGo">원장으로 등록</button></div>
   </div>
 </div>
 <div id="mcBar" hidden><span><b id="mcWho"></b> <span id="mcRole"></span></span><button type="button" id="mcStaffBtn" hidden>계정 관리</button><button type="button" id="mcOut">로그아웃</button></div>
 <div id="mcStaff" hidden>
   <div class="box">
     <div style="display:flex;justify-content:space-between;align-items:center;gap:8px"><h3>계정 관리</h3><button type="button" class="g" id="mcStaffX">닫기</button></div>
-    <p class="hint" style="margin:0">여기 등록한 이메일만 멘토 센터 자료를 봅니다. 그만둔 선생님은 '끄기'를 누르면 바로 막혀요. 선생님은 이 화면의 [처음이면 가입]으로 같은 이메일을 가입하면 됩니다.</p>
+    <p class="hint" style="margin:0">선생님이 멘토 센터에서 [처음이면 가입]을 하면 아래 '승인 대기'에 올라옵니다. [승인]을 눌러야 자료를 볼 수 있어요. 그만둔 선생님은 '끄기'를 누르면 바로 막혀요.</p>
+    <div id="mcPending"></div>
+    <p class="hint" style="margin:0">미리 등록해 두려면 (가입하면 바로 들어옵니다):</p>
     <div class="add"><input id="mcNewEmail" type="email" placeholder="이메일"><input id="mcNewName" type="text" placeholder="이름 (예: 김멘토)"><select id="mcNewRole"><option value="mentor">멘토</option><option value="admin">원장·부원장</option></select><button type="button" id="mcAdd">등록</button></div>
     <div id="mcStaffList">불러오는 중…</div>
     <div id="mcCodeBox" style="display:grid;gap:6px"></div>
@@ -71,31 +82,49 @@ var esc=function(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){re
 var ME=null,readyRes,READY=new Promise(function(r){readyRes=r});
 function setMsg(t,ok){var m=$('mcMsg');if(!m)return;m.textContent=t||'';m.className='msg'+(ok?' ok':'')}
 function showAuth(lead){var a=$('mcAuth');if(!a)return;a.hidden=false;if(lead)$('mcAuthLead').textContent=lead}
-function enter(me){ME=me;$('mcAuth').hidden=true;$('mcBar').hidden=false;$('mcWho').textContent=me.name||me.email;$('mcRole').textContent=me.role==='admin'?'· 원장·부원장':'· 멘토';$('mcStaffBtn').hidden=me.role!=='admin';readyRes(true)}
+function lsGet(k){try{return localStorage.getItem(k)||''}catch(e){return ''}}
+function lsSet(k,v){try{if(v)localStorage.setItem(k,v);else localStorage.removeItem(k)}catch(e){}}
+/* 한 번 들어온 기기는 이메일을 기억해서 다음부터 비밀번호만 넣는다 */
+function known(){var e=lsGet('bestian-mc-email');if(e&&!$('mcEmail').value)$('mcEmail').value=e;var k=!!e&&$('mcEmail').value===e;$('mcKnown').hidden=!k;$('mcKnownEmail').textContent=e;$('mcEmailL').hidden=k;$('mcNameL').hidden=k}
+function enter(me){ME=me;lsSet('bestian-mc-email',me.email);lsSet('bestian-mc-name','');$('mcAuth').hidden=true;$('mcBar').hidden=false;$('mcWho').textContent=me.name||me.email;$('mcRole').textContent=me.role==='admin'?'· 원장·부원장':'· 멘토';$('mcStaffBtn').hidden=me.role!=='admin';if(me.role==='admin')pendingCount();readyRes(true)}
+async function pendingCount(){if(MOCK||!sb)return;var r=await sb.from('bestian_staff').select('email,status').eq('status','pending');var n=r.error?0:(r.data||[]).filter(function(s){return s.status==='pending'}).length;$('mcStaffBtn').textContent=n?'계정 관리 · 승인 대기 '+n+'명':'계정 관리'}
 async function check(){
   if(MOCK){enter({email:'mock@local',name:'연습 모드',role:'admin'});return}
   if(!sb){showAuth('서버에 연결하지 못했어요. 인터넷을 확인하고 새로고침하세요.');return}
   var s=(await sb.auth.getSession()).data.session;
-  if(!s){showAuth();return}
+  if(!s){showAuth();known();return}
   var r=await sb.rpc('bestian_me');
-  if(r.error){showAuth();setMsg('확인 오류: 잠시 뒤 다시 시도하세요.');return}
-  if(!r.data){showAuth();setMsg(s.user.email+' 은(는) 아직 명단에 없어요. 원장님께 이 이메일을 등록해 달라고 하세요.');return}
+  if(r.error){showAuth();known();setMsg('확인 오류: 잠시 뒤 다시 시도하세요.');return}
+  if(!r.data){showAuth();lsSet('bestian-mc-email',s.user.email);known();
+    /* 명단에 없으면 승인 요청을 올리고, 지금 상태를 알려 준다 */
+    var q=await sb.rpc('bestian_request_access',{p_name:($('mcName').value||'').trim()||lsGet('bestian-mc-name')});
+    var st=q.error?'':(q.data&&q.data.status);
+    if(st==='approved'){var r2=await sb.rpc('bestian_me');if(r2.data){enter(r2.data);return}}
+    setMsg(st==='pending'?s.user.email+' 가입 요청을 올렸어요. 원장님 승인을 기다리는 중이에요. 승인되면 다시 로그인하세요.':st==='rejected'?'원장님이 이 계정을 승인하지 않았어요. 원장님께 문의하세요.':st==='off'?'원장님이 이 계정을 꺼 두었어요. 원장님께 문의하세요.':'승인 요청을 올리지 못했어요. 원장님께 알려 주세요.',st==='pending');return}
   enter(r.data)}
 function creds(){var e=($('mcEmail').value||'').trim().toLowerCase(),p=$('mcPw').value||'';if(!e||e.indexOf('@')<1){setMsg('이메일을 넣어 주세요.');return null}if(p.length<6){setMsg('비밀번호는 6자 이상이에요.');return null}return {email:e,password:p}}
 document.addEventListener('click',async function(ev){var id=ev.target&&ev.target.id;if(!id)return;
   if(id==='mcLogin'){var c=creds();if(!c||!sb)return;setMsg('확인 중…',true);var r=await sb.auth.signInWithPassword(c);
     if(r.error){setMsg(/confirm/i.test(r.error.message)?'메일함에서 가입 확인 링크를 먼저 눌러 주세요.':'이메일이나 비밀번호가 맞지 않아요.');return}setMsg('');check()}
-  else if(id==='mcSignup'){var c2=creds();if(!c2||!sb)return;setMsg('가입 중…',true);var r2=await sb.auth.signUp({email:c2.email,password:c2.password,options:{emailRedirectTo:location.href.split('#')[0]}});
+  else if(id==='mcSignup'){var c2=creds();if(!c2||!sb)return;var nm=($('mcName').value||'').trim();if(!$('mcNameL').hidden&&!nm){setMsg('이름을 넣어 주세요.');return}lsSet('bestian-mc-name',nm);setMsg('가입 중…',true);var r2=await sb.auth.signUp({email:c2.email,password:c2.password,options:{emailRedirectTo:location.href.split('#')[0]}});
     if(r2.error){setMsg(/registered|exists/i.test(r2.error.message)?'이미 가입된 이메일이에요. [로그인]을 누르세요.':'가입 오류: '+r2.error.message);return}
     if(r2.data&&r2.data.session){setMsg('');check()}else setMsg('가입했어요. 메일함의 확인 링크를 누른 뒤 여기서 로그인하세요.',true)}
   else if(id==='mcReset'){var e=($('mcEmail').value||'').trim().toLowerCase();if(!e){setMsg('이메일을 먼저 넣어 주세요.');return}if(!sb)return;
     var r3=await sb.auth.resetPasswordForEmail(e,{redirectTo:location.href.split('#')[0]});setMsg(r3.error?'보내지 못했어요: '+r3.error.message:'비밀번호 재설정 메일을 보냈어요.',!r3.error)}
+  else if(id==='mcOther'){lsSet('bestian-mc-email','');$('mcEmail').value='';known();$('mcEmail').focus()}
+  else if(id==='mcOwnerOpen'){$('mcOwnerBox').hidden=!$('mcOwnerBox').hidden;if(!$('mcOwnerBox').hidden)$('mcOwnerCode').focus()}
+  else if(id==='mcOwnerGo'){if(!sb)return;var oc=($('mcOwnerCode').value||'').trim();if(!oc){setMsg('원장 코드를 넣어 주세요.');return}
+    var ss=(await sb.auth.getSession()).data.session;if(!ss){setMsg('먼저 위에서 가입하거나 로그인한 다음 원장 코드를 넣어 주세요.');return}
+    var oc2=await sb.rpc('bestian_claim_admin',{p_code:oc});
+    if(oc2.error){setMsg('확인 오류: 설정 문구를 먼저 실행했는지 확인하세요.');return}
+    if(!oc2.data||!oc2.data.ok){setMsg(oc2.data&&oc2.data.error==='locked'?'여러 번 틀려서 원장 코드가 잠겼어요. 설정 문구를 다시 실행하세요.':'원장 코드가 맞지 않아요.');return}
+    setMsg('');$('mcOwnerCode').value='';check()}
   else if(id==='mcOut'){if(!confirm('로그아웃할까요?'))return;if(sb)await sb.auth.signOut();location.reload()}
   else if(id==='mcStaffBtn'){openStaff()}
   else if(id==='mcStaffX'){$('mcStaff').hidden=true}
   else if(id==='mcAdd'){addStaff()}
 });
-document.addEventListener('keydown',function(e){if(e.key==='Enter'&&(e.target.id==='mcPw'||e.target.id==='mcEmail'))$('mcLogin').click()});
+document.addEventListener('keydown',function(e){if(e.key==='Enter'&&(e.target.id==='mcPw'||e.target.id==='mcEmail'))$('mcLogin').click();if(e.key==='Enter'&&e.target.id==='mcOwnerCode')$('mcOwnerGo').click()});
 if(sb)sb.auth.onAuthStateChange(function(evt){if(evt==='PASSWORD_RECOVERY'){var np=prompt('새 비밀번호 (6자 이상)');if(np&&np.length>=6)sb.auth.updateUser({password:np}).then(function(r){alert(r.error?'바꾸지 못했어요: '+r.error.message:'비밀번호를 바꿨어요.')})}});
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',check);else check();
 
@@ -103,13 +132,17 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
 async function openStaff(){$('mcStaff').hidden=false;await renderStaff()}
 async function renderStaff(){var box=$('mcStaffList');if(MOCK){box.textContent='연습 모드에서는 계정 관리를 쓸 수 없어요.';return}
   var r=await sb.from('bestian_staff').select('*').order('role').order('name');if(r.error){box.textContent='불러오지 못했어요: '+r.error.message;return}
-  box.innerHTML='<table><tr><th>이름</th><th>이메일</th><th>역할</th><th></th></tr>'+r.data.map(function(s){return '<tr style="'+(s.active?'':'opacity:.5')+'"><td>'+esc(s.name)+'</td><td>'+esc(s.email)+'</td><td>'+(s.role==='admin'?'원장·부원장':'멘토')+'</td><td><button type="button" class="g" data-st="'+esc(s.email)+'" data-on="'+(s.active?'0':'1')+'">'+(s.active?'끄기':'다시 켜기')+'</button></td></tr>'}).join('')+'</table>';
+  var wait=r.data.filter(function(s){return s.status==='pending'}),rest=r.data.filter(function(s){return s.status!=='pending'});
+  $('mcPending').innerHTML=wait.length?'<b style="font-size:15px">승인 대기 '+wait.length+'명</b>'+wait.map(function(s){return '<div class="pd"><span><b>'+esc(s.name||'(이름 없음)')+'</b> '+esc(s.email)+'</span><button type="button" data-approve="'+esc(s.email)+'">승인</button><button type="button" class="no" data-reject="'+esc(s.email)+'">거절</button></div>'}).join(''):'<span class="hint">승인을 기다리는 사람이 없어요.</span>';
+  $('mcPending').querySelectorAll('[data-approve],[data-reject]').forEach(function(b){b.onclick=async function(){var ok=b.hasAttribute('data-approve'),em=ok?b.dataset.approve:b.dataset.reject;if(!ok&&!confirm(em+' 가입을 거절할까요?'))return;b.disabled=true;
+    var u=await sb.from('bestian_staff').update(ok?{active:true,status:'approved'}:{active:false,status:'rejected'}).eq('email',em);if(u.error)alert('바꾸지 못했어요: '+u.error.message);renderStaff();pendingCount()}});
+  box.innerHTML='<table><tr><th>이름</th><th>이메일</th><th>역할</th><th></th></tr>'+rest.map(function(s){return '<tr style="'+(s.active?'':'opacity:.5')+'"><td>'+esc(s.name)+'</td><td>'+esc(s.email)+'</td><td>'+(s.role==='admin'?'원장·부원장':'멘토')+(s.status==='rejected'?' · 거절함':'')+'</td><td><button type="button" class="g" data-st="'+esc(s.email)+'" data-on="'+(s.active?'0':'1')+'">'+(s.active?'끄기':s.status==='rejected'?'승인하기':'다시 켜기')+'</button></td></tr>'}).join('')+'</table>';
   var c=await sb.from('bestian_settings').select('value').eq('key','vocab_code').maybeSingle();
   $('mcCodeBox').innerHTML='<b style="font-size:15px">영단어 센터 코드</b><p class="hint" style="margin:0">학생이 영단어 시험을 처음 열 때 한 번 넣는 숫자예요. 밖으로 새면 바꾸세요.</p><div style="display:flex;gap:6px;flex-wrap:wrap"><input id="mcCode" value="'+esc(c.data?c.data.value:'')+'" inputmode="numeric" style="max-width:160px"><button type="button" id="mcCodeSave">코드 저장</button></div>';
   $('mcCodeSave').onclick=async function(){var v=($('mcCode').value||'').trim();if(v.length<4){alert('4자리 이상으로 정하세요.');return}var w=await sb.from('bestian_settings').upsert({key:'vocab_code',value:v});alert(w.error?'저장하지 못했어요: '+w.error.message:'저장했어요. 학생들에게 새 코드를 알려 주세요.')};
-  box.querySelectorAll('[data-st]').forEach(function(b){b.onclick=async function(){var on=b.dataset.on==='1';if(!on&&b.dataset.st===ME.email){alert('내 계정은 끌 수 없어요.');return}var u=await sb.from('bestian_staff').update({active:on}).eq('email',b.dataset.st);if(u.error)alert(u.error.message);renderStaff()}})}
+  box.querySelectorAll('[data-st]').forEach(function(b){b.onclick=async function(){var on=b.dataset.on==='1';if(!on&&b.dataset.st===ME.email){alert('내 계정은 끌 수 없어요.');return}var u=await sb.from('bestian_staff').update(on?{active:true,status:'approved'}:{active:false}).eq('email',b.dataset.st);if(u.error)alert(u.error.message);renderStaff()}})}
 async function addStaff(){var e=($('mcNewEmail').value||'').trim().toLowerCase(),n=($('mcNewName').value||'').trim(),ro=$('mcNewRole').value;if(!e||e.indexOf('@')<1){alert('이메일을 넣어 주세요.');return}
-  var r=await sb.from('bestian_staff').upsert({email:e,name:n,role:ro,active:true});if(r.error){alert('등록하지 못했어요: '+r.error.message);return}$('mcNewEmail').value='';$('mcNewName').value='';renderStaff()}
+  var r=await sb.from('bestian_staff').upsert({email:e,name:n,role:ro,active:true,status:'approved'});if(r.error){alert('등록하지 못했어요: '+r.error.message);return}$('mcNewEmail').value='';$('mcNewName').value='';renderStaff()}
 
 /* ---------- 문서 저장소 (클로드 db와 같은 모양) ---------- */
 var LISTEN={},TIMERS={},MOCKK='bestian_mc_mock';
