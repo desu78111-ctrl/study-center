@@ -84,6 +84,15 @@ main{display:grid;grid-template-columns:360px minmax(0,1fr) 340px;gap:14px;paddi
 details summary{cursor:pointer;font-weight:900;color:var(--blued)}
 /* 영단어 */
 .vocab{grid-column:1/-1}
+.meals{grid-column:1/-1}
+.mlg{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:12px;align-items:start}
+.mlc{border:1px solid var(--line);border-radius:12px;padding:12px;display:grid;gap:8px;background:#fff}
+.mlh{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;font-weight:900;font-size:16px;color:var(--blued)}
+.mlh small{font-size:12.5px;font-weight:700;border-radius:999px;padding:2px 10px;background:#eef2f5;color:var(--mute)}.mlh small.open{background:#e3f6ec;color:var(--green)}
+.mlr{display:grid;gap:4px;border-top:1px solid var(--line);padding-top:8px}
+.mlr .t{display:flex;justify-content:space-between;gap:8px;font-weight:900;font-size:15px}.mlr .t span{font-variant-numeric:tabular-nums;color:var(--blue)}
+.mlr.skip .t{font-weight:700;color:var(--mute)}.mlr.skip .t span{color:var(--mute)}
+.mln{display:flex;flex-wrap:wrap;gap:5px}.mln span{border:1px solid var(--line);border-radius:999px;padding:2px 9px;font-size:13px;background:#f7f9fb}
 .vsum{display:flex;gap:6px 14px;flex-wrap:wrap;font-size:13.5px;margin-bottom:8px}
 .vsum b{font-size:18px;font-variant-numeric:tabular-nums}
 .vgrid{display:grid;grid-template-columns:minmax(0,2fr) minmax(0,1fr);gap:14px}
@@ -147,6 +156,12 @@ details summary{cursor:pointer;font-weight:900;color:var(--blued)}
       <button class="btn red" type="button" id="sendAll">전체 공지 보내기</button>
       <div id="sents"></div>
     </div>
+  </section>
+
+  <section class="panel meals">
+    <h2>🍱 오늘 식사 주문 <span class="n" id="mealN">0</span><a href="bestian-meal-admin.html" target="_blank" rel="noopener" style="margin-left:auto;font-size:13px;font-weight:700">메뉴 올리기·마감 ↗</a></h2>
+    <div id="meals" class="mlg"></div>
+    <p class="hint" style="margin-top:8px">학생이 학생 센터 데스크 탭에서 메뉴를 누르면 여기에 바로 올라와요. 이름 앞 숫자는 자리 번호예요.</p>
   </section>
 
   <section class="panel vocab">
@@ -238,7 +253,7 @@ async function load(){var d=bizToday();await closeStale(d);
   if(SEEN&&!first){var fresh=REQ.filter(function(r){return !SEEN[r.id]&&r.status==='new'});
     if(fresh.length){var w=fresh.some(function(r){return r.kind==='wake'});beep(w?'wake':'req');notify(fresh[0])}}
   SEEN=ids;first=false;render()}
-async function loadStu(){try{STU=await api.students(bizToday());STU.sort(function(a,b){return (a.seat||999)-(b.seat||999)});renderTo();if(typeof renderVocab==='function'&&VOC)renderVocab()}catch(e){}}
+async function loadStu(){try{STU=await api.students(bizToday());STU.sort(function(a,b){return (a.seat||999)-(b.seat||999)});renderTo();if(typeof renderVocab==='function'&&VOC)renderVocab();if(typeof renderMeals==='function')renderMeals()}catch(e){}}
 var tmr=null;function onChange(){clearTimeout(tmr);tmr=setTimeout(load,250)}
 function setConn(ok){var c=$('#conn');c.textContent=MOCK?'연습 모드':ok?'● 실시간 연결됨':'연결 끊김 · 재시도 중';c.className='pill'+(ok||MOCK?'':' bad')}
 
@@ -328,6 +343,31 @@ function renderVocab(){var main=VOC.filter(function(v){return v.kind==='main'});
   var not=STU.filter(function(s){return !who[s.id]});
   $('#vNot').innerHTML=not.length?not.map(function(s){return '<span>'+(s.seat?esc(s.seat)+'번 ':'')+esc(s.name)+'</span>'}).join(''):'<span style="border:0;color:var(--mute)">'+(STU.length?'모두 봤어요 👍':'입실한 학생이 없어요')+'</span>'}
 setInterval(loadVocab,20000);
+
+/* ===== 오늘 식사 주문 (학생 센터 데스크 탭에서 누른 주문 · 출결 서버의 bestian_meal_* 표) ===== */
+var MEALK='mock_meal',MMENU=[],MORD=[],mealChan=null,MEALNM={lunch:'점심',dinner:'저녁'};
+function mealVals(o){return Object.keys(o||{}).map(function(k){return o[k]})}
+function mealWon(n){return Number(n).toLocaleString('ko-KR')+'원'}
+function mealHM(){var d=new Date();return pad(d.getHours())+':'+pad(d.getMinutes())}
+async function loadMeals(){var d=fmtD(new Date());try{
+  if(MOCK){var o=LSg(MEALK,{});MMENU=mealVals(o.menus).filter(function(r){return r.meal_date===d});MORD=mealVals(o.orders).filter(function(r){return r.meal_date===d})}
+  else{if(!db)return;var r=await Promise.all([db.from('bestian_meal_menu').select('*').eq('meal_date',d),db.from('bestian_meal_orders').select('*').eq('meal_date',d)]);if(r[0].error)throw r[0].error;if(r[1].error)throw r[1].error;MMENU=r[0].data||[];MORD=r[1].data||[]}
+  renderMeals()}catch(e){$('#meals').innerHTML='<p class="hint">식사 주문을 불러오지 못했어요 (서버 설정 전이면 정상).</p>'}}
+function renderMeals(){var seat={};STU.forEach(function(s){seat[String(s.id)]=s.seat});
+  var who=function(a){return '<div class="mln">'+a.slice().sort(function(x,y){return String(x.student_name).localeCompare(String(y.student_name),'ko')}).map(function(o){var n=seat[String(o.student_id)];return '<span>'+(n?esc(n)+'번 ':'')+esc(o.student_name)+'</span>'}).join('')+'</div>'};
+  var ms=['lunch','dinner'].map(function(k){return MMENU.filter(function(m){return m.meal===k&&(m.options||[]).length})[0]}).filter(Boolean),total=0;
+  $('#meals').innerHTML=ms.length?ms.map(function(m){var list=MORD.filter(function(o){return o.meal===m.meal}),by={};list.forEach(function(o){(by[o.choice]=by[o.choice]||[]).push(o)});
+    var cnt=list.filter(function(o){return o.choice!=='none'}).length,sum=0,hasP=false,known={};total+=cnt;
+    var rows=(m.options||[]).map(function(o){known[o.id]=1;var a=by[o.id]||[];if(o.price){hasP=true;sum+=a.length*Number(o.price)}return a.length?'<div class="mlr"><div class="t"><b>'+esc(o.name)+'</b><span>'+a.length+'개</span></div>'+who(a)+'</div>':''}).join('');
+    var lost=list.filter(function(o){return o.choice!=='none'&&!known[o.choice]});if(lost.length)rows+='<div class="mlr"><div class="t"><b style="color:var(--red)">빠진 메뉴를 고른 학생</b><span>'+lost.length+'명</span></div>'+who(lost)+'</div>';
+    if((by.none||[]).length)rows+='<div class="mlr skip"><div class="t"><b>안 먹어요</b><span>'+by.none.length+'명</span></div>'+who(by.none)+'</div>';
+    var open=!!m.is_open&&(!m.deadline||mealHM()<=m.deadline);
+    return '<div class="mlc"><div class="mlh"><span>'+MEALNM[m.meal]+' · 주문 '+cnt+'개'+(hasP&&cnt?' · '+mealWon(sum):'')+'</span><small class="'+(open?'open':'')+'">'+(open?'주문 받는 중'+(m.deadline?' · '+esc(m.deadline)+' 마감':''):'주문 마감')+'</small></div>'+(list.length?rows:'<p class="hint">아직 주문이 없어요.</p>')+'</div>'}).join('')
+    :'<p class="hint">오늘 올린 메뉴가 없어요. 오른쪽 위 [메뉴 올리기·마감]에서 메뉴를 올리면 학생이 주문할 수 있어요.</p>';
+  $('#mealN').textContent=total}
+function startMealLive(){if(MOCK){window.addEventListener('storage',function(e){if(e.key===MEALK)loadMeals()});return}
+  if(!db||mealChan)return;try{mealChan=db.channel('bdesk-meal').on('postgres_changes',{event:'*',schema:'public',table:'bestian_meal_orders'},function(){loadMeals()}).on('postgres_changes',{event:'*',schema:'public',table:'bestian_meal_menu'},function(){loadMeals()}).subscribe()}catch(e){}}
+loadMeals();startMealLive();setInterval(loadMeals,20000);
 
 /* ===== 소리·알림 ===== */
 var AC=null,SOUND=false;
