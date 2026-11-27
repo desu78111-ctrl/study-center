@@ -113,6 +113,8 @@ main{max-width:1080px;margin:0 auto;padding:18px 16px}
 .mstat{display:inline-block;font-size:12.5px;font-weight:900;border-radius:999px;padding:2px 10px}.mstat.open{background:#e3f6ec;color:var(--green)}.mstat.closed{background:#eef2f5;color:var(--mute)}
 #mlTitle{scroll-margin-top:70px}
 .mjump{width:100%;display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap;border:1px solid var(--line);background:#fff;border-radius:14px;padding:16px 18px;cursor:pointer;color:var(--blued);font-size:17px;margin-bottom:10px;text-align:left}.mjump b{font-size:19px}.mjump span{font-size:14px;font-weight:700;color:var(--mute)}.mjump.open{border-color:#e8d27a;background:#fff8d6}.mjump.open span{color:#6a5300}
+.mopt b{overflow-wrap:anywhere}.mgrp{border:1px solid var(--line);border-radius:12px;background:#fff;padding:0 12px}.mgrp summary{cursor:pointer;font-weight:900;color:var(--blued);padding:13px 0;font-size:15.5px}.mgrp[open]{padding-bottom:12px}
+.mtxt{display:grid;gap:6px;border:1.5px dashed var(--blue);border-radius:12px;padding:12px;background:#f3f9fd}.mtxt b{color:var(--blued);font-size:15px}
 .mbanner{display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap;background:#fff8d6;border:1px solid #e8d27a;color:#6a5300;border-radius:10px;padding:10px 14px;font-size:14.5px}
 </style>
 </head>
@@ -209,6 +211,7 @@ main{max-width:1080px;margin:0 auto;padding:18px 16px}
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
 <script src="bestian-nick.js"></script>
+<script src="bestian-hansot.js"></script>
 <script>
 (function(){
 "use strict";
@@ -347,44 +350,61 @@ var mapi={
     var r=await db.from('bestian_meal_orders').upsert(row,{onConflict:'meal_date,meal,student_id'});if(r.error)throw r.error}
 };
 function mealOpen(m){return !!m&&!!m.is_open&&(!m.deadline||nowHM()<=m.deadline)}
-function hasMenu(k){return !!MENUS[k]&&(MENUS[k].options||[]).length>0}
+/* 그 끼니의 실제 메뉴: 직원이 올린 메뉴가 없으면 한솥도시락 전체 메뉴가 기본으로 열린다 */
+function eff(k){return window.BestianMeal.effective(MENUS[k]||null,k)}
+var MTX={},MOPEN={},mealLoaded=false;
+document.addEventListener('toggle',function(e){var t=e.target;if(t&&t.getAttribute&&t.getAttribute('data-mgrp'))MOPEN[t.getAttribute('data-mgrp')]=t.open},true);
 async function loadMeal(){if(!ME||(!db&&!MOCK))return;var d=mealDate();
-  try{var ms=await mapi.menus(d);var M={};ms.forEach(function(r){M[r.meal]=r});var mine=await mapi.mine(d);var O={};mine.forEach(function(r){O[r.meal]=r.choice});MENUS=M;MYORD=O;mealErr=''}
+  try{var ms=await mapi.menus(d);var M={};ms.forEach(function(r){M[r.meal]=r});var mine=await mapi.mine(d);var O={};mine.forEach(function(r){O[r.meal]=r.choice});MENUS=M;MYORD=O;mealErr='';mealLoaded=true}
   catch(e){mealErr=(e&&(e.code==='42P01'||e.code==='PGRST205'||/bestian_meal/.test(e.message||'')))?'setup':'net'}
   renderMeal();renderMealBanner()}
-function optLabel(m,c){if(c==='none')return '안 먹어요';var o=(m.options||[]).filter(function(x){return x.id===c})[0];return o?o.name:'바뀐 메뉴'}
-function renderMeal(){var box=$('#mealBox');if(!box)return;var d=new Date();$('#mlTitle').textContent=(d.getMonth()+1)+'/'+d.getDate()+' ('+'일월화수목금토'[d.getDay()]+') 식사 주문';
+function optLabel(m,c){var p=window.BestianMeal.parse(c);if(p.type==='none')return '안 먹어요';if(p.type==='txt')return p.name;var o=(m.options||[]).filter(function(x){return x.id===c})[0];return o?o.name:'바뀐 메뉴'}
+function optPrice(m,c){var p=window.BestianMeal.parse(c);if(p.type==='txt')return p.amount;if(p.type==='opt'){var o=(m.options||[]).filter(function(x){return x.id===c})[0];return o&&o.price?Number(o.price):null}return null}
+function renderMeal(){var box=$('#mealBox');if(!box)return;if(!window.BestianMeal){box.innerHTML='<div class="panel empty">식사 주문 화면을 불러오지 못했어요. 새로고침해 주세요.</div>';return}
+  var d=new Date();$('#mlTitle').textContent=(d.getMonth()+1)+'/'+d.getDate()+' ('+'일월화수목금토'[d.getDay()]+') 식사 주문';
   if(mealErr==='setup'){box.innerHTML='<div class="panel empty">식사 주문을 준비하고 있어요. 곧 열려요.</div>';return}
-  if(mealErr==='net'&&!hasMenu('lunch')&&!hasMenu('dinner')){box.innerHTML='<div class="panel empty">메뉴를 불러오지 못했어요. 잠시 후 자동으로 다시 시도해요.</div>';return}
-  var keys=['lunch','dinner'].filter(hasMenu);
-  if(!keys.length){box.innerHTML='<div class="panel empty">아직 오늘 메뉴가 올라오지 않았어요.<br>올라오면 여기에 바로 나타나요.</div>';return}
-  box.innerHTML=keys.map(function(k){var m=MENUS[k],my=MYORD[k],open=mealOpen(m),opts=m.options||[],many=opts.length>=10,q=(MQ[k]||'').trim();
+  if(!mealLoaded){box.innerHTML='<div class="panel empty">메뉴를 불러오지 못했어요. 잠시 후 자동으로 다시 시도해요.</div>';return}
+  var keys=['lunch','dinner'];
+  box.innerHTML=keys.map(function(k){var m=eff(k),my=MYORD[k],open=mealOpen(m),opts=m.options||[],many=opts.length>=10,q=(MQ[k]||'').trim();
     var st=open?'<span class="mstat open">주문 받는 중'+(m.deadline?' · '+esc(m.deadline)+' 마감':'')+'</span>':'<span class="mstat closed">주문 마감</span>';
     var btn=function(o){var id=o.id,on=my===id,skip=id==='none';return '<button type="button" class="mopt'+(skip?' skip':'')+(on?' on':'')+'" data-meal="'+k+'" data-choice="'+esc(id)+'"'+(open?'':' disabled')+' aria-pressed="'+(on?'true':'false')+'">'+(o.img?'<img class="mth" src="'+esc(o.img)+'" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.remove()">':'')+'<span class="mtx"><b>'+(on?'✓ ':'')+esc(o.name)+'</b>'+(o.price?'<small>'+won(o.price)+'</small>':'')+'</span></button>'};
     var shown=q?opts.filter(function(o){return String(o.name||'').toLowerCase().indexOf(q.toLowerCase())>-1}):opts;
     var hasCat=shown.some(function(o){return o.cat});var body='';
     if(hasCat){var order=[],byCat={};shown.forEach(function(o){var c=o.cat||'기타';if(!byCat[c]){byCat[c]=[];order.push(c)}byCat[c].push(o)});
-      body=order.map(function(c){return '<div class="mcat">'+esc(c)+'</div><div class="mopts">'+byCat[c].map(btn).join('')+'</div>'}).join('')}
+      /* 메뉴가 많으면(한솥 전체 등) 종류별로 접어 두고, 누른 종류만 펼친다. 검색하면 결과를 바로 보여 준다 */
+      body=order.map(function(c){var has=byCat[c].some(function(o){return o.id===my});
+        return many&&!q?'<details class="mgrp" data-mgrp="'+esc(k+'|'+c)+'"'+(MOPEN[k+'|'+c]?' open':'')+'><summary>'+esc(c)+' <span class="hint">'+byCat[c].length+'개'+(has?' · ✓ 내 주문':'')+'</span></summary><div class="mopts">'+byCat[c].map(btn).join('')+'</div></details>'
+          :'<div class="mcat">'+esc(c)+'</div><div class="mopts">'+byCat[c].map(btn).join('')+'</div>'}).join('')}
     else body='<div class="mopts">'+shown.map(btn).join('')+'</div>';
     if(q&&!shown.length)body='<p class="empty">"'+esc(q)+'" 메뉴가 없어요.</p>';
-    var mine='<p class="hint mmy">'+(my?'내 주문: <b>'+esc(optLabel(m,my))+'</b>'+(open?' · 마감 전까지 바꿀 수 있어요':''):(open?'아직 고르지 않았어요. 메뉴를 누르면 바로 주문돼요.':'주문하지 않았어요'))+'</p>';
+    var myP=my?optPrice(m,my):null;
+    var typed=m.image_url?'<div class="mtxt"><b>사진에 있는 메뉴는 이름을 적어서 주문해요</b><div class="mtop"><input class="inp" type="text" data-mtxt="'+k+'" maxlength="30" placeholder="예: 짜장면 곱빼기" value="'+esc(MTX[k]||'')+'" autocomplete="off"'+(open?'':' disabled')+'><button type="button" class="btn" data-mtxtgo="'+k+'"'+(open?'':' disabled')+'>이 이름으로 주문</button></div><span class="hint">금액은 데스크 선생님이 적어 줘요.</span></div>':'';
+    var mine='<p class="hint mmy">'+(my?'내 주문: <b>'+esc(optLabel(m,my))+'</b>'+(myP?' · '+won(myP):'')+(open?' · 마감 전까지 바꿀 수 있어요':''):(open?'아직 고르지 않았어요. 메뉴를 누르면 바로 주문돼요.':'주문하지 않았어요'))+'</p>';
     var top=many?'<div class="mtop"><input class="inp" type="search" data-mq="'+k+'" placeholder="메뉴 검색 · 예: 치킨마요" value="'+esc(q)+'" autocomplete="off">'+btn({id:'none',name:'안 먹어요'})+'</div>':'';
     if(!many)body=body.replace(/<\/div>\s*$/,'')+btn({id:'none',name:'안 먹어요'})+'</div>';
-    return '<div class="panel meal"><div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap"><h3 style="margin:0">'+MEAL_NAMES[k]+(many?' <span class="hint" style="font-weight:500">메뉴 '+opts.length+'개</span>':'')+'</h3>'+st+'</div>'+(m.note?'<p class="hint">'+esc(m.note)+'</p>':'')+
-      (m.image_url?'<a href="'+esc(m.image_url)+'" target="_blank" rel="noopener" title="크게 보기"><img class="mimg" src="'+esc(m.image_url)+'" alt="'+MEAL_NAMES[k]+' 메뉴 사진" loading="lazy"></a>':'')+mine+top+body+'</div>'}).join('')}
-document.addEventListener('input',function(e){var t=e.target;if(!t.hasAttribute||!t.hasAttribute('data-mq'))return;var k=t.getAttribute('data-mq');MQ[k]=t.value;var pos=t.selectionStart;renderMeal();var n=document.querySelector('[data-mq="'+k+'"]');if(n){n.focus();try{n.setSelectionRange(pos,pos)}catch(_){}}});
-function renderMealJump(){var j=$('#mealJump'),t=$('#mealJumpSt');if(!j||!t)return;var keys=['lunch','dinner'].filter(hasMenu),need=keys.filter(function(k){return mealOpen(MENUS[k])&&!MYORD[k]});
-  j.className='mjump'+(need.length?' open':'');
-  t.textContent=!keys.length?'아직 오늘 메뉴가 없어요':need.length?MEAL_NAMES[need[0]]+' 주문 받는 중 · 눌러서 고르기 ↓':keys.map(function(k){return MEAL_NAMES[k]+': '+(MYORD[k]?optLabel(MENUS[k],MYORD[k]):'주문 마감')}).join(' · ')}
-document.addEventListener('click',function(e){if(!e.target.closest||!e.target.closest('#mealJump'))return;var el=$('#mlTitle');if(el)el.scrollIntoView({behavior:'smooth',block:'start'})});
-function renderMealBanner(){renderMealJump();var b=$('#mealBanner');if(!b)return;var need=['lunch','dinner'].filter(function(k){return hasMenu(k)&&mealOpen(MENUS[k])&&!MYORD[k]});
-  if(!ME||!need.length){b.hidden=true;return}var k=need[0],m=MENUS[k];b.hidden=false;
-  b.innerHTML='<span>🍱 오늘 <b>'+MEAL_NAMES[k]+'</b> 메뉴가 올라왔어요'+(m.deadline?' · '+esc(m.deadline)+' 마감':'')+'</span><a class="btn sm" href="#desk">주문하기</a>'}
-document.addEventListener('click',async function(e){var t=e.target.closest('.mopt[data-choice]');if(!t||t.disabled||!ME)return;
-  var k=t.getAttribute('data-meal'),c=t.getAttribute('data-choice'),m=MENUS[k];if(!mealOpen(m)){renderMeal();return}
+    return '<div class="panel meal"><div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap"><h3 style="margin:0">'+MEAL_NAMES[k]+(m.hansot?(m.image_url?' · 사진 메뉴 또는 한솥도시락':' · 한솥도시락'):'')+(many?' <span class="hint" style="font-weight:500">메뉴 '+opts.length+'개</span>':'')+'</h3>'+st+'</div>'+(m.note?'<p class="hint">'+esc(m.note)+'</p>':'')+
+      (m.image_url?'<a href="'+esc(m.image_url)+'" target="_blank" rel="noopener" title="크게 보기"><img class="mimg" src="'+esc(m.image_url)+'" alt="'+MEAL_NAMES[k]+' 메뉴 사진" loading="lazy"></a>':'')+mine+typed+(typed&&m.hansot?'<div class="mcat" style="margin-top:8px">또는 한솥도시락에서 고르기</div>':'')+top+body+'</div>'}).join('')}
+document.addEventListener('input',function(e){var t=e.target;if(t.hasAttribute&&t.hasAttribute('data-mtxt'))MTX[t.getAttribute('data-mtxt')]=t.value});
+document.addEventListener('keydown',function(e){var t=e.target;if(e.key==='Enter'&&t.hasAttribute&&t.hasAttribute('data-mtxt')){var b=document.querySelector('[data-mtxtgo="'+t.getAttribute('data-mtxt')+'"]');if(b)b.click()}});
+async function mealSave(k,c){if(!window.BestianMeal)return;var m=eff(k);if(!mealOpen(m)){renderMeal();return}
   var prev=MYORD[k];MYORD[k]=c;renderMeal();renderMealBanner();$('#mealMsg').textContent='저장 중…';
   try{await mapi.order({meal_date:mealDate(),meal:k,student_id:String(ME.id),student_name:ME.name,choice:c,updated_at:new Date().toISOString()});$('#mealMsg').textContent=MEAL_NAMES[k]+' 주문을 저장했어요: '+optLabel(m,c)}
-  catch(err){MYORD[k]=prev;renderMeal();renderMealBanner();$('#mealMsg').textContent='저장하지 못했어요. 인터넷을 확인하고 다시 눌러 주세요.'}});
+  catch(err){MYORD[k]=prev;renderMeal();renderMealBanner();$('#mealMsg').textContent='저장하지 못했어요. 인터넷을 확인하고 다시 눌러 주세요.'}}
+document.addEventListener('click',function(e){var t=e.target.closest&&e.target.closest('[data-mtxtgo]');if(!t||t.disabled||!ME||!window.BestianMeal)return;var k=t.getAttribute('data-mtxtgo'),inp=document.querySelector('[data-mtxt="'+k+'"]');
+  var BM=window.BestianMeal,c=BM.txt(inp?inp.value:'');if(c==='txt:'){$('#mealMsg').textContent='주문할 메뉴 이름을 적어 주세요.';if(inp)inp.focus();return}
+  /* 같은 이름으로 다시 주문하면 데스크가 적어 둔 금액은 그대로 둔다 */
+  var old=MYORD[k]?BM.parse(MYORD[k]):null;if(old&&old.type==='txt'&&old.amount!=null&&old.name===BM.parse(c).name)c=BM.txt(old.name,old.amount);
+  MTX[k]='';mealSave(k,c)});
+document.addEventListener('input',function(e){var t=e.target;if(!t.hasAttribute||!t.hasAttribute('data-mq'))return;var k=t.getAttribute('data-mq');MQ[k]=t.value;var pos=t.selectionStart;renderMeal();var n=document.querySelector('[data-mq="'+k+'"]');if(n){n.focus();try{n.setSelectionRange(pos,pos)}catch(_){}}});
+function renderMealJump(){var j=$('#mealJump'),t=$('#mealJumpSt');if(!j||!t||!window.BestianMeal)return;if(!mealLoaded){t.textContent='오늘 메뉴 보기';return}
+  var keys=['lunch','dinner'],need=keys.filter(function(k){return mealOpen(eff(k))&&!MYORD[k]});
+  j.className='mjump'+(need.length?' open':'');
+  t.textContent=keys.map(function(k){var m=eff(k);return MYORD[k]?MEAL_NAMES[k]+': '+optLabel(m,MYORD[k]):mealOpen(m)?MEAL_NAMES[k]+' 주문 받는 중':MEAL_NAMES[k]+' 마감'}).join(' · ')}
+document.addEventListener('click',function(e){if(!e.target.closest||!e.target.closest('#mealJump'))return;var el=$('#mlTitle');if(el)el.scrollIntoView({behavior:'smooth',block:'start'})});
+function renderMealBanner(){renderMealJump();var b=$('#mealBanner');if(!b)return;if(!window.BestianMeal){b.hidden=true;return}var need=['lunch','dinner'].filter(function(k){return !!MENUS[k]&&mealOpen(eff(k))&&!MYORD[k]});
+  if(!ME||!need.length){b.hidden=true;return}var k=need[0],m=eff(k);b.hidden=false;
+  b.innerHTML='<span>🍱 오늘 <b>'+MEAL_NAMES[k]+'</b> 메뉴가 올라왔어요'+(m.deadline?' · '+esc(m.deadline)+' 마감':'')+'</span><a class="btn sm" href="#desk">주문하기</a>'}
+document.addEventListener('click',function(e){var t=e.target.closest('.mopt[data-choice]');if(!t||t.disabled||!ME)return;mealSave(t.getAttribute('data-meal'),t.getAttribute('data-choice'))});
 function startMealLive(){if(MOCK){if(!mealChan){mealChan=1;window.addEventListener('storage',function(e){if(e.key===MK)loadMeal()})}return}
   if(!db||mealChan)return;try{mealChan=db.channel('bs-meal').on('postgres_changes',{event:'*',schema:'public',table:'bestian_meal_menu'},function(){loadMeal()}).subscribe()}catch(e){}}
 setInterval(function(){if(ME)loadMeal()},60000);

@@ -92,6 +92,15 @@ details summary{cursor:pointer;font-weight:900;color:var(--blued)}
 .mlr{display:grid;gap:4px;border-top:1px solid var(--line);padding-top:8px}
 .mlr .t{display:flex;justify-content:space-between;gap:8px;font-weight:900;font-size:15px}.mlr .t span{font-variant-numeric:tabular-nums;color:var(--blue)}
 .mlr.skip .t{font-weight:700;color:var(--mute)}.mlr.skip .t span{color:var(--mute)}
+.mlt{display:flex;gap:6px;align-items:center;flex-wrap:wrap;padding:4px 0;font-size:14px}.mlt .w{min-width:84px}.mlt .f{flex:1;min-width:90px;overflow-wrap:anywhere}.mlt .u{color:var(--mute);font-size:13px}
+.mlt .ok{color:var(--green);font-weight:900;font-size:13px;min-width:62px;text-align:right}.mlt .need{color:var(--red);font-weight:900;font-size:12.5px;min-width:62px;text-align:right}
+.mlt .x{border:0;background:none;color:var(--mute);cursor:pointer;font-size:14px;padding:4px 6px}
+.meals .inp.amt{width:86px;text-align:right;padding:6px 8px}
+.mlo{display:flex;gap:8px;align-items:center;justify-content:space-between;flex-wrap:wrap}.mlo .inp{padding:4px 6px;width:auto}
+.mlp{display:flex;gap:8px;align-items:center;flex-wrap:wrap;background:#f7f9fb;border-radius:10px;padding:8px}.mlp img{height:64px;max-width:120px;object-fit:cover;border-radius:8px;border:1px solid var(--line);display:block}.mlp .hint{flex:1;min-width:140px}
+.mla{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.3fr) 86px auto;gap:6px;border-top:1px dashed var(--line);padding-top:8px}.mla .inp{padding:6px 8px;min-width:0}
+@media(max-width:520px){.mla{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}}
+.btn.sm{padding:6px 10px;font-size:13px}
 .mln{display:flex;flex-wrap:wrap;gap:5px}.mln span{border:1px solid var(--line);border-radius:999px;padding:2px 9px;font-size:13px;background:#f7f9fb}
 .vsum{display:flex;gap:6px 14px;flex-wrap:wrap;font-size:13.5px;margin-bottom:8px}
 .vsum b{font-size:18px;font-variant-numeric:tabular-nums}
@@ -161,7 +170,7 @@ details summary{cursor:pointer;font-weight:900;color:var(--blued)}
   <section class="panel meals">
     <h2>🍱 오늘 식사 주문 <span class="n" id="mealN">0</span><a href="bestian-meal-admin.html" target="_blank" rel="noopener" style="margin-left:auto;font-size:13px;font-weight:700">메뉴 올리기·마감 ↗</a></h2>
     <div id="meals" class="mlg"></div>
-    <p class="hint" style="margin-top:8px">학생이 학생 센터 데스크 탭에서 메뉴를 누르면 여기에 바로 올라와요. 이름 앞 숫자는 자리 번호예요.</p>
+    <p class="hint" style="margin-top:8px">학생이 학생 센터 데스크 탭에서 메뉴를 누르면 여기에 바로 올라와요. 이름 앞 숫자는 자리 번호예요. 메뉴를 따로 안 올리면 한솥도시락 전체 메뉴가 기본으로 열려 있어요 (점심 11:00 · 저녁 16:30 마감).</p>
   </section>
 
   <section class="panel vocab">
@@ -180,6 +189,7 @@ details summary{cursor:pointer;font-weight:900;color:var(--blued)}
 <div class="toast" id="toast"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<script src="bestian-hansot.js"></script>
 <script>
 (function(){
 "use strict";
@@ -253,7 +263,7 @@ async function load(){var d=bizToday();await closeStale(d);
   if(SEEN&&!first){var fresh=REQ.filter(function(r){return !SEEN[r.id]&&r.status==='new'});
     if(fresh.length){var w=fresh.some(function(r){return r.kind==='wake'});beep(w?'wake':'req');notify(fresh[0])}}
   SEEN=ids;first=false;render()}
-async function loadStu(){try{STU=await api.students(bizToday());STU.sort(function(a,b){return (a.seat||999)-(b.seat||999)});renderTo();if(typeof renderVocab==='function'&&VOC)renderVocab();if(typeof renderMeals==='function')renderMeals()}catch(e){}}
+async function loadStu(){try{STU=await api.students(bizToday());STU.sort(function(a,b){return (a.seat||999)-(b.seat||999)});renderTo();if(typeof renderVocab==='function'&&VOC)renderVocab();if(typeof renderMeals==='function'&&!mealBusy())renderMeals()}catch(e){}}
 var tmr=null;function onChange(){clearTimeout(tmr);tmr=setTimeout(load,250)}
 function setConn(ok){var c=$('#conn');c.textContent=MOCK?'연습 모드':ok?'● 실시간 연결됨':'연결 끊김 · 재시도 중';c.className='pill'+(ok||MOCK?'':' bad')}
 
@@ -344,27 +354,78 @@ function renderVocab(){var main=VOC.filter(function(v){return v.kind==='main'});
   $('#vNot').innerHTML=not.length?not.map(function(s){return '<span>'+(s.seat?esc(s.seat)+'번 ':'')+esc(s.name)+'</span>'}).join(''):'<span style="border:0;color:var(--mute)">'+(STU.length?'모두 봤어요 👍':'입실한 학생이 없어요')+'</span>'}
 setInterval(loadVocab,20000);
 
-/* ===== 오늘 식사 주문 (학생 센터 데스크 탭에서 누른 주문 · 출결 서버의 bestian_meal_* 표) ===== */
-var MEALK='mock_meal',MMENU=[],MORD=[],mealChan=null,MEALNM={lunch:'점심',dinner:'저녁'};
+/* ===== 오늘 식사 주문 (학생 센터 데스크 탭에서 누른 주문 · 출결 서버의 bestian_meal_* 표) =====
+   직원이 메뉴를 안 올리면 한솥도시락 전체 메뉴가 기본으로 열린다. 사진을 올리면 학생이 사진을 보고 음식 이름을 적어 주문하고,
+   금액은 여기서 적는다 (주문 글자 'txt:이름|금액' — bestian-hansot.js). */
+var MEALK='mock_meal',MMENU=[],MORD=[],mealChan=null,MEALNM={lunch:'점심',dinner:'저녁'},BM=window.BestianMeal,MADD={};
 function mealVals(o){return Object.keys(o||{}).map(function(k){return o[k]})}
 function mealWon(n){return Number(n).toLocaleString('ko-KR')+'원'}
 function mealHM(){var d=new Date();return pad(d.getHours())+':'+pad(d.getMinutes())}
-async function loadMeals(){var d=fmtD(new Date());try{
-  if(MOCK){var o=LSg(MEALK,{});MMENU=mealVals(o.menus).filter(function(r){return r.meal_date===d});MORD=mealVals(o.orders).filter(function(r){return r.meal_date===d})}
-  else{if(!db)return;var r=await Promise.all([db.from('bestian_meal_menu').select('*').eq('meal_date',d),db.from('bestian_meal_orders').select('*').eq('meal_date',d)]);if(r[0].error)throw r[0].error;if(r[1].error)throw r[1].error;MMENU=r[0].data||[];MORD=r[1].data||[]}
-  renderMeals()}catch(e){$('#meals').innerHTML='<p class="hint">식사 주문을 불러오지 못했어요 (서버 설정 전이면 정상).</p>'}}
-function renderMeals(){var seat={};STU.forEach(function(s){seat[String(s.id)]=s.seat});
-  var who=function(a){return '<div class="mln">'+a.slice().sort(function(x,y){return String(x.student_name).localeCompare(String(y.student_name),'ko')}).map(function(o){var n=seat[String(o.student_id)];return '<span>'+(n?esc(n)+'번 ':'')+esc(o.student_name)+'</span>'}).join('')+'</div>'};
-  var ms=['lunch','dinner'].map(function(k){return MMENU.filter(function(m){return m.meal===k&&(m.options||[]).length})[0]}).filter(Boolean),total=0;
-  $('#meals').innerHTML=ms.length?ms.map(function(m){var list=MORD.filter(function(o){return o.meal===m.meal}),by={};list.forEach(function(o){(by[o.choice]=by[o.choice]||[]).push(o)});
-    var cnt=list.filter(function(o){return o.choice!=='none'}).length,sum=0,hasP=false,known={};total+=cnt;
-    var rows=(m.options||[]).map(function(o){known[o.id]=1;var a=by[o.id]||[];if(o.price){hasP=true;sum+=a.length*Number(o.price)}return a.length?'<div class="mlr"><div class="t"><b>'+esc(o.name)+'</b><span>'+a.length+'개</span></div>'+who(a)+'</div>':''}).join('');
-    var lost=list.filter(function(o){return o.choice!=='none'&&!known[o.choice]});if(lost.length)rows+='<div class="mlr"><div class="t"><b style="color:var(--red)">빠진 메뉴를 고른 학생</b><span>'+lost.length+'명</span></div>'+who(lost)+'</div>';
-    if((by.none||[]).length)rows+='<div class="mlr skip"><div class="t"><b>안 먹어요</b><span>'+by.none.length+'명</span></div>'+who(by.none)+'</div>';
-    var open=!!m.is_open&&(!m.deadline||mealHM()<=m.deadline);
-    return '<div class="mlc"><div class="mlh"><span>'+MEALNM[m.meal]+' · 주문 '+cnt+'개'+(hasP&&cnt?' · '+mealWon(sum):'')+'</span><small class="'+(open?'open':'')+'">'+(open?'주문 받는 중'+(m.deadline?' · '+esc(m.deadline)+' 마감':''):'주문 마감')+'</small></div>'+(list.length?rows:'<p class="hint">아직 주문이 없어요.</p>')+'</div>'}).join('')
-    :'<p class="hint">오늘 올린 메뉴가 없어요. 오른쪽 위 [메뉴 올리기·마감]에서 메뉴를 올리면 학생이 주문할 수 있어요.</p>';
+function mealDay(){return fmtD(new Date())}
+function mealRow(k){return MMENU.filter(function(m){return m.meal===k})[0]||null}
+var mealApi={
+  load:async function(d){if(MOCK){var o=LSg(MEALK,{});return [mealVals(o.menus).filter(function(r){return r.meal_date===d}),mealVals(o.orders).filter(function(r){return r.meal_date===d})]}
+    var r=await Promise.all([db.from('bestian_meal_menu').select('*').eq('meal_date',d),db.from('bestian_meal_orders').select('*').eq('meal_date',d)]);if(r[0].error)throw r[0].error;if(r[1].error)throw r[1].error;return [r[0].data||[],r[1].data||[]]},
+  saveOrder:async function(row){if(MOCK){var o=LSg(MEALK,{});o.orders=o.orders||{};o.orders[row.meal_date+'|'+row.meal+'|'+row.student_id]=row;LSs(MEALK,o);return}
+    var r=await db.from('bestian_meal_orders').upsert(row,{onConflict:'meal_date,meal,student_id'});if(r.error)throw r.error},
+  delOrder:async function(d,meal,sid){if(MOCK){var o=LSg(MEALK,{});if(o.orders)delete o.orders[d+'|'+meal+'|'+sid];LSs(MEALK,o);return}
+    var r=await db.from('bestian_meal_orders').delete().eq('meal_date',d).eq('meal',meal).eq('student_id',sid);if(r.error)throw r.error},
+  saveMenu:async function(row){if(MOCK){var o=LSg(MEALK,{});o.menus=o.menus||{};o.menus[row.meal_date+'|'+row.meal]=row;LSs(MEALK,o);return}
+    var r=await db.from('bestian_meal_menu').upsert(row,{onConflict:'meal_date,meal'});if(r.error)throw r.error},
+  upload:async function(blob,path){if(MOCK)return await new Promise(function(res){var fr=new FileReader();fr.onload=function(){res(fr.result)};fr.readAsDataURL(blob)});
+    var r=await db.storage.from('bestian-meal').upload(path,blob,{contentType:'image/jpeg',cacheControl:'86400',upsert:false});if(r.error)throw r.error;return db.storage.from('bestian-meal').getPublicUrl(path).data.publicUrl}};
+function mealShrink(file){return new Promise(function(res,rej){var u=URL.createObjectURL(file),im=new Image();
+  im.onload=function(){var max=1280,w=im.naturalWidth,h=im.naturalHeight,k=Math.min(1,max/Math.max(w,h));var c=document.createElement('canvas');c.width=Math.max(1,Math.round(w*k));c.height=Math.max(1,Math.round(h*k));
+    var g=c.getContext('2d');g.fillStyle='#fff';g.fillRect(0,0,c.width,c.height);g.drawImage(im,0,0,c.width,c.height);URL.revokeObjectURL(u);c.toBlob(function(b){b?res(b):rej(new Error('jpeg'))},'image/jpeg',0.82)};
+  im.onerror=function(){URL.revokeObjectURL(u);rej(new Error('decode'))};im.src=u})}
+function mealBusy(){var a=document.activeElement;return !!(a&&a.closest&&a.closest('#meals')&&/^(INPUT|TEXTAREA)$/.test(a.tagName)&&a.type!=='file')}
+async function loadMeals(force){if(!MOCK&&!db)return;try{var r=await mealApi.load(mealDay());MMENU=r[0];MORD=r[1];if(force||!mealBusy())renderMeals()}
+  catch(e){if(!mealBusy())$('#meals').innerHTML='<p class="hint">식사 주문을 불러오지 못했어요 (서버 설정 전이면 정상).</p>'}}
+function renderMeals(){if(!BM)return;var seat={};STU.forEach(function(s){seat[String(s.id)]=s.seat});var total=0;
+  var nm=function(o){var n=seat[String(o.student_id)];return (n?esc(n)+'번 ':'')+esc(o.student_name)};
+  var who=function(a){return '<div class="mln">'+a.slice().sort(function(x,y){return String(x.student_name).localeCompare(String(y.student_name),'ko')}).map(function(o){return '<span>'+nm(o)+'</span>'}).join('')+'</div>'};
+  $('#meals').innerHTML=['lunch','dinner'].map(function(k){var m=BM.effective(mealRow(k),k),list=MORD.filter(function(o){return o.meal===k}),by={},typed=[],none=[],lost=[],known={};
+    (m.options||[]).forEach(function(o){known[o.id]=o});
+    list.forEach(function(o){var p=BM.parse(o.choice);if(p.type==='none')none.push(o);else if(p.type==='txt')typed.push({o:o,p:p});else if(known[o.choice])(by[o.choice]=by[o.choice]||[]).push(o);else lost.push(o)});
+    var cnt=list.length-none.length,sum=0,hasP=false;total+=cnt;
+    var rows=(m.options||[]).map(function(o){var a=by[o.id]||[];if(!a.length)return '';if(o.price){hasP=true;sum+=a.length*Number(o.price)}return '<div class="mlr"><div class="t"><b>'+esc(o.name)+(o.price?' <small class="hint">'+mealWon(o.price)+'</small>':'')+'</b><span>'+a.length+'개</span></div>'+who(a)+'</div>'}).join('');
+    typed.sort(function(x,y){return String(x.o.student_name).localeCompare(String(y.o.student_name),'ko')});
+    typed.forEach(function(t){if(t.p.amount!=null){hasP=true;sum+=t.p.amount}});
+    if(typed.length)rows+='<div class="mlr"><div class="t"><b>이름을 적어 주문한 메뉴</b><span>'+typed.length+'개</span></div>'+typed.map(function(t){var key=k+'|'+t.o.student_id,desk=String(t.o.student_id).indexOf('desk:')===0;
+      return '<div class="mlt"><span class="w">'+nm(t.o)+'</span><b class="f">'+esc(t.p.name)+'</b><input class="inp amt" inputmode="numeric" data-amt="'+esc(key)+'" value="'+(t.p.amount!=null?t.p.amount:'')+'" placeholder="금액" aria-label="'+esc(t.o.student_name)+' 금액"><span class="u">원</span>'+(t.p.amount!=null?'<span class="ok">'+mealWon(t.p.amount)+'</span>':'<span class="need">금액 적기</span>')+'<button type="button" class="x" data-mdel="'+esc(key)+'" title="이 주문 지우기" aria-label="'+esc(t.o.student_name)+' 주문 지우기">✕</button></div>'}).join('')+'</div>';
+    if(lost.length)rows+='<div class="mlr"><div class="t"><b style="color:var(--red)">빠진 메뉴를 고른 학생</b><span>'+lost.length+'명</span></div>'+who(lost)+'</div>';
+    if(none.length)rows+='<div class="mlr skip"><div class="t"><b>안 먹어요</b><span>'+none.length+'명</span></div>'+who(none)+'</div>';
+    var late=!!m.deadline&&mealHM()>m.deadline,open=!!m.is_open&&!late,A=MADD[k]||{};
+    var ctl='<div class="mlo"><label class="hint">마감 시각 <input type="time" class="inp" data-mdl="'+k+'" value="'+esc(m.deadline||'')+'" aria-label="'+MEALNM[k]+' 주문 마감 시각"></label><button type="button" class="btn g sm" data-mtoggle="'+k+'">'+(m.is_open?'지금 마감하기':'주문 다시 열기')+'</button></div>';
+    var pic='<div class="mlp">'+(m.image_url?'<a href="'+esc(m.image_url)+'" target="_blank" rel="noopener"><img data-mpicprev="'+k+'" src="'+esc(m.image_url)+'" alt="'+MEALNM[k]+' 메뉴 사진"></a><span class="hint">학생에게 이 사진이 보이고, 음식 이름을 적어 주문해요.</span><button type="button" class="btn g sm" data-mpicdel="'+k+'">사진 내리기</button>':'<span class="hint">한솥 말고 다른 가게에서 시킬 때는 메뉴판 사진을 올리세요.</span>')
+      +'<label class="btn g sm" style="cursor:pointer">📷 '+(m.image_url?'사진 바꾸기':'메뉴 사진 올리기')+'<input type="file" accept="image/*" data-mpic="'+k+'" hidden></label></div>';
+    var add='<div class="mla"><input class="inp" data-addname="'+k+'" maxlength="12" placeholder="학생 이름" value="'+esc(A.n||'')+'"><input class="inp" data-addfood="'+k+'" maxlength="30" placeholder="음식 이름" value="'+esc(A.f||'')+'"><input class="inp amt" inputmode="numeric" data-addamt="'+k+'" placeholder="금액" value="'+esc(A.a||'')+'"><button type="button" class="btn sm" data-madd="'+k+'">주문 넣기</button></div>';
+    return '<div class="mlc"><div class="mlh"><span>'+MEALNM[k]+(m.hansot?(m.image_url?' · 사진 메뉴 + 한솥도시락':' · 한솥도시락'):'')+' · 주문 '+cnt+'개'+(hasP&&cnt?' · '+mealWon(sum):'')+'</span><small class="'+(open?'open':'')+'">'+(open?'주문 받는 중'+(m.deadline?' · '+esc(m.deadline)+' 마감':''):!m.is_open?'주문 마감':'마감 시각 지남 · '+esc(m.deadline))+'</small></div>'+ctl+pic+(list.length?rows:'<p class="hint">아직 주문이 없어요.</p>')+add+'</div>'}).join('');
   $('#mealN').textContent=total}
+function mealMsg(t){toast(t)}
+async function mealSetAmt(key,val){var i=key.indexOf('|'),k=key.slice(0,i),sid=key.slice(i+1),o=MORD.filter(function(x){return x.meal===k&&String(x.student_id)===sid})[0];if(!o)return;var p=BM.parse(o.choice);if(p.type!=='txt')return;
+  var c=BM.txt(p.name,val);if(c===o.choice)return;
+  try{await mealApi.saveOrder({meal_date:o.meal_date,meal:o.meal,student_id:o.student_id,student_name:o.student_name,choice:c,updated_at:new Date().toISOString()});o.choice=c;await loadMeals(true)}catch(e){mealMsg('금액을 저장하지 못했어요. 다시 해 주세요.')}}
+/* 그 끼니의 메뉴 줄을 지금 값 그대로 두고 일부만 바꿔 저장한다 (줄이 없으면 한솥 기본값으로 새로 만든다) */
+async function mealSetMenu(k,patch){var r=mealRow(k),m=BM.effective(r,k);
+  var row={meal_date:mealDay(),meal:k,options:r?(r.options||[]):[],deadline:m.deadline||null,note:r?(r.note||null):null,image_url:r?(r.image_url||null):null,is_open:r?!!r.is_open:true,updated_at:new Date().toISOString()};
+  Object.keys(patch).forEach(function(x){row[x]=patch[x]});await mealApi.saveMenu(row);await loadMeals(true)}
+function mealSetPic(k,url){return mealSetMenu(k,{image_url:url})}
+$('#meals').addEventListener('input',function(e){var t=e.target,k;if((k=t.getAttribute('data-addname'))){(MADD[k]=MADD[k]||{}).n=t.value}else if((k=t.getAttribute('data-addfood'))){(MADD[k]=MADD[k]||{}).f=t.value}else if((k=t.getAttribute('data-addamt'))){t.value=t.value.replace(/[^\d]/g,'');(MADD[k]=MADD[k]||{}).a=t.value}else if(t.hasAttribute('data-amt')){t.value=t.value.replace(/[^\d]/g,'')}});
+$('#meals').addEventListener('keydown',function(e){if(e.key!=='Enter')return;var t=e.target;if(t.hasAttribute('data-amt')){e.preventDefault();t.blur()}else if(t.closest('.mla')){e.preventDefault();t.closest('.mla').querySelector('[data-madd]').click()}});
+$('#meals').addEventListener('change',async function(e){var t=e.target;
+  if(t.hasAttribute('data-amt')){mealSetAmt(t.getAttribute('data-amt'),t.value);return}
+  if(t.hasAttribute('data-mdl')){var dk=t.getAttribute('data-mdl');try{await mealSetMenu(dk,{deadline:t.value||null});mealMsg(MEALNM[dk]+' 마감 시각을 '+(t.value||'없음')+'(으)로 바꿨어요.')}catch(err){mealMsg('마감 시각을 저장하지 못했어요.')}return}
+  if(t.hasAttribute('data-mpic')){var k=t.getAttribute('data-mpic'),f=t.files&&t.files[0];if(!f)return;if(!/^image\//.test(f.type||'')){mealMsg('사진 파일만 올릴 수 있어요.');return}
+    mealMsg('사진 올리는 중…');try{var b=await mealShrink(f);var url=await mealApi.upload(b,mealDay()+'-'+k+'-'+Date.now().toString(36)+'.jpg');await mealSetPic(k,url);mealMsg(MEALNM[k]+' 메뉴 사진을 올렸어요. 학생 화면에 바로 보여요.')}catch(err){mealMsg('사진을 올리지 못했어요. 다른 사진으로 해 보세요.')}}});
+$('#meals').addEventListener('click',async function(e){var t=e.target.closest('[data-madd],[data-mdel],[data-mpicdel],[data-mtoggle]');if(!t)return;var k;
+  if((k=t.getAttribute('data-mtoggle'))){var cur=BM.effective(mealRow(k),k).is_open;try{await mealSetMenu(k,{is_open:!cur});mealMsg(MEALNM[k]+(cur?' 주문을 마감했어요. 학생은 더 바꿀 수 없어요.':' 주문을 다시 열었어요.'))}catch(err){mealMsg('바꾸지 못했어요. 다시 눌러 주세요.')}return}
+  if((k=t.getAttribute('data-mpicdel'))){if(!confirm(MEALNM[k]+' 메뉴 사진을 내릴까요?'))return;try{await mealSetPic(k,null)}catch(err){mealMsg('사진을 내리지 못했어요.')}return}
+  if(t.hasAttribute('data-mdel')){var key=t.getAttribute('data-mdel'),i=key.indexOf('|'),mk=key.slice(0,i),sid=key.slice(i+1),o=MORD.filter(function(x){return x.meal===mk&&String(x.student_id)===sid})[0];if(!o||!confirm(o.student_name+' 주문을 지울까요?'))return;
+    try{await mealApi.delOrder(o.meal_date,mk,sid);await loadMeals(true)}catch(err){mealMsg('지우지 못했어요.')}return}
+  k=t.getAttribute('data-madd');var A=MADD[k]||{},n=String(A.n||'').trim().slice(0,12),c=BM.txt(A.f,A.a);if(!n){mealMsg('학생 이름을 적어 주세요.');return}if(c==='txt:'||c.indexOf('txt:|')===0){mealMsg('음식 이름을 적어 주세요.');return}
+  var hit=STU.filter(function(s){return s.name===n});var sid2=hit.length===1?String(hit[0].id):'desk:'+n;
+  try{await mealApi.saveOrder({meal_date:mealDay(),meal:k,student_id:sid2,student_name:n,choice:c,updated_at:new Date().toISOString()});MADD[k]={};await loadMeals(true);mealMsg(n+' '+MEALNM[k]+' 주문을 넣었어요.')}catch(err){mealMsg('주문을 넣지 못했어요. 다시 해 주세요.')}});
 function startMealLive(){if(MOCK){window.addEventListener('storage',function(e){if(e.key===MEALK)loadMeals()});return}
   if(!db||mealChan)return;try{mealChan=db.channel('bdesk-meal').on('postgres_changes',{event:'*',schema:'public',table:'bestian_meal_orders'},function(){loadMeals()}).on('postgres_changes',{event:'*',schema:'public',table:'bestian_meal_menu'},function(){loadMeals()}).subscribe()}catch(e){}}
 loadMeals();startMealLive();setInterval(loadMeals,20000);

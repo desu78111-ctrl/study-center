@@ -68,7 +68,7 @@ details.zero summary{cursor:pointer;color:var(--mute);font-size:13.5px;font-weig
   <div class="g2">
     <div class="panel" style="display:grid;gap:12px;align-content:start">
       <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap"><h3 style="margin:0" id="edTitle">점심 메뉴 올리기</h3><span class="stat none" id="stat">아직 안 올림</span></div>
-      <p class="hint">메뉴 사진을 붙여넣거나 메뉴 이름을 적고 <b>저장하고 학생에게 올리기</b>를 누르면 학생 센터의 <b>식사 주문</b>에 1분 안에 나타나요. 이름 없이 사진만 올리면 학생은 <b>먹어요</b>와 <b>안 먹어요</b> 중에 골라요.</p>
+      <p class="hint">메뉴 사진을 붙여넣거나 메뉴 이름을 적고 <b>저장하고 학생에게 올리기</b>를 누르면 학생 센터의 <b>식사 주문</b>에 1분 안에 나타나요. 이름 없이 사진만 올리면 학생은 사진을 보고 <b>음식 이름을 적어서</b> 주문해요 (금액은 데스크 화면에서 적어요). 메뉴를 따로 올리지 않은 날은 <b>한솥도시락 전체 메뉴</b>가 기본으로 열려 있어요.</p>
       <div class="picbox">
         <div class="drop" id="drop" contenteditable="true" role="textbox" aria-label="메뉴 사진 붙여넣기">📋 메뉴 사진을 복사한 뒤 여기를 누르고 붙여넣으세요<br><span class="hint">PC는 Ctrl+V · 휴대폰은 길게 눌러 붙여넣기</span></div>
         <img id="picPrev" alt="올릴 메뉴 사진" hidden>
@@ -92,6 +92,7 @@ details.zero summary{cursor:pointer;color:var(--mute);font-size:13.5px;font-weig
   </div>
 </main>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<script src="bestian-hansot.js"></script>
 <script>
 (function(){
 "use strict";
@@ -102,7 +103,7 @@ var esc=function(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){re
 function fmtD(d){return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate())}
 function nowHM(){var d=new Date();return pad(d.getHours())+':'+pad(d.getMinutes())}
 function won(n){return Number(n).toLocaleString('ko-KR')+'원'}
-var MEALS={lunch:'점심',dinner:'저녁'},DEF_DL={lunch:'11:00',dinner:'16:30'};
+var MEALS={lunch:'점심',dinner:'저녁'},DEF_DL=window.BestianMeal.DEF_DL,BM=window.BestianMeal;
 var GATE_H='d8553e3ac2d808918a2ff3be6f092d23550436d4f051d0fccb41dc675a3bd83a';
 function gateOk(){if(location.protocol==='file:')return Promise.resolve(true);
   var k=(location.search.match(/[?&]k=([^&#]+)/)||[])[1]||'';if(!k){try{k=localStorage.getItem('bestian_staff_k')||''}catch(e){}}
@@ -138,7 +139,7 @@ function isSetupErr(e){return !!e&&(e.code==='42P01'||e.code==='PGRST205'||e.cod
 var DATE=fmtD(new Date()),MEAL=(new Date().getHours()>=13?'dinner':'lunch'),MENUS={},ORDERS=[],PRESENT=[],EDIT=null,dirty=false,chan=null,loading=false;
 function newId(){return 'o'+Date.now().toString(36)+Math.random().toString(36).slice(2,5)}
 function fillEditor(){var m=MENUS[MEAL];
-  var only=m&&(m.options||[]).length===1&&m.options[0].id==='eat';
+  var only=m&&((m.options||[]).length===0||((m.options||[]).length===1&&m.options[0].id==='eat'));
   EDIT=m?{options:only?[{id:newId(),name:'',price:''}]:(m.options||[]).map(function(o){return {id:o.id,name:o.name,price:o.price||'',cat:o.cat||'',img:o.img||''}}),deadline:m.deadline||DEF_DL[MEAL],note:m.note||'',image:m.image_url||null,blob:null}
         :{options:[{id:newId(),name:'',price:''},{id:newId(),name:'',price:''},{id:newId(),name:'',price:''}],deadline:DEF_DL[MEAL],note:'',image:null,blob:null};
   dirty=false;$('#picMsg').textContent='';renderEditor()}
@@ -162,23 +163,26 @@ async function takeImage(file){if(!file||!/^image\//.test(file.type||'')){$('#pi
   try{var b=await shrink(file);if(picURL){URL.revokeObjectURL(picURL);picURL=null}EDIT.blob=b;dirty=true;renderPic();$('#picMsg').textContent='사진을 넣었어요 ('+Math.round(b.size/1024)+'KB). 저장하면 학생에게 보여요.'}
   catch(e){$('#picMsg').textContent='이 사진은 읽지 못했어요. 다른 사진으로 해 주세요.'}}
 function imageFrom(dt){if(!dt)return null;var it=dt.items||[];for(var i=0;i<it.length;i++){if(it[i].kind==='file'&&/^image\//.test(it[i].type))return it[i].getAsFile()}var f=dt.files||[];for(var j=0;j<f.length;j++){if(/^image\//.test(f[j].type))return f[j]}return null}
-function menuState(m){if(!m||!(m.options||[]).length)return 'none';if(!m.is_open)return 'closed';var t=fmtD(new Date());if(DATE<t||(DATE===t&&m.deadline&&nowHM()>m.deadline))return 'late';return 'open'}
-function renderStat(){var m=MENUS[MEAL],s=menuState(m),el=$('#stat'),tg=$('#toggle');
-  el.className='stat '+(s==='open'?'open':s==='none'?'none':'closed');
-  el.textContent=s==='none'?'아직 안 올림':s==='closed'?'주문 마감':s==='late'?'마감 시각 지남':'주문 받는 중'+(m.deadline?' · '+m.deadline+' 마감':'');
-  tg.hidden=s==='none';tg.textContent=m&&m.is_open?'주문 마감하기':'주문 다시 열기'}
-function renderOrders(){var m=MENUS[MEAL],opts=(m&&m.options)||[],list=ORDERS.filter(function(o){return o.meal===MEAL});
-  var by={};list.forEach(function(o){(by[o.choice]=by[o.choice]||[]).push(o)});
+function menuState(m){var e=BM.effective(m||null,MEAL);if(!e.is_open)return 'closed';var t=fmtD(new Date());if(DATE<t||(DATE===t&&e.deadline&&nowHM()>e.deadline))return 'late';return 'open'}
+function renderStat(){var m=MENUS[MEAL],e=BM.effective(m||null,MEAL),s=menuState(m),el=$('#stat'),tg=$('#toggle');
+  el.className='stat '+(s==='open'?'open':'closed');
+  el.textContent=(e.hansot?'한솥 기본 메뉴 · ':'')+(s==='closed'?'주문 마감':s==='late'?'마감 시각 지남':'주문 받는 중'+(e.deadline?' · '+e.deadline+' 마감':''));
+  tg.hidden=false;tg.textContent=e.is_open?'주문 마감하기':'주문 다시 열기'}
+function renderOrders(){var m=MENUS[MEAL],e=BM.effective(m||null,MEAL),opts=e.options||[],list=ORDERS.filter(function(o){return o.meal===MEAL});
+  var by={},typed=[];list.forEach(function(o){var p=BM.parse(o.choice);if(p.type==='txt')typed.push({o:o,p:p});else (by[o.choice]=by[o.choice]||[]).push(o)});
   var ordered=list.filter(function(o){return o.choice!=='none'}).length,skip=(by.none||[]).length,total=0,hasPrice=false;
   opts.forEach(function(o){var n=(by[o.id]||[]).length;if(o.price){hasPrice=true;total+=n*Number(o.price)}});
+  typed.forEach(function(t){if(t.p.amount!=null){hasPrice=true;total+=t.p.amount}});
   var got={};list.forEach(function(o){got[String(o.student_id)]=1});var wait=PRESENT.filter(function(u){return !got[String(u.id)]}).sort(function(a,b){return a.name.localeCompare(b.name,'ko')});
   $('#kpi').innerHTML='<div><small>주문</small><b>'+ordered+'개</b></div><div><small>안 먹어요</small><b>'+skip+'명</b></div><div><small>아직 안 고름</small><b style="color:var(--amber)">'+wait.length+'명</b></div><div><small>합계 금액</small><b>'+(hasPrice?won(total):'-')+'</b></div>';
   var names=function(a){return a.slice().sort(function(x,y){return x.student_name.localeCompare(y.student_name,'ko')}).map(function(o){return '<span class="chip">'+esc(o.student_name)+'</span>'}).join('')};
-  var known={};opts.forEach(function(o){known[o.id]=1});var lost=list.filter(function(o){return o.choice!=='none'&&!known[o.choice]});
+  var known={};opts.forEach(function(o){known[o.id]=1});var lost=list.filter(function(o){return o.choice!=='none'&&!known[o.choice]&&BM.parse(o.choice).type!=='txt'});
   var optHtml=function(o){var a=by[o.id]||[];return '<div class="opt"><div class="h"><b>'+esc(o.name)+(o.price?' <small class="hint">'+won(o.price)+'</small>':'')+'</b><span>'+a.length+'개</span></div>'+(a.length?'<div class="chips">'+names(a)+'</div>':'')+'</div>'};
   var hot=opts.filter(function(o){return (by[o.id]||[]).length}),zero=opts.filter(function(o){return !(by[o.id]||[]).length});
-  $('#opts').innerHTML=opts.length?(hot.map(optHtml).join('')+(opts.length>8&&zero.length?'<details class="zero"><summary>주문 없는 메뉴 '+zero.length+'개 보기</summary>'+zero.map(optHtml).join('')+'</details>':zero.map(optHtml).join(''))+(hot.length?'':'<p class="hint" style="margin:4px 0">아직 주문이 없어요.</p>'))+(lost.length?'<div class="opt"><div class="h"><b style="color:var(--red)">빠진 메뉴를 고른 학생</b><span>'+lost.length+'명</span></div><div class="chips">'+names(lost)+'</div></div>':'')
-    :'<p class="hint">메뉴를 올리면 여기에 메뉴별 주문이 모여요.</p>';
+  var typedHtml=typed.length?'<div class="opt"><div class="h"><b>이름을 적어 주문한 메뉴 <small class="hint">금액은 데스크 화면에서 적어요</small></b><span>'+typed.length+'개</span></div><div class="chips">'+typed.slice().sort(function(x,y){return x.o.student_name.localeCompare(y.o.student_name,'ko')}).map(function(t){return '<span class="chip">'+esc(t.o.student_name)+' · '+esc(t.p.name)+' · '+(t.p.amount!=null?won(t.p.amount):'금액 미정')+'</span>'}).join('')+'</div></div>':'';
+  $('#opts').innerHTML=hot.map(optHtml).join('')+typedHtml+(hot.length||typed.length?'':'<p class="hint" style="margin:4px 0">아직 주문이 없어요.</p>')
+    +(zero.length?(opts.length>8?'<details class="zero"><summary>주문 없는 메뉴 '+zero.length+'개 보기</summary>'+zero.map(optHtml).join('')+'</details>':zero.map(optHtml).join('')):'')
+    +(lost.length?'<div class="opt"><div class="h"><b style="color:var(--red)">빠진 메뉴를 고른 학생</b><span>'+lost.length+'명</span></div><div class="chips">'+names(lost)+'</div></div>':'');
   $('#skipList').innerHTML=skip?names(by.none):'<span class="hint">없음</span>';
   $('#waitList').innerHTML=wait.length?wait.map(function(u){return '<span class="chip wait">'+esc(u.name)+'</span>'}).join(''):'<span class="hint">'+(PRESENT.length?'모두 골랐어요':'이 날 입실한 학생이 아직 없어요')+'</span>';
   renderStat()}
@@ -201,7 +205,7 @@ $('#drop').addEventListener('keydown',function(e){if(!(e.ctrlKey||e.metaKey))e.p
 ['dragleave','drop'].forEach(function(t){$('#drop').addEventListener(t,function(e){e.preventDefault();this.classList.remove('over');if(t==='drop'){var f=imageFrom(e.dataTransfer);if(f)takeImage(f)}})});
 $('#picFile').onchange=function(){var f=this.files&&this.files[0];if(f)takeImage(f);this.value=''};
 $('#picDel').onclick=function(){if(picURL){URL.revokeObjectURL(picURL);picURL=null}EDIT.blob=null;EDIT.image=null;dirty=true;renderPic();$('#picMsg').textContent='사진을 뺐어요. 저장하면 학생 화면에서도 사라져요.'};
-var HANSOT={base:'https://www.hsd.co.kr/images/',date:'2026-11-07',groups:[["11월 신메뉴",[["제육 잡채밥",6900,"4f939b8814794d718b5d8abc04285e5e20261030035406"],["더블 제육 잡채밥",9900,"eb515a7a3e314f0a8ba4cdd471a1d72920261030030053"],["벌교꼬막 비빔밥",7800,"50843bba433548c8b7f85c5a38c9408920261030025844"],["통통 고추튀김",3700,"f5fbf1434b1a47528e1cc13a0347904420261030112114"]]],["스페셜",[["스페셜 해바라기 도시락",13000,"ed9d01aca504452291a05a6513ebf1b820260330012216"],["스페셜 숯불직화 진달래 도시락",12000,"a76fdf50bcc54cd5ae41933a77cf73ac20260330012137"],["스페셜 송정식 떡갈비 도시락",11000,"43bba181244a43b7ad38e920e24e84d520260330111257"]]],["프리미엄",[["매화 연어",12500,"5724348a4ba941b994eeb9ea603a551820260529102226"],["매화 고등어",11500,"6d0409ab1d534ee09be1492f5b34c61520260529104319"],["해바라기",10300,"0fb65dba41b54de8a8ff26d1185bd9f620251128052345"],["진달래",8800,"744c75244ade47379e42f4d7682ee7f320260330012510"]]],["고기고기",[["카츠카츠 고기고기",8000,"5d67848239144ec3836e21e43a1149ee20260401011629"],["새치 고기고기",7800,"578669b0407b45ceae98820167f92b1f20260330012552"],["돈까스도련님 고기고기",7300,"cc86d73aff95472799a919574b4f4b8420260330012730"],["돈치 고기고기",6800,"fb74cb73990c491ab8b76f7f3860616a20260330012826"]]],["모둠",[["송정식 떡갈비",7200,"14dce9e0040448f4bdbdb325de6556c220260330103056"],["동백",6700,"2cad228b2a19464883775f87aae3a34b20260330103514"],["돈치스팸",5500,"999d28d902e44b8f9edfba6d6b7c29ff20260330103625"],["치킨제육",5500,"06ec81176cf0487d8320318989443bca20260330111058"],["돈까스도련님",5200,"81e7a7b5e0fe4439bf5ab2b4261ca43420260330104901"],["제육 돈까스도련님",5200,"4e1b20e397bc4f4a9a73d8859957b96720260330104940"],["칠리 찹쌀탕수육도련님",5000,"e3862893aa2d4ed9b763ad55e8144cd720260330104421"]]],["더블",[["더블 돈까스도련님",10500,"9497e4a16b3247ab8df28dd51489573020251001101333"],["더블 칠리 찹쌀탕수육도련님",8500,"8f78b4beaa4347f691900d7148fd0e0e20251001101320"]]],["함박",[["치즈 한우 함박스테이크",10500,"5cb83e2b4273437699ab367604c8488520260930053818"],["왕갈비맛 함박스테이크",9900,"0f5fbdb4d1394580ae0cd45e7c830e2d20260930040440"],["치폴레 함박스테이크",9900,"430b8d4782c649cfbd979376ba4963c920260923052430"]]],["마요",[["치킨마요",3900,"e36c04b219ff41ad82f32208585e41cf20220127081455"],["빅치킨마요",4600,"3182c01777d04bdeb96abd9423c92fc520220127081319"],["메가치킨마요",6600,"7dfad1e4006b4ee584c707dd45c1984620220127081219"],["스팸마요",4400,"4d82aaca2c954a498786dba8d8b7097920220127075646"],["참치마요",3800,"40f8e1985f804226bf7c7cc783ae091420220324025555"],["치킨마요 제육볶음 콤보",7400,"c957addfe5034157963d4d25a7f8c67420261019110025"],["치킨마요 돈까스도련님 콤보",7700,"2d89c8807ff545a0b97cd7b7594b438c20261019111357"]]],["볶음밥",[["김치볶음밥&돼지불백",7900,"9ca993828ee345698bdbeb4fe543cbce20250630023010"],["스팸 김치볶음밥",5200,"6c27f07d1ad3495d8146d345ac29839b20201016081816"],["김치볶음밥",4400,"bff76222e93b42d690c1e7d091c65fdc20201016081556"]]],["찌개",[["부대찌개",6500,"241de055e19c4ab8ae8cb74cebbbe3ab20211129033214"],["묵은지 김치찌개",6000,"800becbaa11940bb8641b5ed8551180a20250731053550"]]],["덮밥",[["왕갈비맛 함박스테이크 덮밥",8800,"9ac7d7b76fae4e34aa87bd3cd453930c20260831040748"],["치폴레 함박스테이크 덮밥",8800,"5b7b3e7ceec346b0b2385a225af92c8f20260831040735"],["빅 제많덮(빅 제육 많이 덮밥)",7500,"a9b089fb2e8f41e7b1ef8e627bb71adc20250131044155"],["왕카레돈까스 덮밥",6700,"dfbe11bfc7ff48eaa6f1eb02ad9d064d20251128050703"],["왕카레치킨 덮밥",6700,"2d47b2a28275418d9293790feb91f2fa20260612052931"],["왕김치돈까스 덮밥",6700,"f373b508f20848169a3a4aa2b58267d520260612052900"],["제많덮(제육 많이 덮밥)",6500,"712114bfb43d4872bb4ebf7a0814e14220250131043830"],["숯불직화구이 덮밥",6500,"9614b1bdb2444f01894cbb5d41fc23fa20250731035552"],["오리지널 치즈 닭갈비덮밥",6500,"614b95fca5ba4f358c55758cde284ffa20240430024838"],["핫 치즈 닭갈비덮밥",6500,"57e28668bc0c45d5bd4ad4e25c6a0a8120240430024936"],["돼지불백 덮밥",5900,"bb8b3d3cc5fd4a9ca761c7fc4b17963a20250626041040"],["김치 제육 덮밥",5200,"4386e57260ae4a53bed5a032c698b1a820251020050859"],["돈까스 카레",5100,"136c4a8bc0924e18bd82fc2bd6e7e58220251128050533"],["열무 감초고추장 비빔밥",5000,"0619e536664049e8b3f69559677a132220260429062438"],["김치 참치 덮밥",4900,"1e1dcb10bb874034aa4ff60daf1d647120251031110440"],["돈까스 덮밥",4700,"df580f47c5e1425d90059444be76c38520251128050453"]]],["비빔밥",[["시골제육 두부강된장 비빔밥",6500,"f81a94b723fa4d7a9ab8f398d74dd20520250731053724"],["소불고기 감초고추장 비빔밥",6000,"aeba48de4fc34d458124a9f4a6ab8ef120250731053640"],["참치야채 감초고추장 비빔밥",4000,"817a42bba6bb45238632233e369294b020240430025059"]]],["정식",[["빅치킨마요 부대찌개 정식",8800,"561be74d089340258e64e77b98ef196920220127074925"],["치킨마요 부대찌개 정식",8100,"0ca7d002f7fd495dbe15f9cc330fde6f20220127075018"]]],["단품·실속반찬",[["단품 부대찌개",5200,"85acc4bde4c04c10af6afeb4059abd3e20211129051759"],["단품 묵은지 김치찌개",4700,"e179d0d8f03645648ae3b0d2162c088120190109110329"],["단품 카레",2900,"6b6241cf9d0b4365a59db6e2c36f9e1e20240930044246"],["반찬 돈까스도련님",4200,"9bad996911354fdd9a879ebce2516d2d20260529101106"],["반찬 치킨",4000,"51d992e9949e41dcb96269fc4deaf69020220127074301"],["반찬 제육볶음",3900,"f0ddff7fa1284b6f9f6731c3c4340b0c20250905033735"],["반찬 고기고기",3900,"02a15eaf142a422eaf7e47d63f06878e20210521044427"],["반찬 고등어 데리야끼",3900,"947ead456efb46abab68f3c547f0c6a020210521044504"],["반찬 토네이도 소세지",3200,"6e48dd60e0904e30b0ce70445c5e73db20210531055314"],["반찬 돈까스",2900,"901d93a8fd234d359f8070fbd8ea96c620260414104656"]]],["스낵",[["김피탕",6700,"09dab8d66e4844fb8eadf4e17fb6223420251020044110"],["미니 찹쌀핫도그",2800,"ee4fa90749c540ff88364501d24eba7f20220127035559"],["뉴 감자고로케",2700,"bdee96c6be514aeb9695be9c8ae63ef020220127115951"],["미니 찹쌀탕수육",2300,"faa992b4cca94e3d9d045e0a8420372520220127035741"],["치즈버터 해시 포테이토 스틱",2200,"919227b22ab04c1d84058e39ff4598e720230228033454"],["허니버터 해시 포테이토 스틱",2200,"a98cd3c5f17e491cad3831e9d746fc8c20230228033234"],["해시 포테이토 스틱",2000,"c8c5b696227141e9b2c3edf18825ad5920230131033751"],["케이준후라이",1900,"39bc501c45f947fb8b994f9c44355ee020220127035851"]]],["치킨",[["크림 닭강정(소)",3900,"bc6040ba12a64613b18cbf89525da14b20250626052611"],["크림 닭강정(중)",9900,"2f5cd2adaba54070acb92c594a9d4d1320250626052552"],["한솥 닭강정(소)",3500,"4ba49c0ed10f4fbd82bdf7bb2358893520250901090259"],["한솥 닭강정(중)",9000,"a12e875d9e9642b599e896ea2f138a3020250901090353"],["후라이드 순살(소) 양념치킨소스",4000,"0cb9bf04877f4812b17d492c2d3c075f20220127072925"],["후라이드 순살(소) 케이준소스",4000,"004232d91f524010a6968c73246b5b4520220127073123"],["후라이드 순살(중)",7500,"d8c0a76abb67474fa6ed53c525ee05cc20220127081659"]]],["디저트",[["제주녹차 미니꿀호떡",2500,"0aa0ec66fc0c4c6eaaf19c069dd08f6c20240930041056"]]]]};
+var HANSOT=window.BestianMeal.HANSOT;   /* 한솥 전체 메뉴는 bestian-hansot.js 한 곳에 둔다 (학생 센터 · 데스크와 같이 씀) */
 function openHansot(){var m=document.createElement('div');m.className='modal';m.id='hsModal';
   m.innerHTML='<div class="mbox" role="dialog" aria-modal="true"><header><h3>🍱 한솥도시락 전체 메뉴 ('+HANSOT.groups.reduce(function(a,g){return a+g[1].length},0)+'개)</h3><span class="hint">한솥 공식 홈페이지 권장가 · '+HANSOT.date+' 기준</span></header>'+
     '<div class="tools"><button class="btn g" type="button" data-hs="all">전체 선택</button><button class="btn g" type="button" data-hs="none">전체 해제</button><button class="btn g" type="button" data-hs="meals">도시락만 (반찬·스낵 제외)</button><button class="btn g" type="button" data-hs="cheap">8,000원 이하만</button></div>'+
@@ -227,26 +231,26 @@ $('#hansot').onclick=openHansot;
 $('#addRow').onclick=function(){EDIT.options.push({id:newId(),name:'',price:''});dirty=true;renderEditor();var ins=document.querySelectorAll('#rows input[data-f="name"]');ins[ins.length-1].focus()};
 $('#deadline').oninput=function(){EDIT.deadline=this.value;dirty=true};$('#note').oninput=function(){EDIT.note=this.value;dirty=true};
 $('#loadPrev').onclick=async function(){try{var p=await api.prevMenu(DATE,MEAL);if(!p){$('#saveMsg').textContent='불러올 지난 '+MEALS[MEAL]+' 메뉴가 없어요.';return}
-  var only=(p.options||[]).length===1&&p.options[0].id==='eat';
+  var only=(p.options||[]).length===0||((p.options||[]).length===1&&p.options[0].id==='eat');
   EDIT={options:only?[{id:newId(),name:'',price:''}]:(p.options||[]).map(function(o){return {id:newId(),name:o.name,price:o.price||'',cat:o.cat||'',img:o.img||''}}),deadline:p.deadline||DEF_DL[MEAL],note:p.note||'',image:p.image_url||null,blob:null};dirty=true;renderEditor();$('#saveMsg').textContent=p.meal_date+' '+MEALS[MEAL]+' 메뉴를 불러왔어요. 확인하고 저장하세요.'}
   catch(e){$('#saveMsg').textContent='지난 메뉴를 불러오지 못했어요.'}};
 async function saveMenu(isOpen,msg){var opts=EDIT.options.map(function(o){var x={id:o.id,name:String(o.name||'').trim().slice(0,24),price:o.price?Number(o.price):null};if(o.cat)x.cat=o.cat;if(o.img)x.img=o.img;return x}).filter(function(o){return o.name});
-  if(!opts.length&&!EDIT.blob&&!EDIT.image){$('#saveMsg').textContent='메뉴 사진을 넣거나 메뉴 이름을 하나 이상 적어 주세요.';return}
-  if(!opts.length)opts=[{id:'eat',name:'먹어요',price:null}];
   $('#saveMsg').textContent='저장 중…';
   try{var url=EDIT.image||null;
     if(EDIT.blob){$('#saveMsg').textContent='사진 올리는 중…';url=await api.uploadImage(EDIT.blob,'menu/'+DATE+'_'+MEAL+'_'+Date.now()+'.jpg')}
     var row={meal_date:DATE,meal:MEAL,options:opts,deadline:EDIT.deadline||null,note:String(EDIT.note||'').trim().slice(0,60)||null,image_url:url,is_open:isOpen,updated_at:new Date().toISOString()};
     await api.saveMenu(row);if(picURL){URL.revokeObjectURL(picURL);picURL=null}MENUS[MEAL]=row;dirty=false;fillEditor();renderOrders();$('#saveMsg').textContent=msg}
   catch(e){$('#saveMsg').textContent=isSetupErr(e)?'식사 주문 설정이 아직 안 됐어요. Supabase에서 설정 SQL(bestian_meal_setup.sql)을 실행해 주세요.':'저장하지 못했어요. 인터넷을 확인하고 다시 눌러 주세요.'}}
-$('#save').onclick=function(){saveMenu(true,MEALS[MEAL]+' 메뉴를 올렸어요. 학생 센터에 1분 안에 나타나요.')};
-$('#toggle').onclick=function(){var m=MENUS[MEAL];if(!m)return;if(dirty&&!confirm('고친 내용도 함께 저장할까요?'))return;saveMenu(!m.is_open,m.is_open?'주문을 마감했어요. 학생은 더 이상 바꿀 수 없어요.':'주문을 다시 열었어요.')};
+$('#save').onclick=function(){var named=EDIT.options.filter(function(o){return String(o.name||'').trim()}).length,pic=!!(EDIT.blob||EDIT.image);
+  saveMenu(true,named?MEALS[MEAL]+' 메뉴를 올렸어요. 학생 센터에 1분 안에 나타나요.':(pic?'사진을 올렸어요. 학생은 사진을 보고 음식 이름을 적어 주문해요. ':'저장했어요. ')+'메뉴 이름을 적지 않아서 한솥도시락 전체 메뉴가 기본으로 열려 있어요.')};
+$('#toggle').onclick=function(){var cur=BM.effective(MENUS[MEAL]||null,MEAL).is_open;if(dirty&&!confirm('고친 내용도 함께 저장할까요?'))return;saveMenu(!cur,cur?'주문을 마감했어요. 학생은 더 이상 바꿀 수 없어요.':'주문을 다시 열었어요.')};
 $('#mealSeg').addEventListener('click',function(e){var b=e.target.closest('[data-m]');if(!b||b.getAttribute('data-m')===MEAL)return;if(dirty&&!confirm('저장하지 않은 메뉴가 있어요. 그래도 바꿀까요?'))return;MEAL=b.getAttribute('data-m');$('#saveMsg').textContent='';fillEditor();renderOrders()});
 $('#date').onchange=function(){if(dirty&&!confirm('저장하지 않은 메뉴가 있어요. 그래도 날짜를 바꿀까요?')){this.value=DATE;return}DATE=this.value||fmtD(new Date());dirty=false;$('#saveMsg').textContent='';load()};
 $('#refresh').onclick=function(){load()};
-$('#copy').onclick=function(){var m=MENUS[MEAL];if(!m||!(m.options||[]).length){$('#saveMsg').textContent='먼저 메뉴를 올려 주세요.';return}
+$('#copy').onclick=function(){var m=BM.effective(MENUS[MEAL]||null,MEAL);
   var list=ORDERS.filter(function(o){return o.meal===MEAL}),d=new Date(DATE+'T00:00:00'),lines=['[베스티안 '+MEALS[MEAL]+' 주문] '+(d.getMonth()+1)+'월 '+d.getDate()+'일 ('+'일월화수목금토'[d.getDay()]+')'],cnt=0,sum=0,hasP=false;
   m.options.forEach(function(o){var n=list.filter(function(x){return x.choice===o.id}).length;if(!n)return;cnt+=n;if(o.price){hasP=true;sum+=n*o.price}lines.push((o.id==='eat'?'식사':o.name)+' '+n+'개')});
+  var tn={},to=[];list.forEach(function(x){var p=BM.parse(x.choice);if(p.type!=='txt')return;if(!tn[p.name]){tn[p.name]=0;to.push(p.name)}tn[p.name]++;cnt++;if(p.amount!=null){hasP=true;sum+=p.amount}});to.forEach(function(n){lines.push(n+' '+tn[n]+'개')});
   lines.push('합계 '+cnt+'개'+(hasP?' · '+won(sum):''));var skip=list.filter(function(x){return x.choice==='none'}).length;if(skip)lines.push('안 먹어요 '+skip+'명');
   var t=lines.join('\n');(navigator.clipboard?navigator.clipboard.writeText(t):Promise.reject()).then(function(){$('#saveMsg').textContent='주문서를 복사했어요. 식당 카톡에 붙여넣으세요.'}).catch(function(){var ta=document.createElement('textarea');ta.value=t;document.body.appendChild(ta);ta.select();try{document.execCommand('copy');$('#saveMsg').textContent='주문서를 복사했어요.'}catch(_){$('#saveMsg').textContent=t}ta.remove()})};
 window.addEventListener('beforeunload',function(e){if(dirty){e.preventDefault();e.returnValue=''}});
