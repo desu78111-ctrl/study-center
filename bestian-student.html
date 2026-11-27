@@ -111,6 +111,8 @@ main{max-width:1080px;margin:0 auto;padding:18px 16px}
 .mopt[disabled]{cursor:not-allowed;opacity:.55}
 .mimg{display:block;width:100%;max-height:460px;object-fit:contain;border-radius:10px;border:1px solid var(--line);background:#f5f7f9}
 .mstat{display:inline-block;font-size:12.5px;font-weight:900;border-radius:999px;padding:2px 10px}.mstat.open{background:#e3f6ec;color:var(--green)}.mstat.closed{background:#eef2f5;color:var(--mute)}
+#mlTitle{scroll-margin-top:70px}
+.mjump{width:100%;display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap;border:1px solid var(--line);background:#fff;border-radius:14px;padding:16px 18px;cursor:pointer;color:var(--blued);font-size:17px;margin-bottom:10px;text-align:left}.mjump b{font-size:19px}.mjump span{font-size:14px;font-weight:700;color:var(--mute)}.mjump.open{border-color:#e8d27a;background:#fff8d6}.mjump.open span{color:#6a5300}
 .mbanner{display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap;background:#fff8d6;border:1px solid #e8d27a;color:#6a5300;border-radius:10px;padding:10px 14px;font-size:14.5px}
 </style>
 </head>
@@ -163,6 +165,7 @@ main{max-width:1080px;margin:0 auto;padding:18px 16px}
 <section class="view" id="v-desk" hidden><div class="wrap">
   <div class="title"><h2>데스크 요청</h2><span>누르면 데스크 컴퓨터에 바로 떠요 · 데스크 답장도 여기로 와요</span></div>
   <div class="panel dk-wake" id="dkWake"></div>
+  <button type="button" id="mealJump" class="mjump"><b>🍱 식사 주문</b><span id="mealJumpSt">오늘 메뉴 보기</span></button>
   <div class="dk-btns">
     <button type="button" data-dk="question"><b>💬</b>질문하기</button>
     <button type="button" data-dk="material"><b>📄</b>자료 요청</button>
@@ -370,7 +373,11 @@ function renderMeal(){var box=$('#mealBox');if(!box)return;var d=new Date();$('#
     return '<div class="panel meal"><div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap"><h3 style="margin:0">'+MEAL_NAMES[k]+(many?' <span class="hint" style="font-weight:500">메뉴 '+opts.length+'개</span>':'')+'</h3>'+st+'</div>'+(m.note?'<p class="hint">'+esc(m.note)+'</p>':'')+
       (m.image_url?'<a href="'+esc(m.image_url)+'" target="_blank" rel="noopener" title="크게 보기"><img class="mimg" src="'+esc(m.image_url)+'" alt="'+MEAL_NAMES[k]+' 메뉴 사진" loading="lazy"></a>':'')+mine+top+body+'</div>'}).join('')}
 document.addEventListener('input',function(e){var t=e.target;if(!t.hasAttribute||!t.hasAttribute('data-mq'))return;var k=t.getAttribute('data-mq');MQ[k]=t.value;var pos=t.selectionStart;renderMeal();var n=document.querySelector('[data-mq="'+k+'"]');if(n){n.focus();try{n.setSelectionRange(pos,pos)}catch(_){}}});
-function renderMealBanner(){var b=$('#mealBanner');if(!b)return;var need=['lunch','dinner'].filter(function(k){return hasMenu(k)&&mealOpen(MENUS[k])&&!MYORD[k]});
+function renderMealJump(){var j=$('#mealJump'),t=$('#mealJumpSt');if(!j||!t)return;var keys=['lunch','dinner'].filter(hasMenu),need=keys.filter(function(k){return mealOpen(MENUS[k])&&!MYORD[k]});
+  j.className='mjump'+(need.length?' open':'');
+  t.textContent=!keys.length?'아직 오늘 메뉴가 없어요':need.length?MEAL_NAMES[need[0]]+' 주문 받는 중 · 눌러서 고르기 ↓':keys.map(function(k){return MEAL_NAMES[k]+': '+(MYORD[k]?optLabel(MENUS[k],MYORD[k]):'주문 마감')}).join(' · ')}
+document.addEventListener('click',function(e){if(!e.target.closest||!e.target.closest('#mealJump'))return;var el=$('#mlTitle');if(el)el.scrollIntoView({behavior:'smooth',block:'start'})});
+function renderMealBanner(){renderMealJump();var b=$('#mealBanner');if(!b)return;var need=['lunch','dinner'].filter(function(k){return hasMenu(k)&&mealOpen(MENUS[k])&&!MYORD[k]});
   if(!ME||!need.length){b.hidden=true;return}var k=need[0],m=MENUS[k];b.hidden=false;
   b.innerHTML='<span>🍱 오늘 <b>'+MEAL_NAMES[k]+'</b> 메뉴가 올라왔어요'+(m.deadline?' · '+esc(m.deadline)+' 마감':'')+'</span><a class="btn sm" href="#desk">주문하기</a>'}
 document.addEventListener('click',async function(e){var t=e.target.closest('.mopt[data-choice]');if(!t||t.disabled||!ME)return;
