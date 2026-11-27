@@ -18,6 +18,8 @@ button,input,select,textarea{font:inherit}
 main{max-width:1080px;margin:0 auto;padding:18px 16px;display:grid;gap:16px}
 .panel{background:#fff;border:1px solid var(--line);border-radius:12px;padding:16px 18px;min-width:0}.panel h3{margin:0 0 8px;font-size:16px;font-weight:900;color:var(--blued)}
 .inp{width:100%;font-size:16px;padding:10px 11px;border-radius:8px;border:1px solid var(--line);background:#fff;color:var(--ink);min-width:0}
+/* 숨김 표시(hidden)가 .btn 등의 display에 덮이지 않게 한다 (사진이 없는데 '사진 빼기'와 빈 사진 칸이 보이던 문제) */
+[hidden]{display:none!important}
 .btn{display:inline-block;background:var(--blue);color:#fff;font-weight:900;padding:10px 14px;border-radius:8px;border:0;cursor:pointer;min-height:40px;text-decoration:none}.btn.g{background:var(--soft);color:var(--ink)}.btn.warn{background:#fff3dd;color:var(--amber);border:1px solid #f3d89a}
 .hint{font-size:13px;color:var(--mute);margin:0}
 .bar{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
@@ -136,7 +138,9 @@ api.uploadImage=async function(blob,path){
 function isSetupErr(e){return !!e&&(e.code==='42P01'||e.code==='PGRST205'||e.code==='42703'||/bestian_meal|image_url|bucket/i.test(e.message||''))}
 
 /* ===== 상태 ===== */
-var DATE=fmtD(new Date()),MEAL=(new Date().getHours()>=13?'dinner':'lunch'),MENUS={},ORDERS=[],PRESENT=[],EDIT=null,dirty=false,chan=null,loading=false;
+var DATE=fmtD(new Date()),MEAL=(BM.MEALS.indexOf('dinner')>-1&&new Date().getHours()>=13?'dinner':'lunch'),MENUS={},ORDERS=[],PRESENT=[],EDIT=null,dirty=false,chan=null,loading=false;
+/* 받지 않는 끼니(저녁)는 고르는 버튼을 숨긴다. 한 끼만 받으면 고르는 줄 자체가 필요 없다 */
+document.querySelectorAll('#mealSeg button').forEach(function(b){if(BM.MEALS.indexOf(b.getAttribute('data-m'))<0)b.style.display='none'});if(BM.MEALS.length<2)$('#mealSeg').style.display='none';
 function newId(){return 'o'+Date.now().toString(36)+Math.random().toString(36).slice(2,5)}
 function fillEditor(){var m=MENUS[MEAL];
   var only=m&&((m.options||[]).length===0||((m.options||[]).length===1&&m.options[0].id==='eat'));

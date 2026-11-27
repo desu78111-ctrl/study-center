@@ -86,7 +86,7 @@ details summary{cursor:pointer;font-weight:900;color:var(--blued)}
 .vocab{grid-column:1/-1}
 .meals{grid-column:1/-1}
 .mlg{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:12px;align-items:start}
-.mlc{border:1px solid var(--line);border-radius:12px;padding:12px;display:grid;gap:8px;background:#fff}
+.mlc{border:1px solid var(--line);border-radius:12px;padding:12px;display:grid;gap:8px;background:#fff;max-width:780px}
 .mlh{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;font-weight:900;font-size:16px;color:var(--blued)}
 .mlh small{font-size:12.5px;font-weight:700;border-radius:999px;padding:2px 10px;background:#eef2f5;color:var(--mute)}.mlh small.open{background:#e3f6ec;color:var(--green)}
 .mlr{display:grid;gap:4px;border-top:1px solid var(--line);padding-top:8px}
@@ -170,7 +170,7 @@ details summary{cursor:pointer;font-weight:900;color:var(--blued)}
   <section class="panel meals">
     <h2>🍱 오늘 식사 주문 <span class="n" id="mealN">0</span><a href="bestian-meal-admin.html" target="_blank" rel="noopener" style="margin-left:auto;font-size:13px;font-weight:700">메뉴 올리기·마감 ↗</a></h2>
     <div id="meals" class="mlg"></div>
-    <p class="hint" style="margin-top:8px">학생이 학생 센터 데스크 탭에서 메뉴를 누르면 여기에 바로 올라와요. 이름 앞 숫자는 자리 번호예요. 메뉴를 따로 안 올리면 한솥도시락 전체 메뉴가 기본으로 열려 있어요 (점심 11:00 · 저녁 16:30 마감).</p>
+    <p class="hint" style="margin-top:8px">학생이 학생 센터 데스크 탭에서 메뉴를 누르면 여기에 바로 올라와요. 이름 앞 숫자는 자리 번호예요. 메뉴를 따로 안 올리면 한솥도시락 전체 메뉴가 기본으로 열려 있어요 (기본 11:00 마감 · 위의 마감 시각 칸에서 바꿀 수 있어요). 식사 주문은 점심만 받아요.</p>
   </section>
 
   <section class="panel vocab">
@@ -384,7 +384,7 @@ async function loadMeals(force){if(!MOCK&&!db)return;try{var r=await mealApi.loa
 function renderMeals(){if(!BM)return;var seat={};STU.forEach(function(s){seat[String(s.id)]=s.seat});var total=0;
   var nm=function(o){var n=seat[String(o.student_id)];return (n?esc(n)+'번 ':'')+esc(o.student_name)};
   var who=function(a){return '<div class="mln">'+a.slice().sort(function(x,y){return String(x.student_name).localeCompare(String(y.student_name),'ko')}).map(function(o){return '<span>'+nm(o)+'</span>'}).join('')+'</div>'};
-  $('#meals').innerHTML=['lunch','dinner'].map(function(k){var m=BM.effective(mealRow(k),k),list=MORD.filter(function(o){return o.meal===k}),by={},typed=[],none=[],lost=[],known={};
+  $('#meals').innerHTML=BM.MEALS.map(function(k){var m=BM.effective(mealRow(k),k),list=MORD.filter(function(o){return o.meal===k}),by={},typed=[],none=[],lost=[],known={};
     (m.options||[]).forEach(function(o){known[o.id]=o});
     list.forEach(function(o){var p=BM.parse(o.choice);if(p.type==='none')none.push(o);else if(p.type==='txt')typed.push({o:o,p:p});else if(known[o.choice])(by[o.choice]=by[o.choice]||[]).push(o);else lost.push(o)});
     var cnt=list.length-none.length,sum=0,hasP=false;total+=cnt;

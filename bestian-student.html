@@ -115,6 +115,8 @@ main{max-width:1080px;margin:0 auto;padding:18px 16px}
 .mjump{width:100%;display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap;border:1px solid var(--line);background:#fff;border-radius:14px;padding:16px 18px;cursor:pointer;color:var(--blued);font-size:17px;margin-bottom:10px;text-align:left}.mjump b{font-size:19px}.mjump span{font-size:14px;font-weight:700;color:var(--mute)}.mjump.open{border-color:#e8d27a;background:#fff8d6}.mjump.open span{color:#6a5300}
 .mopt b{overflow-wrap:anywhere}.mgrp{border:1px solid var(--line);border-radius:12px;background:#fff;padding:0 12px}.mgrp summary{cursor:pointer;font-weight:900;color:var(--blued);padding:13px 0;font-size:15.5px}.mgrp[open]{padding-bottom:12px}
 .mtxt{display:grid;gap:6px;border:1.5px dashed var(--blue);border-radius:12px;padding:12px;background:#f3f9fd}.mtxt b{color:var(--blued);font-size:15px}
+/* 숨김 표시(hidden)가 display:flex에 덮이지 않게 한다 (덮이면 빈 노란 띠가 계속 보인다) */
+.mbanner[hidden]{display:none!important}
 .mbanner{display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap;background:#fff8d6;border:1px solid #e8d27a;color:#6a5300;border-radius:10px;padding:10px 14px;font-size:14.5px}
 </style>
 </head>
@@ -364,7 +366,7 @@ function renderMeal(){var box=$('#mealBox');if(!box)return;if(!window.BestianMea
   var d=new Date();$('#mlTitle').textContent=(d.getMonth()+1)+'/'+d.getDate()+' ('+'일월화수목금토'[d.getDay()]+') 식사 주문';
   if(mealErr==='setup'){box.innerHTML='<div class="panel empty">식사 주문을 준비하고 있어요. 곧 열려요.</div>';return}
   if(!mealLoaded){box.innerHTML='<div class="panel empty">메뉴를 불러오지 못했어요. 잠시 후 자동으로 다시 시도해요.</div>';return}
-  var keys=['lunch','dinner'];
+  var keys=window.BestianMeal.MEALS;
   box.innerHTML=keys.map(function(k){var m=eff(k),my=MYORD[k],open=mealOpen(m),opts=m.options||[],many=opts.length>=10,q=(MQ[k]||'').trim();
     var st=open?'<span class="mstat open">주문 받는 중'+(m.deadline?' · '+esc(m.deadline)+' 마감':'')+'</span>':'<span class="mstat closed">주문 마감</span>';
     var btn=function(o){var id=o.id,on=my===id,skip=id==='none';return '<button type="button" class="mopt'+(skip?' skip':'')+(on?' on':'')+'" data-meal="'+k+'" data-choice="'+esc(id)+'"'+(open?'':' disabled')+' aria-pressed="'+(on?'true':'false')+'">'+(o.img?'<img class="mth" src="'+esc(o.img)+'" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.remove()">':'')+'<span class="mtx"><b>'+(on?'✓ ':'')+esc(o.name)+'</b>'+(o.price?'<small>'+won(o.price)+'</small>':'')+'</span></button>'};
@@ -397,11 +399,11 @@ document.addEventListener('click',function(e){var t=e.target.closest&&e.target.c
   MTX[k]='';mealSave(k,c)});
 document.addEventListener('input',function(e){var t=e.target;if(!t.hasAttribute||!t.hasAttribute('data-mq'))return;var k=t.getAttribute('data-mq');MQ[k]=t.value;var pos=t.selectionStart;renderMeal();var n=document.querySelector('[data-mq="'+k+'"]');if(n){n.focus();try{n.setSelectionRange(pos,pos)}catch(_){}}});
 function renderMealJump(){var j=$('#mealJump'),t=$('#mealJumpSt');if(!j||!t||!window.BestianMeal)return;if(!mealLoaded){t.textContent='오늘 메뉴 보기';return}
-  var keys=['lunch','dinner'],need=keys.filter(function(k){return mealOpen(eff(k))&&!MYORD[k]});
+  var keys=window.BestianMeal.MEALS,need=keys.filter(function(k){return mealOpen(eff(k))&&!MYORD[k]});
   j.className='mjump'+(need.length?' open':'');
   t.textContent=keys.map(function(k){var m=eff(k);return MYORD[k]?MEAL_NAMES[k]+': '+optLabel(m,MYORD[k]):mealOpen(m)?MEAL_NAMES[k]+' 주문 받는 중':MEAL_NAMES[k]+' 마감'}).join(' · ')}
 document.addEventListener('click',function(e){if(!e.target.closest||!e.target.closest('#mealJump'))return;var el=$('#mlTitle');if(el)el.scrollIntoView({behavior:'smooth',block:'start'})});
-function renderMealBanner(){renderMealJump();var b=$('#mealBanner');if(!b)return;if(!window.BestianMeal){b.hidden=true;return}var need=['lunch','dinner'].filter(function(k){return !!MENUS[k]&&mealOpen(eff(k))&&!MYORD[k]});
+function renderMealBanner(){renderMealJump();var b=$('#mealBanner');if(!b)return;if(!window.BestianMeal){b.hidden=true;return}var need=window.BestianMeal.MEALS.filter(function(k){return !!MENUS[k]&&mealOpen(eff(k))&&!MYORD[k]});
   if(!ME||!need.length){b.hidden=true;return}var k=need[0],m=eff(k);b.hidden=false;
   b.innerHTML='<span>🍱 오늘 <b>'+MEAL_NAMES[k]+'</b> 메뉴가 올라왔어요'+(m.deadline?' · '+esc(m.deadline)+' 마감':'')+'</span><a class="btn sm" href="#desk">주문하기</a>'}
 document.addEventListener('click',function(e){var t=e.target.closest('.mopt[data-choice]');if(!t||t.disabled||!ME)return;mealSave(t.getAttribute('data-meal'),t.getAttribute('data-choice'))});
